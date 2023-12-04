@@ -62,7 +62,7 @@ class App(tk.Tk):
 
         self.call_new_observation()
 
-
+#TODO pour effectuer des tests a supp a la fin
     def redirect_to_selection_sensor_quantity_window(self, new_observation_page):
         # Clear the new_observation_window content
         new_observation_page.clear_page()
