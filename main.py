@@ -3,6 +3,7 @@ from tkinter import ttk
 
 from vue.login_as_admin_window import LoginAsAdministrator
 from vue.new_observation_window import NewObservation
+from vue.selection_sensor_quantity_window import QuantitySensor
 
 
 class App(tk.Tk):
@@ -29,6 +30,9 @@ class App(tk.Tk):
         # Redirection to login as an admin button
         redirect_button = ttk.Button(self.main_frame, text="Login as administrator", command= lambda : self.redirect_to_login_as_admin(new_observation_page))
         redirect_button.pack(side=tk.TOP, anchor=tk.NE, padx=10, pady=10)
+
+        redirect_quantity_sensor_button = ttk.Button(self.main_frame, text="Quantity sensor", command= lambda : self.redirect_to_selection_sensor_quantity_window(new_observation_page))
+        redirect_quantity_sensor_button.pack(side=tk.TOP, anchor=tk.NE, padx=10, pady=10)
 
     def redirect_to_login_as_admin(self, new_observation_page):
         # Clear the new_observation_window content
@@ -57,6 +61,20 @@ class App(tk.Tk):
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
         self.call_new_observation()
+
+
+    def redirect_to_selection_sensor_quantity_window(self, new_observation_page):
+        # Clear the new_observation_window content
+        new_observation_page.clear_page()
+        self.main_frame.destroy()
+
+        # Création du cadre principal
+        self.main_frame = ttk.Frame(self)
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Redirecting to the login page
+        quantity_page = QuantitySensor(self.master)
+        quantity_page.show_page()
 
 
 
