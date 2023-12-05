@@ -34,8 +34,9 @@ def create_gui():
     name_entry.pack(fill="x")
 
     tk.Label(right_frame, text="Description :").pack(anchor="nw")
-    description_entry = tk.Entry(right_frame)
-    description_entry.pack(fill="x")
+    # Create a Text widget for multi-line text entry
+    description_text = tk.Text(right_frame, height=5)  # Height is set to 5 lines
+    description_text.pack(fill="x")
 
     create_button = tk.Button(right_frame, text="Create a configuration")
     create_button.pack(side="bottom", fill="x")
