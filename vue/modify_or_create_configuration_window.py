@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 import mysql.connector
+from login_as_admin_window import LoginAsAdministrator
 
 
 class MyApplication:
@@ -59,8 +60,14 @@ class MyApplication:
         scenarioname = self.name_entry.get()
         description = self.description_text_entry.get("1.0", "end-1c")
 
-        num_config = self.create_id_config('1') + 1
-        id_config = id_user + "-" + num_config
+        admin_login = LoginAsAdministrator(self.root)
+        # TODO voir apres que la redirection est faite pour recuperer l'id_user de la page de connexion
+        # id_user = admin_login.get_id_user_by_admin()
+        id_user = 1
+
+        num_config = self.get_number_config_create_by_admin(id_user) + 1
+
+        id_config = str(id_user) + "-" + str(num_config)
 
         # Connexion à la base de données MySQL
         conn = mysql.connector.connect(
@@ -73,14 +80,14 @@ class MyApplication:
 
         # Exécutez une requête
         query = "INSERT INTO configuration (id_config, id_user, label, description)VALUES(%s, '1', %s, %s)"
-        cursor.execute(query, (num_config, scenarioname, description))
+        cursor.execute(query, (id_config, scenarioname, description))
         conn.commit()
 
         # Fermez la connexion à la base de données
         cursor.close()
         conn.close()
 
-    def create_id_config(self, id_user):
+    def get_number_config_create_by_admin(self, id_user):
         # Connexion à la base de données MySQL
         conn = mysql.connector.connect(
             host="localhost",
