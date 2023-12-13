@@ -40,6 +40,11 @@ class LoginAsAdministrator:
         username = self.login_entry.get()
         password = self.password_entry.get()
 
+        print("connexion as admin")
+
+        # Fonctionnement sans conncexion BDD (supprimer ou commenter la ligne)
+        # return True
+
         # Connexion à la base de données MySQL
         conn = mysql.connector.connect(
             host="localhost",

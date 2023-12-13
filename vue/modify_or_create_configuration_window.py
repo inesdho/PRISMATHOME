@@ -2,28 +2,24 @@ import tkinter as tk
 from tkinter import ttk
 
 import mysql.connector
-from login_as_admin_window import LoginAsAdministrator
+from vue.login_as_admin_window import LoginAsAdministrator
 
 
-class MyApplication:
-    def __init__(self, root):
-        self.root = root
-        self.create_gui()
+class ModifyOrCreateConfiguration:
+    def __init__(self, master):
+        self.master = master
+        self.frame = ttk.Frame(self.master)
 
-    def create_gui(self):
-        # Create the main window
-
-        self.root.title("PRISM@Home")
-
-        # Set the window size
-        self.root.geometry("800x400")
+    def show_page(self, login_value):
+        self.frame = ttk.Frame(self.master)
+        self.frame.pack(fill=tk.BOTH, expand=True)
 
         # Logout Button
-        logout_button = tk.Button(root, text="Log out")
+        logout_button = tk.Button(self.master, text="Log out")
         logout_button.place(relx=0.9, rely=0.01)  # Position the logout button above the frames
 
         # Left Frame for Scenario Selection
-        left_frame = tk.Frame(root, bd=2, relief="sunken", padx=5, pady=5)
+        left_frame = tk.Frame(self.master, bd=2, relief="sunken", padx=5, pady=5)
         left_frame.place(relx=0.02, rely=0.09, relwidth=0.46, relheight=0.50)
 
         tk.Label(left_frame, text="Scenario name :").pack(anchor="nw")
@@ -37,7 +33,7 @@ class MyApplication:
         modify_button.pack(side="bottom", fill="x")
 
         # Right Frame for Scenario Creation
-        right_frame = tk.Frame(root, bd=2, relief="sunken", padx=5, pady=5)
+        right_frame = tk.Frame(self.master, bd=2, relief="sunken", padx=5, pady=5)
         right_frame.place(relx=0.50, rely=0.09, relwidth=0.48, relheight=0.50)
 
         tk.Label(right_frame, text="Scenario name :").pack(anchor="nw")
@@ -50,18 +46,15 @@ class MyApplication:
         self.description_text_entry.pack(fill="x")
 
         create_button = tk.Button(right_frame, text="Create a configuration",
-                                  command=self.on_create_configuration_button_click)
+                                  command=lambda: self.on_create_configuration_button_click(login_value))
         create_button.pack(side="bottom", fill="x")
 
-        # Start the GUI event loop
-        root.mainloop()
-
-    def on_create_configuration_button_click(self):
+    def on_create_configuration_button_click(self, login_value):
         scenarioname = self.name_entry.get()
         description = self.description_text_entry.get("1.0", "end-1c")
 
-        admin_login = LoginAsAdministrator(self.root)
-        # TODO voir apres que la redirection est faite pour recuperer l'id_user de la page de connexion
+        admin_login = LoginAsAdministrator(self.master)
+        # TODO réccuèpre l'id de l'admin en fonction de la valeur du login que je t'ai mis en paramètre
         # id_user = admin_login.get_id_user_by_admin()
         id_user = 1
 
@@ -109,9 +102,3 @@ class MyApplication:
         conn.close()
 
         return count
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = MyApplication(root)
-    root.mainloop()

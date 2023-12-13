@@ -5,6 +5,7 @@ from tkinter.messagebox import *
 from ttkthemes import ThemedTk, ThemedStyle
 from vue.new_observation_window import NewObservation
 from vue.login_as_admin_window import LoginAsAdministrator
+from vue.modify_or_create_configuration_window import ModifyOrCreateConfiguration
 from vue.summary_window import Summary
 
 
@@ -22,23 +23,16 @@ class App(ThemedTk):
 
         self.show_frame()
 
-
-
-
     def show_frame(self):
         # Création du cadre principal
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
 
-# Si vous voulez lancer summary, il faut décommenter la ligne 35 et 36 et ommenter la ligne 37
+# Si vous voulez lancer summary, il faut décommenter les deux lignes en dessous et ommenter la troisème
         # summary = Summary(self)
         # summary.show_page()
         self.call_new_observation()
-
-
-
-
 
     def call_new_observation(self):
         # Redirecting to the login page
@@ -81,11 +75,11 @@ class App(ThemedTk):
         if login_as_admin_page.connexion_admin() == False:
             showerror("Error", "The login or the password is incorrect")
         else:
-            # TODO rediriger vers la page de mise en place des configurations
+            self.redirect_to_modify_or_create_configuration(login_as_admin_page, login_value)
             pass
 
     def redirect_to_new_observation(self, login_as_admin_page):
-        # Clear the new_observation_window content
+        # Clear the login_as_admin_page content
         login_as_admin_page.clear_page()
         self.main_frame.destroy()
 
@@ -94,6 +88,22 @@ class App(ThemedTk):
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
         self.call_new_observation()
+
+    def redirect_to_modify_or_create_configuration(self, login_as_admin_page, login_value):
+        print("redirect_to_modify_or_create_configuration")
+        # Clear the login_as_admin_page content
+        login_as_admin_page.clear_page()
+        print("clear page")
+
+        self.main_frame.destroy()
+
+        # Creation of a main frame
+        self.main_frame = ttk.Frame(self)
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+        modify_or_create_configuration_page = ModifyOrCreateConfiguration(self.master)
+        modify_or_create_configuration_page.show_page(login_value)
+
 
 if __name__ == "__main__":
     app = App()
