@@ -10,7 +10,7 @@ class ModifyOrCreateConfiguration:
         self.master = master
         self.frame = ttk.Frame(self.master)
 
-    def show_page(self, login_value):
+    def show_page(self):
         self.frame = ttk.Frame(self.master)
         self.frame.pack(fill=tk.BOTH, expand=True)
 
@@ -46,15 +46,15 @@ class ModifyOrCreateConfiguration:
         self.description_text_entry.pack(fill="x")
 
         create_button = tk.Button(right_frame, text="Create a configuration",
-                                  command=lambda: self.on_create_configuration_button_click(login_value))
+                                  command=self.on_create_configuration_button_click)
         create_button.pack(side="bottom", fill="x")
 
-    def on_create_configuration_button_click(self, login_value):
+    def on_create_configuration_button_click(self):
         scenarioname = self.name_entry.get()
         description = self.description_text_entry.get("1.0", "end-1c")
 
         admin_login = LoginAsAdministrator(self.master)
-        # TODO réccuèpre l'id de l'admin en fonction de la valeur du login que je t'ai mis en paramètre
+        # TODO voir apres que la redirection est faite pour recuperer l'id_user de la page de connexion
         # id_user = admin_login.get_id_user_by_admin()
         id_user = 1
 

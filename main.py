@@ -75,7 +75,7 @@ class App(ThemedTk):
         if login_as_admin_page.connexion_admin() == False:
             showerror("Error", "The login or the password is incorrect")
         else:
-            self.redirect_to_modify_or_create_configuration(login_as_admin_page, login_value)
+            self.redirect_to_modify_or_create_configuration(login_as_admin_page)
             pass
 
     def redirect_to_new_observation(self, login_as_admin_page):
@@ -89,7 +89,7 @@ class App(ThemedTk):
 
         self.call_new_observation()
 
-    def redirect_to_modify_or_create_configuration(self, login_as_admin_page, login_value):
+    def redirect_to_modify_or_create_configuration(self, login_as_admin_page):
         print("redirect_to_modify_or_create_configuration")
         # Clear the login_as_admin_page content
         login_as_admin_page.clear_page()
@@ -102,7 +102,7 @@ class App(ThemedTk):
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
         modify_or_create_configuration_page = ModifyOrCreateConfiguration(self.master)
-        modify_or_create_configuration_page.show_page(login_value)
+        modify_or_create_configuration_page.show_page()
 
 
 if __name__ == "__main__":
