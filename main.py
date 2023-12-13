@@ -8,6 +8,7 @@ from vue.login_as_admin_window import LoginAsAdministrator
 from vue.summary_window import Summary
 
 
+
 class App(ThemedTk):
     def __init__(self):
         ThemedTk.__init__(self)
@@ -29,6 +30,8 @@ class App(ThemedTk):
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
+
+# Si vous voulez lancer summary, il faut décommenter la ligne 35 et 36 et ommenter la ligne 37
         # summary = Summary(self)
         # summary.show_page()
         self.call_new_observation()
