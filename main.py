@@ -7,6 +7,7 @@ from vue.new_observation_window import NewObservation
 from vue.login_as_admin_window import LoginAsAdministrator
 from vue.summary_window import Summary
 
+
 class App(ThemedTk):
     def __init__(self):
         ThemedTk.__init__(self)
