@@ -9,7 +9,6 @@ from vue.modify_or_create_configuration_window import ModifyOrCreateConfiguratio
 from vue.summary_window import Summary
 
 
-
 class App(ThemedTk):
     def __init__(self):
         ThemedTk.__init__(self)
