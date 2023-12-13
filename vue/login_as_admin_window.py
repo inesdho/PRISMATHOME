@@ -28,10 +28,6 @@ class LoginAsAdministrator:
         self.password_entry = ttk.Entry(self.frame, show="*")  # Hide password input
         self.password_entry.pack(pady=10)
 
-        # Connection button
-        connexion_button = ttk.Button(self.frame, text="Connexion", command=self.on_login_button_click)
-        connexion_button.pack(pady=20)
-
         # Afficher le cadre de la page de connexion en tant qu'administrateur
         self.frame.pack(fill=tk.BOTH, expand=True)
 
@@ -40,7 +36,7 @@ class LoginAsAdministrator:
         self.frame.destroy()
 
     # Get the data from the user input
-    def on_login_button_click(self):
+    def connexion_admin(self):
         username = self.login_entry.get()
         password = self.password_entry.get()
 
