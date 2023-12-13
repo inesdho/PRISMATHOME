@@ -36,6 +36,7 @@ class App(ThemedTk):
         # summary.show_page()
         self.call_new_observation()
 
+
     def call_new_observation(self):
         # Redirecting to the login page
         new_observation_page = NewObservation(self)
