@@ -20,6 +20,7 @@ class App(ThemedTk):
 
         self.show_frame()
 
+
     def show_frame(self):
         # Création du cadre principal
         self.main_frame = ttk.Frame(self)
