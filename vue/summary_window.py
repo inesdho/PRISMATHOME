@@ -87,6 +87,11 @@ class Summary:
         self.expanding_frames[sensor_type] = expanding_frame
 
 
+    def clear_page(self):
+        self.frame.destroy()
+        self.frame_text.destroy()
+        self.frame_sensor_type.destroy()
+
     def get_scenario_label(self):
         # TODO Modifier la fonction pour qu'elle retourne le scénario de l'observation en cours
         return "Ceci est le scénario de l'observation"

@@ -27,10 +27,6 @@ class App(ThemedTk):
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
-
-# Si vous voulez lancer summary, il faut décommenter les deux lignes en dessous et ommenter la troisème
-        # summary = Summary(self)
-        # summary.show_page()
         self.call_new_observation()
 
     def call_new_observation(self):
@@ -40,6 +36,10 @@ class App(ThemedTk):
 
         # Redirection to login as an admin button
         ttk.Button(self.main_frame, text="Login as administrator", command=lambda: self.redirect_to_login_as_admin(new_observation_page)).place(relx=0.9, rely=0.1)
+
+
+        # A SUPPRIMER bouton de redirection test vers la page summary
+        ttk.Button(self.main_frame, text="TEST : accès page summary", command=lambda: self.redirect_to_summary(new_observation_page)).place(relx=0.5, rely=0.1)
 
         # TODO bouton vers la mise en place des capteurs une fois la config choisie
 
@@ -106,6 +106,22 @@ class App(ThemedTk):
         # Logout Button
         logout_button = tk.Button(self.master, text="Log out", command=lambda: self.redirect_to_new_observation(modify_or_create_configuration_page))
         logout_button.place(relx=0.9, rely=0.01)  # Position the logout button above the frames
+
+
+    def redirect_to_summary(self, page):
+        # Clear the login_as_admin_page content
+        page.clear_page()
+        self.main_frame.destroy()
+
+        # Creation of a main frame
+        self.main_frame = ttk.Frame(self)
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+        summary_page = Summary(self)
+        summary_page.show_page()
+
+        # Cancel button to redirect to the new observation  page
+        ttk.Button(self.main_frame, text="Cancel", command=lambda: self.redirect_to_new_observation(summary_page)).place(relx=0.9, rely=0.1)
 
 
 if __name__ == "__main__":
