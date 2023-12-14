@@ -61,7 +61,7 @@ class LoginAsAdministrator:
 
         # Vérifiez si l'utilisateur a été trouvé dans la base de données
         if user:
-            globals.id_user = user[0]
+            globals.global_id_user = user[0]
             query_update = "UPDATE prismathome.user SET connected=1 WHERE login=%s AND password=%s"
             cursor.execute(query_update, (username, password))
             conn.commit()
