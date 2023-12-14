@@ -3,7 +3,7 @@ from tkinter import ttk
 
 import mysql.connector
 from vue.login_as_admin_window import LoginAsAdministrator
-
+import globals
 
 class ModifyOrCreateConfiguration:
     def __init__(self, master):
@@ -50,10 +50,7 @@ class ModifyOrCreateConfiguration:
         scenarioname = self.name_entry.get()
         description = self.description_text_entry.get("1.0", "end-1c")
 
-        admin_login = LoginAsAdministrator(self.master)
-        # TODO voir apres que la redirection est faite pour recuperer l'id_user de la page de connexion
-        # id_user = admin_login.get_id_user_by_admin()
-        id_user = 1
+        id_user = globals.id_user
 
         num_config = self.get_number_config_create_by_admin(id_user) + 1
 

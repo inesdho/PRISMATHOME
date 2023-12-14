@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 import mysql.connector
-
+import globals
 
 class LoginAsAdministrator:
     def __init__(self, master):
@@ -61,6 +61,7 @@ class LoginAsAdministrator:
 
         # Vérifiez si l'utilisateur a été trouvé dans la base de données
         if user:
+            globals.id_user = user[0]
             query_update = "UPDATE prismathome.user SET connected=1 WHERE login=%s AND password=%s"
             cursor.execute(query_update, (username, password))
             conn.commit()
@@ -73,28 +74,3 @@ class LoginAsAdministrator:
         cursor.close()
         conn.close()
 
-    def get_id_user_by_admin(self):
-
-        username = self.login_entry.get()
-        password = self.password_entry.get()
-
-        # Connexion à la base de données MySQL
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="",
-            database="prismathome"
-        )
-        cursor = conn.cursor()
-
-        # Exécutez une requête
-        query = "SELECT id_user FROM `user` WHERE login=%s AND password=%s AND connected=1"
-        cursor.execute(query, (username, password))
-        # Récupérer le résultat
-        id = cursor.fetchone()[0]
-
-        # Fermez la connexion à la base de données
-        cursor.close()
-        conn.close()
-
-        return id

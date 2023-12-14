@@ -1,0 +1,1 @@
+global_id_user = None
