@@ -14,38 +14,35 @@ class ModifyOrCreateConfiguration:
         self.frame = ttk.Frame(self.master)
         self.frame.pack(fill=tk.BOTH, expand=True)
 
-        # Logout Button
-        logout_button = tk.Button(self.master, text="Log out")
-        logout_button.place(relx=0.9, rely=0.01)  # Position the logout button above the frames
-
         # Left Frame for Scenario Selection
-        left_frame = tk.Frame(self.master, bd=2, relief="sunken", padx=5, pady=5)
-        left_frame.place(relx=0.02, rely=0.09, relwidth=0.46, relheight=0.50)
+        self.left_frame = tk.Frame(self.master, bd=2, relief="sunken", padx=5, pady=5)
+        self.left_frame.place(relx=0.02, rely=0.09, relwidth=0.46, relheight=0.50)
 
-        tk.Label(left_frame, text="Scenario name :").pack(anchor="nw")
-        self.scenario_combobox = ttk.Combobox(left_frame, values=["Example", "Exemple 2", "Exemple 3"],
+        label_scenario_name = tk.Label(self.left_frame, text="Scenario name :")
+        label_scenario_name.pack(anchor="nw")
+        self.scenario_combobox = ttk.Combobox(self.left_frame, values=["Example", "Exemple 2", "Exemple 3"],
                                               state="readonly",
                                               width=30)
         self.scenario_combobox.set("Example")
         self.scenario_combobox.pack(fill="x")
 
-        modify_button = tk.Button(left_frame, text="Modify the configuration")
+        modify_button = tk.Button(self.left_frame, text="Modify the configuration")
         modify_button.pack(side="bottom", fill="x")
 
         # Right Frame for Scenario Creation
-        right_frame = tk.Frame(self.master, bd=2, relief="sunken", padx=5, pady=5)
-        right_frame.place(relx=0.50, rely=0.09, relwidth=0.48, relheight=0.50)
+        self.right_frame = tk.Frame(self.master, bd=2, relief="sunken", padx=5, pady=5)
+        self.right_frame.place(relx=0.50, rely=0.09, relwidth=0.48, relheight=0.50)
 
-        tk.Label(right_frame, text="Scenario name :").pack(anchor="nw")
-        self.name_entry = tk.Entry(right_frame)
+        tk.Label(self.right_frame, text="Scenario name :").pack(anchor="nw")
+        self.name_entry = tk.Entry(self.right_frame)
         self.name_entry.pack(fill="x")
 
-        tk.Label(right_frame, text="Description :").pack(anchor="nw")
+        tk.Label(self.right_frame, text="Description :").pack(anchor="nw")
         # Create a Text widget for multi-line text entry
-        self.description_text_entry = tk.Text(right_frame, height=5)  # Height is set to 5 lines
+        self.description_text_entry = tk.Text(self.right_frame, height=5)  # Height is set to 5 lines
         self.description_text_entry.pack(fill="x")
 
-        create_button = tk.Button(right_frame, text="Create a configuration",
+        create_button = tk.Button(self.right_frame, text="Create a configuration",
                                   command=self.on_create_configuration_button_click)
         create_button.pack(side="bottom", fill="x")
 
@@ -102,3 +99,9 @@ class ModifyOrCreateConfiguration:
         conn.close()
 
         return count
+
+    def clear_page(self):
+        # Destroy the frame
+        self.frame.destroy()
+        self.right_frame.destroy()
+        self.left_frame.destroy()

@@ -39,7 +39,7 @@ class App(ThemedTk):
         new_observation_page.show_page()
 
         # Redirection to login as an admin button
-        ttk.Button(new_observation_page.frame, text="Login as administrator", command=lambda: self.redirect_to_login_as_admin(new_observation_page)).pack(side=tk.TOP, anchor=tk.NE, padx=10, pady=10)
+        ttk.Button(self.main_frame, text="Login as administrator", command=lambda: self.redirect_to_login_as_admin(new_observation_page)).place(relx=0.9, rely=0.1)
 
         # TODO bouton vers la mise en place des capteurs une fois la config choisie
 
@@ -59,8 +59,8 @@ class App(ThemedTk):
         # Connection button
         ttk.Button(login_as_admin_page.frame, text="Connexion", command=lambda: self.connexion_button_clic(login_as_admin_page)).pack(pady=20)
 
-        # Redirection to login as an admin button
-        ttk.Button(login_as_admin_page.frame, text="Cancel", command=lambda: self.redirect_to_new_observation(login_as_admin_page)).pack(side=tk.TOP, anchor=tk.NE, padx=10, pady=10)
+        # Cancel button to redirect to the new observation  page
+        ttk.Button(self.main_frame, text="Cancel", command=lambda: self.redirect_to_new_observation(login_as_admin_page)).place(relx=0.9, rely=0.1)
 
     # Get the data from the user input
     def connexion_button_clic(self, login_as_admin_page):
@@ -77,9 +77,9 @@ class App(ThemedTk):
             self.redirect_to_modify_or_create_configuration(login_as_admin_page)
             pass
 
-    def redirect_to_new_observation(self, login_as_admin_page):
+    def redirect_to_new_observation(self, page):
         # Clear the login_as_admin_page content
-        login_as_admin_page.clear_page()
+        page.clear_page()
         self.main_frame.destroy()
 
         # Creation of a main frame
@@ -102,6 +102,10 @@ class App(ThemedTk):
 
         modify_or_create_configuration_page = ModifyOrCreateConfiguration(self.master)
         modify_or_create_configuration_page.show_page()
+
+        # Logout Button
+        logout_button = tk.Button(self.master, text="Log out", command=lambda: self.redirect_to_new_observation(modify_or_create_configuration_page))
+        logout_button.place(relx=0.9, rely=0.01)  # Position the logout button above the frames
 
 
 if __name__ == "__main__":

@@ -42,8 +42,8 @@ class LoginAsAdministrator:
 
         print("connexion as admin")
 
-        # Fonctionnement sans conncexion BDD (supprimer ou commenter la ligne)
-        # return True
+        # Valisation automatique pour fonctionnement sans conncexion, commenter la ligne pour un fonctionnement avec BDD et supprimer la ligen avant la fin du projet
+        #return True
 
         # Connexion à la base de données MySQL
         conn = mysql.connector.connect(
