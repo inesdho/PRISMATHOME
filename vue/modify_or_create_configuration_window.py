@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 
 import mysql.connector
+from ttkthemes.themed_style import ThemedStyle
+
 from vue.login_as_admin_window import LoginAsAdministrator
 
 

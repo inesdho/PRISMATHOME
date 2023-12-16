@@ -16,9 +16,9 @@ class App(ThemedTk):
         self.attributes('-fullscreen', True)
         self.bind('<Escape>', lambda e: self.attributes('-fullscreen', False))
 
-        # Configure le thème de l'application
+        # Theme of the application
         self.style = ThemedStyle(self)
-        self.style.set_theme("breeze")  # Choisissez le thème que vous préférez
+        self.style.set_theme("breeze")  # Write the theme you would like
 
         self.show_frame()
 

@@ -4,6 +4,7 @@ from tkinter import ttk
 # TODO remplacer cette liste par une requête listant les différents types de capteurs stockés dans la BDD
 sensor_types = ["presence", "pressure", "opening"]
 
+
 class Summary:
     def __init__(self, master):
         self.master = master
@@ -13,22 +14,21 @@ class Summary:
         self.expanding_frames = {}
 
     def show_page(self):
-        self.frame_text = ttk.Frame(self.master, padding="10px")
-        self.frame_text.pack(fill=tk.BOTH, expand=True)
+        frame_text = ttk.Frame(self.master, padding="10px")
+        frame_text.pack(fill='both', expand=True)
 
-        label = ttk.Label(self.frame_text, text="Summary", anchor='n', font='16')
+
+        label = ttk.Label(frame_text, text="Summary", anchor='n', font='16')
         label.pack(fill='both', expand=True)
 
         # Label wich contain the information relative to the current observation
-        label_observation_info = ttk.Label(self.frame_text, text="Scenario : " + self.get_scenario_label() + "\n" +
-                                                                 "Session : " + self.get_session() + "\n" +
-                                                                 "Participant : " + self.get_participant() + "\n\n" )
-        label_observation_info.pack(side='left', pady=5)
+        label_observation_info = ttk.Label(frame_text, text="Scenario : " + self.get_scenario_label() + "\n" +
+                                                            "Session : " + self.get_session() + "\n" +
+                                                            "Participant : " + self.get_participant() + "\n\n")
+        label_observation_info.pack(side='left', fill='both', pady=5)
 
-        self.frame_sensor_type  = ttk.Frame(self.master, padding="10px")
+        self.frame_sensor_type = ttk.Frame(self.master, padding="10px")
         self.frame_sensor_type.pack(fill=tk.BOTH, expand=True)
-
-
 
         # Show a button that will display the details of a type of sensor
         self.show_sensor_types()
@@ -41,12 +41,11 @@ class Summary:
                 sensor_frame = ttk.Frame(self.frame_sensor_type)
                 sensor_frame.pack(pady=5, fill=tk.BOTH)
 
-                toggle_button = ttk.Button(sensor_frame, text=sensor_type, command=lambda st=sensor_type: self.toggle_frame(st))
+                toggle_button = ttk.Button(sensor_frame, text=sensor_type,
+                                           command=lambda st=sensor_type: self.toggle_frame(st))
                 toggle_button.pack(pady=5)
 
                 self.create_expanding_frame(sensor_type, sensor_frame)
-
-
 
     def toggle_frame(self, sensor_type):
         # Get the actual frame
@@ -61,11 +60,11 @@ class Summary:
     def create_expanding_frame(self, sensor_type, sensor_frame):
         # Create a frame
         expanding_frame = ttk.Frame(sensor_frame, relief="sunken")
-        expanding_frame.pack(fill=tk.BOTH, expand=True)
+        expanding_frame.pack(fill='y', expand=True)
 
         # Add content to the frame
         text_sensor = tk.Text(expanding_frame)
-        text_sensor.pack(side="left", fill="both", expand=True)
+        text_sensor.pack(side="left", fill=tk.BOTH, expand=True)
 
         scrollbar = ttk.Scrollbar(text_sensor, command=text_sensor.yview())
         scrollbar.pack(side="right", fill="y")
@@ -85,7 +84,6 @@ class Summary:
 
         # Add the frame to the dictionaries
         self.expanding_frames[sensor_type] = expanding_frame
-
 
     def clear_page(self):
         self.frame.destroy()
@@ -108,7 +106,7 @@ class Summary:
         # TODO Modifier la fonction pour qu'elle retourne true si ce type de capteur est présent dans la configuration en cours sinon false
         return True
 
-    def get_sensors_id_from_type(self,sensor_type):
+    def get_sensors_id_from_type(self, sensor_type):
         # TODO Modifier la fonction pour qu'elle retourne la liste des capteurs de type 'sensor_type' présent dans la configuration
         return ["id_sensor1", "id_sensor2", "id_sensor3", "id_sensor4", "id_sensor5", "id_sensor6"]
 
@@ -123,5 +121,3 @@ class Summary:
     def get_sensor_status(self, id_sensor):
         # TODO Modifier la fonction pour qu'elle retourne le status d'un capteur en fonction de son id
         return "Status du capteur " + id_sensor
-
-
