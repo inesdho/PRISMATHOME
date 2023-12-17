@@ -8,14 +8,20 @@ root.title("PRISM@Home")
 frame = tk.Frame(root)
 frame.pack(expand=True, padx=20, pady=20)
 
-# Helper function to create a labeled entry with a text box
+# Helper function to create a labeled entry with two text boxes, one for label and one for description
 def create_labeled_entry(master, label_text):
     entry_frame = tk.Frame(master)
     entry_frame.pack(fill=tk.X, pady=5)
     label = tk.Label(entry_frame, text=label_text, width=20, anchor='w')
     label.pack(side=tk.LEFT)
+
+    label_label = tk.Label(entry_frame, text="Label :", width=10)
+    label_label.pack(side=tk.LEFT)
     entry_label = tk.Entry(entry_frame, width=20)
     entry_label.pack(side=tk.LEFT, padx=5)
+
+    description_label = tk.Label(entry_frame, text="Description :", width=10)
+    description_label.pack(side=tk.LEFT)
     entry_description = tk.Entry(entry_frame, width=50)
     entry_description.pack(side=tk.LEFT, padx=5)
 
