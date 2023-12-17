@@ -3,6 +3,7 @@ from tkinter import ttk
 
 import mysql.connector
 from ttkthemes.themed_style import ThemedStyle
+import globals
 
 from view.login_as_admin_window import LoginAsAdministrator
 
