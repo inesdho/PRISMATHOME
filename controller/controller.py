@@ -8,6 +8,7 @@ from view.login_as_admin_window import LoginAsAdministrator
 from view.modify_or_create_configuration_window import ModifyOrCreateConfiguration
 from view.summary_window import Summary
 from view.selection_sensor_quantity_window import QuantitySensor
+from view.labellisation_sensor_window import LabelisationSensor
 
 
 class App(ThemedTk):
@@ -38,20 +39,15 @@ class App(ThemedTk):
         # Redirection to login as an admin button
         ttk.Button(self.main_frame, text="Login as administrator", command=lambda: self.redirect_to_login_as_admin(new_observation_page)).place(relx=0.9, rely=0.1)
 
-
-        # A SUPPRIMER bouton de redirection test vers la page summary
-        ttk.Button(self.main_frame, text="TEST : accès page summary", command=lambda: self.redirect_to_summary(new_observation_page)).place(relx=0.5, rely=0.1)
-
         # TODO bouton vers la mise en place des capteurs une fois la config choisie
 
     def redirect_to_login_as_admin(self, new_observation_page):
-        # Clear the new_observation_window content
-        new_observation_page.clear_page()
-        self.main_frame.destroy()
 
-        # Creation of a main frame which will contain the button
-        self.main_frame = ttk.Frame(self)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
+        # Clear the previous page content
+        self.clear_the_page(new_observation_page)
+
+        # Creation of a main frame
+        self.create_new_main_frame()
 
         # Redirecting to the login page
         login_as_admin_page = LoginAsAdministrator(self.master)
@@ -79,75 +75,130 @@ class App(ThemedTk):
             pass
 
     def redirect_to_new_observation(self, page):
-        # Clear the login_as_admin_page content
-        page.clear_page()
-        self.main_frame.destroy()
+
+        # Clear the previous page content
+        self.clear_the_page(page)
 
         # Creation of a main frame
-        self.main_frame = ttk.Frame(self)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
+        self.create_new_main_frame()
 
         self.call_new_observation()
 
     def redirect_to_modify_or_create_configuration(self, page):
-        # Clear the login_as_admin_page content
-        page.clear_page()
-        self.main_frame.destroy()
+
+        # Clear the previous page content
+        self.clear_the_page(page)
 
         # Creation of a main frame
-        self.main_frame = ttk.Frame(self)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
+        self.create_new_main_frame()
 
         modify_or_create_configuration_page = ModifyOrCreateConfiguration(self.master)
         modify_or_create_configuration_page.show_page()
 
         # Logout Button
-        logout_button = tk.Button(self.master, text="Log out", command=lambda: self.redirect_to_new_observation(modify_or_create_configuration_page))
+        logout_button = ttk.Button(self.main_frame, text="Log out", command=lambda: self.redirect_to_new_observation(modify_or_create_configuration_page))
         logout_button.place(relx=0.9, rely=0.01)  # Position the logout button above the frames
 
+        modify_button = ttk.Button(modify_or_create_configuration_page.left_frame, text="Modify the configuration",
+                                   command=lambda: self.redirect_to_selection_sensor_quantity_from_create_a_config(modify_or_create_configuration_page))
+        modify_button.pack(side="bottom", fill="x")
+
         # Create a new configuration button
-        create_button = tk.Button(modify_or_create_configuration_page.right_frame, text="Create a configuration",
-                                  command=lambda: self.redirect_to_selection_sensor_quantity(modify_or_create_configuration_page))
+        create_button = ttk.Button(modify_or_create_configuration_page.right_frame, text="Create a configuration",
+                                  command=lambda: self.redirect_to_selection_sensor_quantity_from_create_a_config(modify_or_create_configuration_page))
         create_button.pack(side="bottom", fill="x")
 
 
-    def redirect_to_summary(self, page):
-        # Clear the previous page content
-        page.clear_page()
-        self.main_frame.destroy()
-
-        # Creation of a main frame
-        self.main_frame = ttk.Frame(self)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
-
-        summary_page = Summary(self)
-        summary_page.show_page()
-
-        # Cancel button to redirect to the new observation  page
-        ttk.Button(self.main_frame, text="Cancel", command=lambda: self.redirect_to_new_observation(summary_page)).place(relx=0.9, rely=0.1)
-
-    def redirect_to_selection_sensor_quantity(self, page):
+    def redirect_to_selection_sensor_quantity_from_create_a_config(self, page):
         # Clear the previous page content
         page.on_create_configuration_button_click
 
-        page.clear_page()
-        self.main_frame.destroy()
+        # Clear the previous page content
+        self.clear_the_page(page)
 
         selction_sensor_quantity_page = QuantitySensor(self)
         selction_sensor_quantity_page.show_page()
 
         # Creation of a main frame
-        self.main_frame = ttk.Frame(self)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
+        self.create_new_main_frame()
 
         # Add buttons
-        btn_back = tk.Button(self.main_frame, text="Back", command=lambda: self.redirect_to_modify_or_create_configuration(selction_sensor_quantity_page))
-        btn_back.pack(side=tk.LEFT, padx=10, expand=True)
+        back_button = ttk.Button(self.main_frame, text="Back", command=lambda: self.redirect_to_modify_or_create_configuration(selction_sensor_quantity_page))
+        back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
-        btn_next = tk.Button(self.main_frame, text="Next", command=selction_sensor_quantity_page.on_next_button_click)
-        btn_next.pack(side=tk.RIGHT, padx=10, expand=True)
+        next_button = ttk.Button(self.main_frame, text="Next", command=lambda: self.redirection_to_labellisation_sensor(selction_sensor_quantity_page))
+        next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
 
+    def redirect_to_selection_sensor_quantity(self, page):
+
+        # Clear the previous page content
+        self.clear_the_page(page)
+
+        selction_sensor_quantity_page = QuantitySensor(self)
+        selction_sensor_quantity_page.show_page()
+
+        # Creation of a main frame
+        self.create_new_main_frame()
+
+        # Add buttons
+        back_button = ttk.Button(self.main_frame, text="Back", command=lambda: self.redirect_to_modify_or_create_configuration(selction_sensor_quantity_page))
+        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        next_button = ttk.Button(self.main_frame, text="Next", command=lambda: self.redirection_to_labellisation_sensor(selction_sensor_quantity_page))
+        next_button.pack(side=tk.RIGHT, padx=10, expand=True)
+
+
+    def redirection_to_labellisation_sensor(self, page):
+
+        # Clear the previous page content
+        self.clear_the_page(page)
+
+        labellisation_sensor_page = LabelisationSensor(self)
+        labellisation_sensor_page.show_page()
+
+        # Creation of a main frame
+        self.create_new_main_frame()
+
+        # Add buttons
+        back_button = ttk.Button(self.main_frame, text="Back", command=lambda: self.redirect_to_selection_sensor_quantity(labellisation_sensor_page))
+        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        next_button = ttk.Button(self.main_frame, text="Next", command=lambda: self.redirect_to_summary_from_labellisation(labellisation_sensor_page))
+        next_button.pack(side=tk.RIGHT, padx=10, expand=True)
+
+
+    def redirect_to_summary_from_labellisation(self, page):
+        # Clear the previous page content
+        self.clear_the_page(page)
+
+        # Creation of a main frame
+        self.create_new_main_frame()
+
+        summary_page = Summary(self)
+        summary_page.show_page()
+
+        # Cancel button
+        concenl_button = ttk.Button(self.main_frame, text="Cancel", command=lambda: self.redirect_to_modify_or_create_configuration(summary_page))
+        concenl_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        # Back button
+        back_button = ttk.Button(self.main_frame, text="Back", command=lambda: self.redirection_to_labellisation_sensor(summary_page))
+        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        # Validate configuration button
+        back_button = ttk.Button(self.main_frame, text="Validate configuration", command=lambda: self.redirect_to_modify_or_create_configuration(summary_page))
+        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+    def clear_the_page(self, page):
+        # Clear the previous page content
+        page.clear_page()
+        self.main_frame.destroy()
+
+    def create_new_main_frame(self):
+        # Creation of a main frame
+        self.main_frame = ttk.Frame(self)
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
 
 
 

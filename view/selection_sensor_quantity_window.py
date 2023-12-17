@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-
+from tkinter import *
 
 class QuantitySensor:
     def __init__(self, master):
@@ -8,14 +8,13 @@ class QuantitySensor:
         self.frame = ttk.Frame(self.master)
 
     def show_page(self):
-        print("je suis dans la bonne page")
 
         # Create a main frame which will be centered in the window
-        self.frame_main = tk.Frame(self.master)
-        self.frame_main.pack(expand=True)
+        self.frame = ttk.Frame(self.master)
+        self.frame.pack(expand=True)
 
         # Create a frame for the sensor selectors inside the main frame
-        self.frame_sensors = tk.Frame(self.frame_main, padx=10, pady=10)
+        self.frame_sensors = tk.Frame(self.frame, padx=10, pady=10)
         self.frame_sensors.pack()
 
         # Function to create a labeled frame with a ComboBox inside

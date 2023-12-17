@@ -29,9 +29,6 @@ class ModifyOrCreateConfiguration:
         self.scenario_combobox.set("Example")
         self.scenario_combobox.pack(fill="x")
 
-        modify_button = tk.Button(self.left_frame, text="Modify the configuration")
-        modify_button.pack(side="bottom", fill="x")
-
         # Right Frame for Scenario Creation
         self.right_frame = tk.Frame(self.master, bd=2, relief="sunken", padx=5, pady=5)
         self.right_frame.place(relx=0.50, rely=0.09, relwidth=0.48, relheight=0.50)
@@ -45,9 +42,6 @@ class ModifyOrCreateConfiguration:
         self.description_text_entry = tk.Text(self.right_frame, height=5)  # Height is set to 5 lines
         self.description_text_entry.pack(fill="x")
 
-        create_button = tk.Button(self.right_frame, text="Create a configuration",
-                                  command=self.on_create_configuration_button_click)
-        create_button.pack(side="bottom", fill="x")
 
     def on_create_configuration_button_click(self):
         scenarioname = self.name_entry.get()
@@ -55,7 +49,7 @@ class ModifyOrCreateConfiguration:
 
 
         # RETURN TRUE POUR TESTER LES REDIRECTIONS SANS LA BDD
-        #return True
+        # return True
 
         admin_login = LoginAsAdministrator(self.master)
         # TODO voir apres que la redirection est faite pour recuperer l'id_user de la page de connexion

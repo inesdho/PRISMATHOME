@@ -15,6 +15,7 @@ class Summary:
 
         # Will contain the expanding frames
         self.expanding_frames = {}
+        self.sensor_frames = {}
 
 
     def show_page(self):
@@ -46,6 +47,8 @@ class Summary:
 
                 toggle_button = ttk.Button(sensor_frame, text=sensor_type, command=lambda st=sensor_type: self.toggle_frame(st))
                 toggle_button.pack(pady=5)
+
+                self.sensor_frames[sensor_type] = sensor_frame
 
                 self.create_expanding_frame(sensor_type, sensor_frame)
 
@@ -91,8 +94,16 @@ class Summary:
 
     def clear_page(self):
         self.frame.destroy()
-        for frame in self.expanding_frames.get():
-            frame.destroy()
+
+        for sensor_frame in self.sensor_frames.values():
+            sensor_frame.destroy()
+
+        for expanding_frame in self.expanding_frames.values():
+            expanding_frame.destroy()
+
+        self.sensor_frames = {}
+        self.expanding_frames = {}
+
 
     def get_scenario_label(self):
         # TODO Modifier la fonction pour qu'elle retourne le scénario de l'observation en cours
