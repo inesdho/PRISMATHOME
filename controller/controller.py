@@ -89,12 +89,9 @@ class App(ThemedTk):
 
         self.call_new_observation()
 
-    def redirect_to_modify_or_create_configuration(self, login_as_admin_page):
-        print("redirect_to_modify_or_create_configuration")
+    def redirect_to_modify_or_create_configuration(self, page):
         # Clear the login_as_admin_page content
-        login_as_admin_page.clear_page()
-        print("clear page")
-
+        page.clear_page()
         self.main_frame.destroy()
 
         # Creation of a main frame
@@ -107,6 +104,11 @@ class App(ThemedTk):
         # Logout Button
         logout_button = tk.Button(self.master, text="Log out", command=lambda: self.redirect_to_new_observation(modify_or_create_configuration_page))
         logout_button.place(relx=0.9, rely=0.01)  # Position the logout button above the frames
+
+        # Create a new configuration button
+        create_button = tk.Button(modify_or_create_configuration_page.right_frame, text="Create a configuration",
+                                  command=lambda: self.redirect_to_selection_sensor_quantity(modify_or_create_configuration_page))
+        create_button.pack(side="bottom", fill="x")
 
 
     def redirect_to_summary(self, page):
@@ -125,8 +127,25 @@ class App(ThemedTk):
         ttk.Button(self.main_frame, text="Cancel", command=lambda: self.redirect_to_new_observation(summary_page)).place(relx=0.9, rely=0.1)
 
     def redirect_to_selection_sensor_quantity(self, page):
+        # Clear the previous page content
+        page.on_create_configuration_button_click
+
         page.clear_page()
         self.main_frame.destroy()
+
+        selction_sensor_quantity_page = QuantitySensor(self)
+        selction_sensor_quantity_page.show_page()
+
+        # Creation of a main frame
+        self.main_frame = ttk.Frame(self)
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Add buttons
+        btn_back = tk.Button(self.main_frame, text="Back", command=lambda: self.redirect_to_modify_or_create_configuration(selction_sensor_quantity_page))
+        btn_back.pack(side=tk.LEFT, padx=10, expand=True)
+
+        btn_next = tk.Button(self.main_frame, text="Next", command=selction_sensor_quantity_page.on_next_button_click)
+        btn_next.pack(side=tk.RIGHT, padx=10, expand=True)
 
 
 

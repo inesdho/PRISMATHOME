@@ -8,6 +8,8 @@ class QuantitySensor:
         self.frame = ttk.Frame(self.master)
 
     def show_page(self):
+        print("je suis dans la bonne page")
+
         # Create a main frame which will be centered in the window
         self.frame_main = tk.Frame(self.master)
         self.frame_main.pack(expand=True)
@@ -44,19 +46,9 @@ class QuantitySensor:
         pressure_sensor_frame = create_sensor_frame(self.frame_sensors, "Pressure sensor", self.pressure_var)
         pressure_sensor_frame.pack(side=tk.LEFT, padx=10)
 
-        # Create a frame for the buttons below the sensor selectors
-        self.frame_buttons = tk.Frame(self.frame_main)
-        self.frame_buttons.pack(pady=5)
-
-        # Add buttons
-        btn_back = tk.Button(self.frame_buttons, text="Back")
-        btn_back.pack(side=tk.LEFT, padx=10, expand=True)
-
-        btn_next = tk.Button(self.frame_buttons, text="Next", command=self.on_next_button_click)
-        btn_next.pack(side=tk.RIGHT, padx=10, expand=True)
-
     def clear_page(self):
         self.frame.destroy()
+        self.frame_sensors.destroy()
 
     def on_next_button_click(self):
         # Retrieve values from the StringVars

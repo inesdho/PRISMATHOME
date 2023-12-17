@@ -2,9 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 
 import mysql.connector
-from ttkthemes.themed_style import ThemedStyle
-
 from view.login_as_admin_window import LoginAsAdministrator
+import globals
 
 
 class ModifyOrCreateConfiguration:
@@ -45,13 +44,14 @@ class ModifyOrCreateConfiguration:
         self.description_text_entry = tk.Text(self.right_frame, height=5)  # Height is set to 5 lines
         self.description_text_entry.pack(fill="x")
 
-        create_button = tk.Button(self.right_frame, text="Create a configuration",
-                                  command=self.on_create_configuration_button_click)
-        create_button.pack(side="bottom", fill="x")
 
     def on_create_configuration_button_click(self):
         scenarioname = self.name_entry.get()
         description = self.description_text_entry.get("1.0", "end-1c")
+
+
+        # RETURN TRUE POUR TESTER LES REDIRECTIONS SANS LA BDD
+        #return True
 
         admin_login = LoginAsAdministrator(self.master)
         # TODO voir apres que la redirection est faite pour recuperer l'id_user de la page de connexion
