@@ -13,12 +13,13 @@ class ModifyOrCreateConfiguration:
         self.frame = ttk.Frame(self.master)
 
     def show_page(self):
-        self.frame = ttk.Frame(self.master)
+        self.frame = ttk.Frame(self.frame)
         self.frame.pack(fill=tk.BOTH, expand=True)
 
         # Left Frame for Scenario Selection
-        self.left_frame = tk.Frame(self.master, bd=2, relief="sunken", padx=5, pady=5)
+        self.left_frame = tk.Frame(self.frame, bd=2, relief="sunken", padx=5, pady=5)
         self.left_frame.place(relx=0.02, rely=0.09, relwidth=0.46, relheight=0.50)
+
 
         label_scenario_name = tk.Label(self.left_frame, text="Scenario name :")
         label_scenario_name.pack(anchor="nw")

@@ -1,8 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import *
 
 # TODO remplacer cette liste par une requête listant les différents types de capteurs stockés dans la BDD
-sensor_types = ["presence", "pressure", "opening"]
+sensor_types = ["presence", "pressure", "opening", "button"]
 
 
 class Summary:
@@ -10,39 +11,40 @@ class Summary:
         self.master = master
         self.frame = ttk.Frame(self.master)
 
+        self.sensors_frame = ttk.Frame(self.master)
+
         # Will contain the expanding frames
         self.expanding_frames = {}
 
+
     def show_page(self):
-        frame_text = ttk.Frame(self.master, padding="10px")
-        frame_text.pack(fill='both', expand=True)
+        # Frame thath will contain the title of the page and the data about the observation
+        self.frame = ttk.Frame(self.master)
+        self.frame.pack(fill=tk.BOTH)
 
+        # Title of the page
+        title_label = tk.Label(self.frame, text='Summary', font=16)
+        title_label.pack(pady=10)
 
-        label = ttk.Label(frame_text, text="Summary", anchor='n', font='16')
-        label.pack(fill='both', expand=True)
+        # Informations about the observation
+        observation_info_text = tk.Text(self.frame, height=5)
+        observation_info_text.insert(1.0, "Scenario : " + self.get_scenario_label() + "\n\n" +
+                                     "Session : " + self.get_session() + "\n\n" +
+                                     "Participant : " + self.get_participant())
+        observation_info_text.configure(state='disabled', font=("Calibri", 14, "bold"))
+        observation_info_text.pack(expand=tk.TRUE, side=tk.LEFT, fill=tk.BOTH)
 
-        # Label wich contain the information relative to the current observation
-        label_observation_info = ttk.Label(frame_text, text="Scenario : " + self.get_scenario_label() + "\n" +
-                                                            "Session : " + self.get_session() + "\n" +
-                                                            "Participant : " + self.get_participant() + "\n\n")
-        label_observation_info.pack(side='left', fill='both', pady=5)
-
-        self.frame_sensor_type = ttk.Frame(self.master, padding="10px")
-        self.frame_sensor_type.pack(fill=tk.BOTH, expand=True)
-
-        # Show a button that will display the details of a type of sensor
+        # Frame with the buttons that will display the details of a type of sensor once clicked
         self.show_sensor_types()
 
     def show_sensor_types(self):
-
         for sensor_type in sensor_types:
             if self.exist_in_this_config(sensor_type):
                 # Sensors type
-                sensor_frame = ttk.Frame(self.frame_sensor_type)
-                sensor_frame.pack(pady=5, fill=tk.BOTH)
+                sensor_frame = ttk.Frame(self.master)
+                sensor_frame.pack(expand=tk.TRUE, fill=tk.BOTH, side=tk.BOTTOM)
 
-                toggle_button = ttk.Button(sensor_frame, text=sensor_type,
-                                           command=lambda st=sensor_type: self.toggle_frame(st))
+                toggle_button = ttk.Button(sensor_frame, text=sensor_type, command=lambda st=sensor_type: self.toggle_frame(st))
                 toggle_button.pack(pady=5)
 
                 self.create_expanding_frame(sensor_type, sensor_frame)
@@ -55,19 +57,19 @@ class Summary:
         if frame.winfo_ismapped():
             frame.pack_forget()
         else:
-            frame.pack(fill=tk.BOTH, expand=True)
+            frame.pack(fill=tk.BOTH, expand=True, side=tk.TOP)
 
     def create_expanding_frame(self, sensor_type, sensor_frame):
+
         # Create a frame
-        expanding_frame = ttk.Frame(sensor_frame, relief="sunken")
-        expanding_frame.pack(fill='y', expand=True)
+        expanding_frame = ttk.Frame(sensor_frame, relief="sunken", height=200)
+        expanding_frame.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
 
         # Add content to the frame
         text_sensor = tk.Text(expanding_frame)
-        text_sensor.pack(side="left", fill=tk.BOTH, expand=True)
 
         scrollbar = ttk.Scrollbar(text_sensor, command=text_sensor.yview())
-        scrollbar.pack(side="right", fill="y")
+        scrollbar.pack(side=tk.RIGHT, fill="y")
 
         # Configure the Text widget to use the scrollbar
         text_sensor.config(yscrollcommand=scrollbar.set)
@@ -79,6 +81,8 @@ class Summary:
                                "\tDescription : " + self.get_sensor_description(sensor_id) + "\n" +
                                "\tStatus : " + self.get_sensor_status(sensor_id) + "\n\n")
 
+        text_sensor.configure(state='disabled', font=("Calibri", 12, "bold"))
+        text_sensor.pack(expand=tk.TRUE, side=tk.LEFT, fill=tk.BOTH)
         # Hide the frame when the page is loaded
         expanding_frame.pack_forget()
 
@@ -87,8 +91,8 @@ class Summary:
 
     def clear_page(self):
         self.frame.destroy()
-        self.frame_text.destroy()
-        self.frame_sensor_type.destroy()
+        for frame in self.expanding_frames.get():
+            frame.destroy()
 
     def get_scenario_label(self):
         # TODO Modifier la fonction pour qu'elle retourne le scénario de l'observation en cours

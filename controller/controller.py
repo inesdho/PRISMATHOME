@@ -7,6 +7,7 @@ from view.new_observation_window import NewObservation
 from view.login_as_admin_window import LoginAsAdministrator
 from view.modify_or_create_configuration_window import ModifyOrCreateConfiguration
 from view.summary_window import Summary
+from view.selection_sensor_quantity_window import QuantitySensor
 
 
 class App(ThemedTk):
@@ -109,7 +110,7 @@ class App(ThemedTk):
 
 
     def redirect_to_summary(self, page):
-        # Clear the login_as_admin_page content
+        # Clear the previous page content
         page.clear_page()
         self.main_frame.destroy()
 
@@ -122,4 +123,12 @@ class App(ThemedTk):
 
         # Cancel button to redirect to the new observation  page
         ttk.Button(self.main_frame, text="Cancel", command=lambda: self.redirect_to_new_observation(summary_page)).place(relx=0.9, rely=0.1)
+
+    def redirect_to_selection_sensor_quantity(self, page):
+        page.clear_page()
+        self.main_frame.destroy()
+
+
+
+
 
