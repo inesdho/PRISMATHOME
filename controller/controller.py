@@ -123,7 +123,3 @@ class App(ThemedTk):
         # Cancel button to redirect to the new observation  page
         ttk.Button(self.main_frame, text="Cancel", command=lambda: self.redirect_to_new_observation(summary_page)).place(relx=0.9, rely=0.1)
 
-
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()
