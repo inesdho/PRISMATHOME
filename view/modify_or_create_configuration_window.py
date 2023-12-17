@@ -54,13 +54,13 @@ class ModifyOrCreateConfiguration:
 
         admin_login = LoginAsAdministrator(self.master)
         # TODO voir apres que la redirection est faite pour recuperer l'id_user de la page de connexion
-        # id_user = admin_login.get_id_user_by_admin()
-        id_user = 1
-
+        id_user = globals.global_id_user
+        print(id_user)
         num_config = self.get_number_config_create_by_admin(id_user) + 1
 
         id_config = str(id_user) + "-" + str(num_config)
-
+        print("valeur de l'id user")
+        print(id_user)
         # Connexion à la base de données MySQL
         conn = mysql.connector.connect(
             host="localhost",
@@ -71,8 +71,8 @@ class ModifyOrCreateConfiguration:
         cursor = conn.cursor()
 
         # Exécutez une requête
-        query = "INSERT INTO configuration (id_config, id_user, label, description)VALUES(%s, '1', %s, %s)"
-        cursor.execute(query, (id_config, scenarioname, description))
+        query = "INSERT INTO configuration (id_config, id_user, label, description)VALUES(%s, %s, %s, %s)"
+        cursor.execute(query, (id_config, id_user, scenarioname, description))
         conn.commit()
 
         # Fermez la connexion à la base de données
