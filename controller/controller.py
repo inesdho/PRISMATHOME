@@ -235,7 +235,7 @@ class App(ThemedTk):
 
 
     def clear_the_page(self, page):
-        # Clear the previous page content
+        # Clear the previous page content and the main frame in order to be sure that there is nothing left
         page.clear_page()
         self.main_frame.destroy()
 

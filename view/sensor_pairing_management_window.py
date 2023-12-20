@@ -1,4 +1,3 @@
-import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import *
@@ -46,11 +45,11 @@ class SensorPairingManagement:
 
     # Create a text widget that will contain the text in the parameter of the function
     def create_a_text_widget(self, text, frame, width):
-        label_text = tk.Text(frame, height=1, width=width)
+        sensor_text = tk.Text(frame, height=1, width=width)
         # Adding the content of the text widget
-        label_text.insert(1.0, text)
-        label_text.configure(state='disabled', font=("Calibri", 11))
-        label_text.pack(side=tk.LEFT, expand=tk.FALSE)
+        sensor_text.insert(1.0, text)
+        sensor_text.configure(state='disabled', font=("Calibri", 11))
+        sensor_text.pack(side=tk.LEFT, expand=tk.FALSE)
 
 
     # Initialise the button to offer the user the option to pair a physical snesor
@@ -93,13 +92,11 @@ class SensorPairingManagement:
 
 
 
-
-
     # TODO INES A voir comment tu le sens INES mais certianes des fonctions ci-dessous sont les mêmes que dans summary_window, est ce que ça vaudrait le coup de faire un fichier
 # TODO spécial qui fait que retourner des résultats de requêtes comme ça ?
 
     def get_sensors(self):
-        # TODO INES le fonction doit retourner la liste des capteurs associés à la configuration en cours
+        # TODO INES la fonction doit retourner la liste des capteurs associés à la configuration en cours
         return ['id_sensor_1', 'id_sensor_2', 'id_sensor_3', 'id_sensor_4']
 
     def get_sensor_label(self, id_sensor):

@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import *
 
-#TODO SI J'AI (MATHILDE) LE TEMPS : au liau qu'un clic d'un bouton affiche ou non une frame, il faudrai qu'au clic du bouton, le contenu du widget de text soit réécrit (fonction pour delete le contenu de la zone de texte : text_widget.delete("1.0", tk.END)
+# TODO SI J'AI (MATHILDE) LE TEMPS : au liau qu'un clic d'un bouton affiche ou non une frame, il faudrai qu'au clic du bouton, le contenu du widget de text soit réécrit (fonction pour delete le contenu de la zone de texte : text_widget.delete("1.0", tk.END)
 
 
 # TODO remplacer cette liste par une requête listant les différents types de capteurs stockés dans la BDD
