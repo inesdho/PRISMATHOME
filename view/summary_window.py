@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import *
 
+#TODO SI J'AI (MATHILDE) LE TEMPS : au liau qu'un clic d'un bouton affiche ou non une frame, il faudrai qu'au clic du bouton, le contenu du widget de text soit réécrit (fonction pour delete le contenu de la zone de texte : text_widget.delete("1.0", tk.END)
+
+
 # TODO remplacer cette liste par une requête listant les différents types de capteurs stockés dans la BDD
 sensor_types = ["presence", "pressure", "opening", "button"]
 
@@ -65,17 +68,11 @@ class Summary:
     def create_expanding_frame(self, sensor_type, sensor_frame):
 
         # Create a frame
-        expanding_frame = ttk.Frame(sensor_frame, relief="sunken", height=200)
-        expanding_frame.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
+        expanding_frame = ttk.Frame(sensor_frame, relief="sunken")
+        expanding_frame.pack(fill=tk.BOTH, expand=True)
 
         # Add content to the frame
         text_sensor = tk.Text(expanding_frame)
-
-        scrollbar = ttk.Scrollbar(text_sensor, command=text_sensor.yview())
-        scrollbar.pack(side=tk.RIGHT, fill="y")
-
-        # Configure the Text widget to use the scrollbar
-        text_sensor.config(yscrollcommand=scrollbar.set)
 
         for sensor_id in self.get_sensors_id_from_type(sensor_type):
             # TODO remplacer le text du label par les infos des capteurs du type de sensor_type

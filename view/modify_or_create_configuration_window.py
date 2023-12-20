@@ -49,7 +49,7 @@ class ModifyOrCreateConfiguration:
 
 
         # RETURN TRUE POUR TESTER LES REDIRECTIONS SANS LA BDD
-        # return True
+        #return True
 
         admin_login = LoginAsAdministrator(self.master)
         # TODO voir apres que la redirection est faite pour recuperer l'id_user de la page de connexion

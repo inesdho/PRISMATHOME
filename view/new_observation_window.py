@@ -20,24 +20,32 @@ class NewObservation:
         options = ["Option 1", "Option 2", "Option 3"]
         configuration_label = ttk.Label(self.frame, text="Configuration")
         configuration_label.pack(pady=10)
-        self.configuration_combobox = ttk.Combobox(self.frame, values=options)
+        self.configuration_combobox = ttk.Combobox(self.frame, values=options, width=50)
         self.configuration_combobox.pack(pady=10)
+
+        # Observation label input
+        session_label = ttk.Label(self.frame, text="Observation label")
+        session_label.pack()
+        self.session_entry = ttk.Entry(self.frame, width=50)
+        self.session_entry.pack(pady=10)
+
+        # Observation description input
+        session_label = ttk.Label(self.frame, text="Observation description")
+        session_label.pack()
+        self.session_entry = ttk.Entry(self.frame, width=50)
+        self.session_entry.pack(pady=10)
 
         # Session input
         session_label = ttk.Label(self.frame, text="Session")
         session_label.pack()
-        self.session_entry = ttk.Entry(self.frame)
+        self.session_entry = ttk.Entry(self.frame, width=50)
         self.session_entry.pack(pady=10)
 
         # Participant input
         participant_label = ttk.Label(self.frame, text="Participant")
         participant_label.pack()
-        self.participant_entry = ttk.Entry(self.frame)
+        self.participant_entry = ttk.Entry(self.frame, width=50)
         self.participant_entry.pack(pady=10)
-
-        # Validation button
-        button = ttk.Button(self.frame, text="Import configuration", command=self.on_button_click)
-        button.pack(pady=20)
 
     def clear_page(self):
         self.frame.destroy()

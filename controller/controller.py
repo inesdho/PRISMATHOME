@@ -9,6 +9,7 @@ from view.modify_or_create_configuration_window import ModifyOrCreateConfigurati
 from view.summary_window import Summary
 from view.selection_sensor_quantity_window import QuantitySensor
 from view.labellisation_sensor_window import LabelisationSensor
+from view.sensor_pairing_management_window import SensorPairingManagement
 
 
 class App(ThemedTk):
@@ -39,7 +40,8 @@ class App(ThemedTk):
         # Redirection to login as an admin button
         ttk.Button(self.main_frame, text="Login as administrator", command=lambda: self.redirect_to_login_as_admin(new_observation_page)).place(relx=0.9, rely=0.1)
 
-        # TODO bouton vers la mise en place des capteurs une fois la config choisie
+        # Redirection to login as an admin button
+        ttk.Button(new_observation_page.frame, text="Import configuration", command=lambda: self.redirect_to_pairing(new_observation_page)).pack()
 
     def redirect_to_login_as_admin(self, new_observation_page):
 
@@ -59,7 +61,7 @@ class App(ThemedTk):
         # Cancel button to redirect to the new observation  page
         ttk.Button(self.main_frame, text="Cancel", command=lambda: self.redirect_to_new_observation(login_as_admin_page)).place(relx=0.9, rely=0.1)
 
-    # Get the data from the user input
+
     def connexion_button_clic(self, login_as_admin_page):
         login_value = login_as_admin_page.login_entry.get()
         password_value = login_as_admin_page.password_entry.get()
@@ -126,7 +128,7 @@ class App(ThemedTk):
         back_button = ttk.Button(self.main_frame, text="Back", command=lambda: self.redirect_to_modify_or_create_configuration(selction_sensor_quantity_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
-        next_button = ttk.Button(self.main_frame, text="Next", command=lambda: self.redirection_to_labellisation_sensor(selction_sensor_quantity_page))
+        next_button = ttk.Button(self.main_frame, text="Next", command=lambda: self.redirect_to_labellisation_sensor(selction_sensor_quantity_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
 
@@ -145,11 +147,11 @@ class App(ThemedTk):
         back_button = ttk.Button(self.main_frame, text="Back", command=lambda: self.redirect_to_modify_or_create_configuration(selction_sensor_quantity_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
-        next_button = ttk.Button(self.main_frame, text="Next", command=lambda: self.redirection_to_labellisation_sensor(selction_sensor_quantity_page))
+        next_button = ttk.Button(self.main_frame, text="Next", command=lambda: self.redirect_to_labellisation_sensor(selction_sensor_quantity_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
 
-    def redirection_to_labellisation_sensor(self, page):
+    def redirect_to_labellisation_sensor(self, page):
 
         # Clear the previous page content
         self.clear_the_page(page)
@@ -183,12 +185,54 @@ class App(ThemedTk):
         concenl_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Back button
-        back_button = ttk.Button(self.main_frame, text="Back", command=lambda: self.redirection_to_labellisation_sensor(summary_page))
+        back_button = ttk.Button(self.main_frame, text="Back", command=lambda: self.redirect_to_labellisation_sensor(summary_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Validate configuration button
         back_button = ttk.Button(self.main_frame, text="Validate configuration", command=lambda: self.redirect_to_modify_or_create_configuration(summary_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+
+    def redirect_to_pairing(self, page):
+        # Clear the previous page content
+        self.clear_the_page(page)
+
+        sensor_pairing_page = SensorPairingManagement(self)
+        sensor_pairing_page.show_page()
+
+        # Creation of a main frame
+        self.create_new_main_frame()
+
+        # Add buttons
+        back_button = ttk.Button(self.main_frame, text="Back", command=lambda: self.redirect_to_new_observation(sensor_pairing_page))
+        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        # Rediraction to summary to confirm the configuration
+        next_button = ttk.Button(self.main_frame, text="Next", command=lambda: self.redirect_to_summary_from_pairing(sensor_pairing_page))
+        next_button.pack(side=tk.RIGHT, padx=10, expand=True)
+
+    def redirect_to_summary_from_pairing(self, page):
+        # Clear the previous page content
+        self.clear_the_page(page)
+
+        # Creation of a main frame
+        self.create_new_main_frame()
+
+        summary_page = Summary(self)
+        summary_page.show_page()
+
+        # Cancel button
+        concenl_button = ttk.Button(self.main_frame, text="Exit", command=lambda: self.redirect_to_new_observation(summary_page))
+        concenl_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        # Back button
+        back_button = ttk.Button(self.main_frame, text="Back", command=lambda: self.redirect_to_pairing(summary_page))
+        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        # Start observation button
+        #back_button = ttk.Button(self.main_frame, text="Start observation", command=lambda: self.redirect_to_modify_or_create_configuration(summary_page))
+        #back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
 
     def clear_the_page(self, page):
         # Clear the previous page content
