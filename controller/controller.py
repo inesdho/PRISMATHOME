@@ -113,7 +113,7 @@ class App(ThemedTk):
 
     def redirect_to_selection_sensor_quantity_from_create_a_config(self, page):
         # Clear the previous page content
-        page.on_create_configuration_button_click
+        page.on_create_configuration_button_click()
 
         # Clear the previous page content
         self.clear_the_page(page)
@@ -153,6 +153,7 @@ class App(ThemedTk):
 
     def redirect_to_labellisation_sensor(self, page):
 
+        page.on_next_button_click()
         # Clear the previous page content
         self.clear_the_page(page)
 
