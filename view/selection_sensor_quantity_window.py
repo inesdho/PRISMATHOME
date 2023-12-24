@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import *
+import globals
 
 class QuantitySensor:
     def __init__(self, master):
@@ -51,13 +52,13 @@ class QuantitySensor:
 
     def on_next_button_click(self):
         # Retrieve values from the StringVars
-        presence_value = self.presence_var.get()
-        opening_value = self.opening_var.get()
-        activity_value = self.activity_var.get()
-        pressure_value = self.pressure_var.get()
+        globals.num_presence_sensors= self.presence_var.get()
+        globals.num_opening_sensors = self.opening_var.get()
+        globals.num_activity_sensors = self.activity_var.get()
+        globals.num_pressure_sensors = self.pressure_var.get()
 
         # Print the values
-        print("Number of Presence Sensors selected:", presence_value)
-        print("Number of Opening Sensors selected:", opening_value)
-        print("Number of Activity Sensors selected:", activity_value)
-        print("Number of Pressure Sensors selected:", pressure_value)
+        print("Number of Presence Sensors selected:", globals.num_presence_sensors)
+        print("Number of Opening Sensors selected:", globals.num_opening_sensors)
+        print("Number of Activity Sensors selected:", globals.num_activity_sensors)
+        print("Number of Pressure Sensors selected:", globals.num_pressure_sensors)

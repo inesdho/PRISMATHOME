@@ -1,9 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
+import globals
 
 
 # TODO remplacer cette liste par une requête listant les différents capteurs de la configuration en cours
-sensor_labels = ['Presence sensor 1', 'Presence sensor 2', 'Opening sensor 1', 'Pressure sensor 1']
+#sensor_labels = ['Presence sensor 1', 'Presence sensor 2', 'Opening sensor 1', 'Pressure sensor 1']
 
 
 class LabelisationSensor:
@@ -12,7 +13,14 @@ class LabelisationSensor:
         self.frame = ttk.Frame(self.master)
 
     def show_page(self):
-        # Create a main frame which will be centered in the window
+        sensor_labels = []
+        for i in range(int(globals.num_presence_sensors)):
+            sensor_labels.append(f'Presence sensor {i+1}')
+        for i in range(int(globals.num_opening_sensors)):
+            sensor_labels.append(f'Opening sensor {i+1}')
+        for i in range(int(globals.num_pressure_sensors)):
+            sensor_labels.append(f'Pressure sensor {i+1}')
+
         self.frame = ttk.Frame(self.master)
         self.frame.pack(expand=True)
 
