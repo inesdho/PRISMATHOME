@@ -93,8 +93,6 @@ class SensorPairingManagement:
 
 
 
-
-
     # TODO INES A voir comment tu le sens INES mais certianes des fonctions ci-dessous sont les mêmes que dans summary_window, est ce que ça vaudrait le coup de faire un fichier
 # TODO spécial qui fait que retourner des résultats de requêtes comme ça ?
 
