@@ -128,7 +128,7 @@ class App(ThemedTk):
         back_button = ttk.Button(self.main_frame, text="Back", command=lambda: self.redirect_to_modify_or_create_configuration(selction_sensor_quantity_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
-        next_button = ttk.Button(self.main_frame, text="Next", command=lambda: self.redirect_to_labellisation_sensor(selction_sensor_quantity_page))
+        next_button = ttk.Button(self.main_frame, text="Next", command=lambda: self.redirect_to_labellisation_sensor_from_sensor_quantity(selction_sensor_quantity_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
 
@@ -147,13 +147,33 @@ class App(ThemedTk):
         back_button = ttk.Button(self.main_frame, text="Back", command=lambda: self.redirect_to_modify_or_create_configuration(selction_sensor_quantity_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
-        next_button = ttk.Button(self.main_frame, text="Next", command=lambda: self.redirect_to_labellisation_sensor(selction_sensor_quantity_page))
+        next_button = ttk.Button(self.main_frame, text="Next", command=lambda: self.redirect_to_labellisation_sensor_from_sensor_quantity(selction_sensor_quantity_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
 
-    def redirect_to_labellisation_sensor(self, page):
+    def redirect_to_labellisation_sensor_from_sensor_quantity(self, page):
 
         page.on_next_button_click()
+
+        # Clear the previous page content
+        self.clear_the_page(page)
+
+        labellisation_sensor_page = LabelisationSensor(self)
+        labellisation_sensor_page.show_page()
+
+        # Creation of a main frame
+        self.create_new_main_frame()
+
+        # Add buttons
+        back_button = ttk.Button(self.main_frame, text="Back", command=lambda: self.redirect_to_selection_sensor_quantity(labellisation_sensor_page))
+        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        next_button = ttk.Button(self.main_frame, text="Next", command=lambda: self.redirect_to_summary_from_labellisation(labellisation_sensor_page))
+        next_button.pack(side=tk.RIGHT, padx=10, expand=True)
+
+
+    def redirect_to_labellisation_sensor_from_summary(self, page):
+
         # Clear the previous page content
         self.clear_the_page(page)
 
@@ -172,21 +192,22 @@ class App(ThemedTk):
 
 
     def redirect_to_summary_from_labellisation(self, page):
+
         # Clear the previous page content
         self.clear_the_page(page)
 
+        summary_page = Summary(self)
+        summary_page.show_page(False)
+
         # Creation of a main frame
         self.create_new_main_frame()
-
-        summary_page = Summary(self)
-        summary_page.show_page()
 
         # Cancel button
         concenl_button = ttk.Button(self.main_frame, text="Cancel", command=lambda: self.redirect_to_modify_or_create_configuration(summary_page))
         concenl_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Back button
-        back_button = ttk.Button(self.main_frame, text="Back", command=lambda: self.redirect_to_labellisation_sensor(summary_page))
+        back_button = ttk.Button(self.main_frame, text="Back", command=lambda: self.redirect_to_labellisation_sensor_from_summary(summary_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Validate configuration button
@@ -216,11 +237,11 @@ class App(ThemedTk):
         # Clear the previous page content
         self.clear_the_page(page)
 
+        summary_page = Summary(self)
+        summary_page.show_page(True)
+
         # Creation of a main frame
         self.create_new_main_frame()
-
-        summary_page = Summary(self)
-        summary_page.show_page()
 
         # Cancel button
         concenl_button = ttk.Button(self.main_frame, text="Exit", command=lambda: self.redirect_to_new_observation(summary_page))

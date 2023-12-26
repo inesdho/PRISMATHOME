@@ -2,11 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import *
 
-# TODO SI J'AI (MATHILDE) LE TEMPS : au liau qu'un clic d'un bouton affiche ou non une frame, il faudrai qu'au clic du bouton, le contenu du widget de text soit réécrit (fonction pour delete le contenu de la zone de texte : text_widget.delete("1.0", tk.END)
-
-
 # TODO remplacer cette liste par une requête listant les différents types de capteurs stockés dans la BDD
-sensor_types = ["presence", "pressure", "opening", "button"]
+sensor_types_id = ["presence", "pressure", "opening", "button"]
 
 
 class Summary:
@@ -14,104 +11,72 @@ class Summary:
         self.master = master
         self.frame = ttk.Frame(self.master)
 
-        self.sensors_frame = ttk.Frame(self.master)
-
-        # Will contain the expanding frames
-        self.expanding_frames = {}
-        self.sensor_frames = {}
-
-
-    def show_page(self):
-        # Frame thath will contain the title of the page and the data about the observation
+    def show_page(self, is_observation):
+        # Frame that will contain the title of the page and the data about the observation
         self.frame = ttk.Frame(self.master)
         self.frame.pack(fill=tk.BOTH)
 
         # Title of the page
-        title_label = tk.Label(self.frame, text='Summary', font=16)
+        title_label = ttk.Label(self.frame, text='Summary', font=16)
         title_label.pack(pady=10)
 
-        # Informations about the observation
-        observation_info_text = tk.Text(self.frame, height=5)
-        observation_info_text.insert(1.0, "Scenario : " + self.get_scenario_label() + "\n\n" +
-                                     "Session : " + self.get_session() + "\n\n" +
-                                     "Participant : " + self.get_participant())
-        observation_info_text.configure(state='disabled', font=("Calibri", 14, "bold"))
-        observation_info_text.pack(expand=tk.TRUE, side=tk.LEFT, fill=tk.BOTH)
+        # Information about the configuration
+        scenario_frame = ttk.Frame(self.frame)
+        scenario_frame.pack(fill=tk.BOTH)
+        scenario_label = ttk.Label(scenario_frame, text="Scenario : " + self.get_scenario_label(), padding=10)
+        scenario_label.pack(side=tk.LEFT)
 
-        # Frame with the buttons that will display the details of a type of sensor once clicked
-        self.show_sensor_types()
+        # The following information need to be display only if this page is called during an observation
+        if is_observation:
+            session_frame = ttk.Frame(self.frame)
+            session_frame.pack(fill=tk.BOTH)
+            session_label = ttk.Label(session_frame, text="Session : " + self.get_session(), padding=10)
+            session_label.pack(side=tk.LEFT)
 
-    def show_sensor_types(self):
-        for sensor_type in sensor_types:
-            if self.exist_in_this_config(sensor_type):
-                # Sensors type
-                sensor_frame = ttk.Frame(self.master)
-                sensor_frame.pack(expand=tk.TRUE, fill=tk.BOTH, side=tk.BOTTOM)
+            participant_frame = ttk.Frame(self.frame)
+            participant_frame.pack(fill=tk.BOTH)
+            participant_label = ttk.Label(participant_frame, text="Participant : " + self.get_participant(), padding=10)
+            participant_label.pack(side=tk.LEFT)
 
-                toggle_button = ttk.Button(sensor_frame, text=sensor_type, command=lambda st=sensor_type: self.toggle_frame(st))
-                toggle_button.pack(pady=5)
+        button_frame = ttk.Frame(self.frame)
+        button_frame.pack(padx=5)
 
-                self.sensor_frames[sensor_type] = sensor_frame
+        self.sensor_text = tk.Text(self.frame, height=50)
+        self.sensor_text.pack(fill=tk.BOTH, expand=tk.TRUE)
 
-                self.create_expanding_frame(sensor_type, sensor_frame)
+        for sensor_type in sensor_types_id:
+            sensor_type_button = ttk.Button(button_frame, text=self.get_sensor_label(sensor_type), command=lambda st=sensor_type : self.display_sensor_info(st), padding=5)
+            sensor_type_button.pack(fill=tk.BOTH, side=tk.LEFT)
 
-    def toggle_frame(self, sensor_type):
-        # Get the actual frame
-        frame = self.expanding_frames.get(sensor_type)
+    def display_sensor_info(self, sensor_type):
 
-        # Show or hide the frame depending on the current state
-        if frame.winfo_ismapped():
-            frame.pack_forget()
-        else:
-            frame.pack(fill=tk.BOTH, expand=True, side=tk.TOP)
+        self.sensor_text.configure(state='normal')
 
-    def create_expanding_frame(self, sensor_type, sensor_frame):
-
-        # Create a frame
-        expanding_frame = ttk.Frame(sensor_frame, relief="sunken")
-        expanding_frame.pack(fill=tk.BOTH, expand=True)
-
-        # Add content to the frame
-        text_sensor = tk.Text(expanding_frame)
+        self.sensor_text.delete("1.0", tk.END)
 
         for sensor_id in self.get_sensors_id_from_type(sensor_type):
             # TODO remplacer le text du label par les infos des capteurs du type de sensor_type
-            text_sensor.insert(1.0, sensor_type + " sensor" + sensor_id + " : \n" +
-                               "\tLabel : " + self.get_sensor_label(sensor_id) + "\n" +
-                               "\tDescription : " + self.get_sensor_description(sensor_id) + "\n" +
-                               "\tStatus : " + self.get_sensor_status(sensor_id) + "\n\n")
+            self.sensor_text.insert(0.1, sensor_type + " sensor" + sensor_id + " : \n" +
+                                    "\tLabel : " + self.get_sensor_label(sensor_id) + "\n" +
+                                    "\tDescription : " + self.get_sensor_description(sensor_id) + "\n" +
+                                    "\tStatus : " + self.get_sensor_status(sensor_id) + "\n\n")
+        self.sensor_text.configure(state='disabled')
 
-        text_sensor.configure(state='disabled', font=("Calibri", 12, "bold"))
-        text_sensor.pack(expand=tk.TRUE, side=tk.LEFT, fill=tk.BOTH)
-        # Hide the frame when the page is loaded
-        expanding_frame.pack_forget()
-
-        # Add the frame to the dictionaries
-        self.expanding_frames[sensor_type] = expanding_frame
 
     def clear_page(self):
         self.frame.destroy()
 
-        for sensor_frame in self.sensor_frames.values():
-            sensor_frame.destroy()
-
-        for expanding_frame in self.expanding_frames.values():
-            expanding_frame.destroy()
-
-        self.sensor_frames = {}
-        self.expanding_frames = {}
-
 
     def get_scenario_label(self):
-        # TODO Modifier la fonction pour qu'elle retourne le scénario de l'observation en cours
+        # TODO Modifier la fonction pour qu'elle retourne le scénario de la configuration en cours
         return "Ceci est le scénario de l'observation"
 
     def get_session(self):
-        # TODO Modifier la fonction pour qu'elle retourne la session de l'observation en cours
+        # TODO Modifier la fonction pour qu'elle retourne la session de la configuration en cours
         return "Ceci est la session de l'observation"
 
     def get_participant(self):
-        # TODO Modifier la fonction pour qu'elle retourne le particpant de l'observation en cours
+        # TODO Modifier la fonction pour qu'elle retourne le particpant de la configuration en cours
         return "Ceci est le participant de l'observation"
 
     def exist_in_this_config(self, sensor_type):
@@ -133,3 +98,4 @@ class Summary:
     def get_sensor_status(self, id_sensor):
         # TODO Modifier la fonction pour qu'elle retourne le status d'un capteur en fonction de son id
         return "Status du capteur " + id_sensor
+
