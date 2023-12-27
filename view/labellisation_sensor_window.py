@@ -1,5 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
+
+import mysql
+
 import globals
 
 
@@ -11,6 +14,8 @@ class LabelisationSensor:
     def __init__(self, master):
         self.master = master
         self.frame = ttk.Frame(self.master)
+        self.sensor_entries = []  # List to hold the label and description entries for each sensor
+
 
     def show_page(self):
         sensor_labels = []
@@ -28,6 +33,9 @@ class LabelisationSensor:
         for label in sensor_labels:
             self.create_labeled_entry(label)
 
+        next_button = ttk.Button(self.frame, text='Next', command=self.print_sensor_data)
+        next_button.pack()
+
     # Helper function to create a labeled entry with two text boxes, one for label and one for description
     def create_labeled_entry(self, label_text):
         entry_frame = ttk.Frame(self.frame)
@@ -44,6 +52,33 @@ class LabelisationSensor:
         description_label.pack(side=tk.LEFT)
         entry_description = ttk.Entry(entry_frame, width=50)
         entry_description.pack(side=tk.LEFT, padx=5)
+
+        self.sensor_entries.append((label_text, entry_label, entry_description))
+
+    def print_sensor_data(self):
+        # Iterate through the sensor_entries list and print the label and description for each sensor
+        for sensor_id, label_entry, description_entry in self.sensor_entries:
+            label = label_entry.get()
+            description = description_entry.get()
+            print(f"{sensor_id}: Label - {label}, Description - {description}")
+
+        for sensor_id in self.sensor_entries:
+            print(f"{sensor_id}")
+
+
+        # Connexion à la base de données MySQL
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="prismathome"
+        )
+        cursor = conn.cursor()
+
+        # Exécutez une requête
+        query = "INSERT INTO sensor_config (id_config, id_sensor_type, label, description)VALUES(%s, %s, %s, %s)"
+        cursor.execute(query, (id_config, id_user, scenarioname, description))
+        conn.commit()
 
     def clear_page(self):
         self.frame.destroy()
