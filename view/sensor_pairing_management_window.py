@@ -1,4 +1,3 @@
-import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import *
@@ -46,21 +45,22 @@ class SensorPairingManagement:
 
     # Create a text widget that will contain the text in the parameter of the function
     def create_a_text_widget(self, text, frame, width):
-        label_text = tk.Text(frame, height=1, width=width)
+        sensor_text = tk.Text(frame, height=1, width=width)
         # Adding the content of the text widget
-        label_text.insert(1.0, text)
-        label_text.configure(state='disabled', font=("Calibri", 11))
-        label_text.pack(side=tk.LEFT, expand=tk.FALSE)
+        sensor_text.insert(1.0, text)
+        sensor_text.configure(state='disabled', font=("Calibri", 11))
+        sensor_text.pack(side=tk.LEFT, expand=tk.FALSE)
 
 
     # Initialise the button to offer the user the option to pair a physical snesor
     def button_init(self, button_pairing, sensor_id):
         button_pairing.config(text="Pairing", command=lambda: self.pairing_a_sensor(button_pairing, sensor_id))
 
+
     # Try to pair a sensor
     def pairing_a_sensor(self, button_pairing, sensor_id):
 
-        if self.is_paired(button_pairing, sensor_id):
+        if self.try_to_pair(button_pairing, sensor_id):
             #If the pairing was a success, show the message change the label of the button and the fonciton it's ralated to
             print("the sensor "+ sensor_id + " was paired")
             button_pairing.config(text="Edit", command=lambda: self.edit_the_pairing(button_pairing, sensor_id))
@@ -69,11 +69,9 @@ class SensorPairingManagement:
 
 
 
-
-
     # TODO INDUS est ce que vous pourriez me remplacer ça par une fonction qui me return true si l'appareillage c'est bien passé sinon false, je vous ai mis l'ID du sensor
     # TODO en cours d'appareillage en paramètre de fonction si jaja. J'ai aussi passé en param le bouton histoire de changer sa fonction et son affichage pour la partie cancel de l'appairage
-    def is_paired(self, button_pairing, sensor_id):
+    def try_to_pair(self, button_pairing, sensor_id):
         button_pairing.config(text="Cancel",  command=lambda: self.cancel_the_pairing(button_pairing, sensor_id))
         # Si vous avez qqch à faire c'est ici qu'il faut le mettre et modifier le return
         return True
@@ -93,13 +91,11 @@ class SensorPairingManagement:
 
 
 
-
-
     # TODO INES A voir comment tu le sens INES mais certianes des fonctions ci-dessous sont les mêmes que dans summary_window, est ce que ça vaudrait le coup de faire un fichier
 # TODO spécial qui fait que retourner des résultats de requêtes comme ça ?
 
     def get_sensors(self):
-        # TODO INES le fonction doit retourner la liste des capteurs associés à la configuration en cours
+        # TODO INES la fonction doit retourner la liste des capteurs associés à la configuration en cours
         return ['id_sensor_1', 'id_sensor_2', 'id_sensor_3', 'id_sensor_4']
 
     def get_sensor_label(self, id_sensor):
