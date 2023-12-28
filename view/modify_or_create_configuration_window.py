@@ -58,6 +58,7 @@ class ModifyOrCreateConfiguration:
         num_config = self.get_number_config_create_by_admin(id_user) + 1
 
         id_config = str(id_user) + "-" + str(num_config)
+        globals.global_id_config=id_config
         print("valeur de l'id user")
         print(id_user)
         # Connexion à la base de données MySQL
