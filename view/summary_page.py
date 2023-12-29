@@ -65,28 +65,6 @@ class Summary:
         self.sensor_text.configure(state='disabled')
 
 
-    def print_sensor_data(self):
-        # Iterate through the sensor_entries list and print the label and description for each sensor
-        for sensor_type_id, label_entry, description_entry in globals.global_sensor_entries:
-            label = label_entry.get()
-            description = description_entry.get()
-            print(f"Sensor Type ID: {sensor_type_id}, Label - {label}, Description - {description}")
-
-            conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="",
-                database="prismathome"
-            )
-            cursor = conn.cursor()
-
-            # Execute the INSERT query using the actual sensor_type_id
-            query = "INSERT INTO sensor_config (id_config, id_sensor_type, sensor_label, sensor_description) VALUES (%s, %s, %s, %s)"
-            cursor.execute(query, (globals.global_id_config, sensor_type_id, label, description))
-            conn.commit()
-            cursor.close()
-            conn.close()
-
     def clear_page(self):
         self.frame.destroy()
 

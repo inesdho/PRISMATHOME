@@ -153,7 +153,7 @@ class App(ThemedTk):
     def connexion_button_clic(self, login_as_admin_page):
 
         # Checking if the login and password are correct
-        if not login_as_admin_page.connexion_admin():
+        if login_as_admin_page.connexion_admin()==False:
             # If they are not correct show an error message
             showerror("Error", "The login or the password is incorrect")
         else:
@@ -207,7 +207,7 @@ class App(ThemedTk):
     def redirect_to_modify_or_create_configuration_after_config_validation(self, summary_page):
 
         # Log the data into the BDD
-        summary_page.print_sensor_data()
+        #summary_page.print_sensor_data()
 
         # Go back to the "modify or create a configuration page"
         self.redirect_to_modify_or_create_configuration_from_anywhere(summary_page)
@@ -310,6 +310,8 @@ class App(ThemedTk):
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
     def redirect_to_summary_from_labellisation(self, labellisation_sensor_page):
+
+        labellisation_sensor_page.print_sensor_data()
 
         # Clear the previous page content
         self.clear_the_page(labellisation_sensor_page)
