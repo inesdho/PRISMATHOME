@@ -80,6 +80,7 @@ class ModifyOrCreateConfiguration:
         conn.close()
 
     def get_number_config_create_by_admin(self, id_user):
+
         # Connexion à la base de données MySQL
         conn = mysql.connector.connect(
             host="localhost",

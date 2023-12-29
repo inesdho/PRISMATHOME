@@ -164,7 +164,7 @@ class App(ThemedTk):
     """!
     @brief This function clears the previous page in order to display the content of the "modify or create a 
     configuration page" and adds navigations buttons
-    @param the instance, the login as admin page
+    @param the instance, the previous page
     @return Nothing
     """
     def redirect_to_modify_or_create_configuration_from_anywhere(self, page):
@@ -198,9 +198,29 @@ class App(ThemedTk):
                                        modify_or_create_configuration_page))
         create_button.pack(side="bottom", fill="x")
 
+    """!
+    @brief This function calls the function located in summary that will save the config into the BDD and then calls the
+    function that display the modify or create a configuration page
+    @param the instance, the summary page
+    @return Nothing
+    """
+    def redirect_to_modify_or_create_configuration_after_config_validation(self, summary_page):
+
+        # Log the data into the BDD
+        summary_page.print_sensor_data()
+
+        # Go back to the "modify or create a configuration page"
+        self.redirect_to_modify_or_create_configuration_from_anywhere(summary_page)
+
+    """!
+    @brief This function clears the previous page in order to display the content of the "selection sensro quantity" and
+    adds navigations buttons. It also create a nex configuration in the BDD
+    @param the instance, the create or modify a configuration page
+    @return Nothing
+    """
     def redirect_to_selection_sensor_quantity_from_create_a_config(self, create_a_config_page):
 
-        # Clear the previous page content
+        # Create a new configuration in the BDD
         create_a_config_page.on_create_configuration_button_click()
 
         # Clear the previous page content
@@ -313,8 +333,8 @@ class App(ThemedTk):
 
         # Validate configuration button
         back_button = ttk.Button(self.main_frame, text="Validate configuration",
-                                 command=lambda: self.redirect_to_modify_or_create_configuration_from_anywhere(
-                                     summary_page))
+                                 command=lambda: self.redirect_to_modify_or_create_configuration_after_config_validation
+                                     (summary_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
     def redirect_to_summary_from_pairing(self, sensor_pairing_page):
@@ -329,9 +349,9 @@ class App(ThemedTk):
         self.create_new_main_frame()
 
         # Cancel button
-        concenl_button = ttk.Button(self.main_frame, text="Exit",
+        cancel_button = ttk.Button(self.main_frame, text="Exit",
                                     command=lambda: self.redirect_to_new_observation_from_anywhere(summary_page))
-        concenl_button.pack(side=tk.LEFT, padx=10, expand=True)
+        cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Back button
         back_button = ttk.Button(self.main_frame, text="Back",
