@@ -291,8 +291,6 @@ class App(ThemedTk):
 
     def redirect_to_summary_from_labellisation(self, labellisation_sensor_page):
 
-        labellisation_sensor_page.print_sensor_data()
-
         # Clear the previous page content
         self.clear_the_page(labellisation_sensor_page)
 
