@@ -10,6 +10,7 @@ class QuantitySensor:
         self.frame = ttk.Frame(self.master)
 
     def fetch_sensor_types(self):
+
         # Connexion à la base de données MySQL
         conn = mysql.connector.connect(
             host="localhost",

@@ -44,7 +44,7 @@ class LoginAsAdministrator:
 
 
         # Valisation automatique pour fonctionnement sans conncexion, commenter la ligne pour un fonctionnement avec BDD et supprimer la ligen avant la fin du projet
-        #return True
+        return True
 
         # Connexion à la base de données MySQL
         conn = mysql.connector.connect(

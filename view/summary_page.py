@@ -41,7 +41,7 @@ class Summary:
         button_frame = ttk.Frame(self.frame)
         button_frame.pack(padx=5)
 
-        self.sensor_text = tk.Text(self.frame, height=50)
+        self.sensor_text = tk.Text(self.frame)
         self.sensor_text.pack(fill=tk.BOTH, expand=tk.TRUE)
 
         for sensor_type in sensor_types_id:
