@@ -4,6 +4,8 @@ from tkinter import ttk, messagebox
 import mysql.connector
 import globals
 
+from controller.input_manager import Input
+
 class LoginAsAdministrator:
     def __init__(self, master):
         self.master = master
@@ -19,14 +21,12 @@ class LoginAsAdministrator:
         # login input
         login_label = ttk.Label(self.frame, text="Login")
         login_label.pack()
-        self.login_entry = ttk.Entry(self.frame)
-        self.login_entry.pack(pady=10)
+        self.login_entry = Input(self.frame, 1, 30, False)
 
         # password input
         password_label = ttk.Label(self.frame, text="Password")
         password_label.pack()
-        self.password_entry = ttk.Entry(self.frame, show="*")  # Hide password input
-        self.password_entry.pack(pady=10)
+        self.login_entry = Input(self.frame, 1, 30, True)
 
         # Afficher le cadre de la page de connexion en tant qu'administrateur
         self.frame.pack(fill=tk.BOTH, expand=True)
