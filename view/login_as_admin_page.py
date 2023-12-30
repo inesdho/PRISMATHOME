@@ -26,7 +26,7 @@ class LoginAsAdministrator:
         # password input
         password_label = ttk.Label(self.frame, text="Password")
         password_label.pack()
-        self.login_entry = Input(self.frame, 1, 30, True)
+        self.password_entry = Input(self.frame, 1, 30, True)
 
         # Afficher le cadre de la page de connexion en tant qu'administrateur
         self.frame.pack(fill=tk.BOTH, expand=True)
@@ -40,7 +40,11 @@ class LoginAsAdministrator:
         username = self.login_entry.get()
         password = self.password_entry.get()
 
-        print("connexion as admin")
+        print(username)
+        print(password)
+
+        # POUR DEBUGGAGE SANS BDD
+        #return True
 
         # Connexion à la base de données MySQL
         conn = mysql.connector.connect(
