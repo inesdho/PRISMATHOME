@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import *
 import globals
-import mysql
+import mysql.connector
 
 # TODO remplacer cette liste par une requête listant les différents types de capteurs stockés dans la BDD
 sensor_types_id = ["presence", "pressure", "opening", "button"]
@@ -68,6 +68,29 @@ class Summary:
     def clear_page(self):
         self.frame.destroy()
 
+    def validate_conf(self):
+        # Connect to the database
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="prismathome"
+        )
+        cursor = conn.cursor()
+
+        # Exécutez une requête
+        query = "INSERT INTO configuration (id_config, id_user, label, description)VALUES(%s, %s, %s, %s)"
+        cursor.execute(query, (globals.global_id_config, globals.global_id_user, globals.global_scenario_name_configuration, globals.global_description_configuration))
+        conn.commit()
+
+        # Insert each sensor's data into the database
+        for sensor_type_id, label, description in globals.global_sensor_entries:
+            query = "INSERT INTO sensor_config (id_config, id_sensor_type, sensor_label, sensor_description) VALUES (%s, %s, %s, %s)"
+            cursor.execute(query, (globals.global_id_config, sensor_type_id, label, description))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     def get_scenario_label(self):
         # TODO Modifier la fonction pour qu'elle retourne le scénario de la configuration en cours
