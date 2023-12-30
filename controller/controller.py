@@ -207,7 +207,7 @@ class App(ThemedTk):
     def redirect_to_modify_or_create_configuration_after_config_validation(self, summary_page):
 
         # Log the data into the BDD
-        #summary_page.print_sensor_data()
+        summary_page.validate_conf()
 
         # Go back to the "modify or create a configuration page"
         self.redirect_to_modify_or_create_configuration_from_anywhere(summary_page)
@@ -311,7 +311,7 @@ class App(ThemedTk):
 
     def redirect_to_summary_from_labellisation(self, labellisation_sensor_page):
 
-        labellisation_sensor_page.print_sensor_data()
+        labellisation_sensor_page.get_sensor_data()
 
         # Clear the previous page content
         self.clear_the_page(labellisation_sensor_page)
