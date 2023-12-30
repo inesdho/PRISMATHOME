@@ -42,45 +42,22 @@ class ModifyOrCreateConfiguration:
         self.description_text_entry = tk.Text(self.right_frame, height=5)  # Height is set to 5 lines
         self.description_text_entry.pack(fill="x")
 
-
     def on_create_configuration_button_click(self):
-        scenarioname = self.name_entry.get()
-        description = self.description_text_entry.get("1.0", "end-1c")
-
+        globals.global_scenario_name_configuration = self.name_entry.get()
+        globals.global_description_configuration = self.description_text_entry.get("1.0", "end-1c")
 
         # RETURN TRUE POUR TESTER LES REDIRECTIONS SANS LA BDD
-        #return True
+        # return True
 
-        admin_login = LoginAsAdministrator(self.master)
-        # TODO voir apres que la redirection est faite pour recuperer l'id_user de la page de connexion
-        id_user = globals.global_id_user
-        print(id_user)
-        num_config = self.get_number_config_create_by_admin(id_user) + 1
+        num_config = self.get_number_config_create_by_admin(globals.global_id_user) + 1
 
-        id_config = str(id_user) + "-" + str(num_config)
-        globals.global_id_config=id_config
+        id_config = str(globals.global_id_user) + "-" + str(num_config)
+        globals.global_id_config = id_config
         print("valeur de l'id user")
-        print(id_user)
-        # Connexion à la base de données MySQL
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="",
-            database="prismathome"
-        )
-        cursor = conn.cursor()
+        print(globals.global_id_user)
 
-        # Exécutez une requête
-        query = "INSERT INTO configuration (id_config, id_user, label, description)VALUES(%s, %s, %s, %s)"
-        cursor.execute(query, (id_config, id_user, scenarioname, description))
-        conn.commit()
-
-        # Fermez la connexion à la base de données
-        cursor.close()
-        conn.close()
 
     def get_number_config_create_by_admin(self, id_user):
-
         # Connexion à la base de données MySQL
         conn = mysql.connector.connect(
             host="localhost",
