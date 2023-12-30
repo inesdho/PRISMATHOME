@@ -6,7 +6,7 @@ from ttkthemes.themed_style import ThemedStyle
 import globals
 
 from view.login_as_admin_page import LoginAsAdministrator
-
+from controller.input_manager import Input
 
 class ModifyOrCreateConfiguration:
     def __init__(self, master):
@@ -34,17 +34,20 @@ class ModifyOrCreateConfiguration:
         self.right_frame.place(relx=0.50, rely=0.09, relwidth=0.48, relheight=0.50)
 
         tk.Label(self.right_frame, text="Scenario name :").pack(anchor="nw")
-        self.name_entry = tk.Entry(self.right_frame)
-        self.name_entry.pack(fill="x")
+        self.right_frame.update()
+        self.name_entry = Input(self.right_frame, has_width=self.right_frame.winfo_width(), min=0, max=30)
 
         tk.Label(self.right_frame, text="Description :").pack(anchor="nw")
         # Create a Text widget for multi-line text entry
         self.description_text_entry = tk.Text(self.right_frame, height=5)  # Height is set to 5 lines
         self.description_text_entry.pack(fill="x")
 
+
     def on_create_configuration_button_click(self):
         globals.global_scenario_name_configuration = self.name_entry.get()
         globals.global_description_configuration = self.description_text_entry.get("1.0", "end-1c")
+
+        print(globals.global_scenario_name_configuration)
 
         # RETURN TRUE POUR TESTER LES REDIRECTIONS SANS LA BDD
         # return True

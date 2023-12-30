@@ -63,6 +63,8 @@ class Input:
         # If the user set a has_width value it will be saved, otherwise has_width stays at None
         if not has_width is None:
             self.has_width = has_width
+        else:
+            self.has_width = None
 
         # If the user set a has_special_char value it will be saved, otherwise has_special_char is set to false
         if not has_special_char is None:
@@ -107,7 +109,7 @@ class Input:
         # Checking if the entry needs to be packed according to "x"
         if self.is_fill_x:
             # If yes the entry is packed with the following parameters
-            self.entry.pack(fill="x", expand=tk.TRUE)
+            self.entry.pack(expand=tk.TRUE, fill="x")
         else:
             # Otherwise the entry is packed using some padding
             self.entry.pack(pady=10)
@@ -162,7 +164,7 @@ class Input:
         # Checking if the length of the entry is sufficient
         if len(entry_text) < self.min:
             # Doesn't allow to have a value under the minimum character required and so displays a message
-            self.entry_var.set("Require min " + str(self.min) + " character")
+            self.entry_var.set("Require at least " + str(self.min) + " character(s)")
         # Checking if the length of the entry is too much
         if len(entry_text) > self.max:
             # Doesn't allow to have a value under the minimum character required and so doesn't allow any more
