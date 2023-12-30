@@ -97,6 +97,9 @@ class App(ThemedTk):
     """
     def redirect_to_pairing_from_anywhere(self, page):
 
+        # /!\ à supprimer test
+        page.on_button_click()
+
         # Clear the previous page content
         self.clear_the_page(page)
 

@@ -21,12 +21,12 @@ class LoginAsAdministrator:
         # login input
         login_label = ttk.Label(self.frame, text="Login")
         login_label.pack()
-        self.login_entry = Input(self.frame, 1, 30, False)
+        self.login_entry = Input(self.frame, 0, 30)
 
         # password input
         password_label = ttk.Label(self.frame, text="Password")
         password_label.pack()
-        self.password_entry = Input(self.frame, 1, 30, True)
+        self.password_entry = Input(self.frame, 0, 30, is_password=True, has_special_char=True)
 
         # Afficher le cadre de la page de connexion en tant qu'administrateur
         self.frame.pack(fill=tk.BOTH, expand=True)
