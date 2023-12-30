@@ -1,14 +1,32 @@
+"""!
+@file labellisation_sensor_page.py
+@brief This file will contain all the widgets and functions related to the "labellisation sensor" page itself
+@author Naviis-Brain
+@version 1.0
+@date
+"""
 import tkinter as tk
 from tkinter import ttk
 import mysql.connector
 import globals
 
 class LabelisationSensor:
+    """!
+    @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
+    this page
+    @param the instance, the master frame (created in the controller.py file)
+    @return Nothing
+    """
     def __init__(self, master):
         self.master = master
         self.frame = ttk.Frame(self.master)
         self.sensor_entries = []  # List to hold the label, description entries for each sensor, and sensor type ID
 
+    """!
+    @brief The show_page function creates and displays all the elements of the "labellisation sensor" page
+    @param the instance
+    @return Nothing
+    """
     def show_page(self):
         self.frame = ttk.Frame(self.master)
         self.frame.pack(expand=True)
@@ -45,7 +63,12 @@ class LabelisationSensor:
                     sensor_type_id = None
                     self.create_labeled_entry(label_text, sensor_type_id)
 
-
+    """!
+    @brief This function creates label entries according to the sensor quantity of each type selected by the user in the
+    selection sensor quantity page. The user can then enter the label and descrition to attribute to each sensor
+    @param the instance, label_text -> the label of the sensor, sensor_type_id
+    @return Nothing
+    """
     def create_labeled_entry(self, label_text, sensor_type_id):
         entry_frame = ttk.Frame(self.frame)
         entry_frame.pack(fill=tk.X, pady=5)
@@ -65,6 +88,11 @@ class LabelisationSensor:
         # Append the sensor_type_id to the sensor_entries list along with label and description
         self.sensor_entries.append((sensor_type_id, entry_label, entry_description))
 
+    """!
+    @brief This function saves the label and description entered by the user for each sensor into global variables 
+    @param the instance
+    @return Nothing
+    """
     def get_sensor_data(self):
 
         globals.global_sensor_entries.clear()
@@ -75,6 +103,10 @@ class LabelisationSensor:
             globals.global_sensor_entries.append((sensor_type_id, label, description))
             print(f"Sensor Type ID: {sensor_type_id}, Label - {label}, Description - {description}")
 
-
+    """!
+    @brief This functions clears the entire "new observation" page
+    @param the instance
+    @return Nothing
+    """
     def clear_page(self):
         self.frame.destroy()

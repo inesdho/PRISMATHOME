@@ -106,7 +106,11 @@ class SensorPairingManagement:
         # TODO INES Modifier la fonction pour qu'elle retourne la description d'un capteur en fonction de son id
         return "Description du capteur" + id_sensor
 
-
+    """!
+    @brief This functions clears the entire "new observation" page
+    @param the instance
+    @return Nothing
+    """
     def clear_page(self):
         self.frame.destroy()
 

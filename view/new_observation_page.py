@@ -1,13 +1,32 @@
+"""!
+@file new_observation_page.py
+@brief This file will contain all the widgets and functions related to the "new observation" page itself
+@author Naviis-Brain
+@version 1.0
+@date
+"""
+
 import tkinter as tk
 from tkinter import ttk
 from controller.input_manager import Input
 
 
 class NewObservation:
+    """!
+    @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
+    this page
+    @param the instance, the master frame (created in the controller.py file)
+    @return Nothing
+    """
     def __init__(self, master):
         self.master = master
         self.frame = ttk.Frame(self.master)
 
+    """!
+    @brief The show_page function creates and displays all the elements of the "new_observation" page
+    @param the instance
+    @return Nothing
+    """
     def show_page(self):
         # Main frame of the new observation window
         self.frame = ttk.Frame(self.master)
@@ -53,10 +72,19 @@ class NewObservation:
         participant_label.pack()
         self.participant_entry = Input(self.frame, min=1, max=70, has_width=70, default_text="Participant")
 
+    """!
+    @brief This functions clears the entire "new observation" page
+    @param the instance
+    @return Nothing
+    """
     def clear_page(self):
         self.frame.destroy()
 
-    # Get the data from the user input
+    """!
+    @brief This functions collects all the datas entered by the user
+    @param the instance
+    @return Nothing
+    """
     def on_button_click(self):
 
         # Print the chosen data
