@@ -46,9 +46,31 @@ class Summary:
         self.sensor_text = tk.Text(self.frame)
         self.sensor_text.pack(fill=tk.BOTH, expand=tk.TRUE)
 
-        for sensor_type in sensor_types_id:
-            sensor_type_button = ttk.Button(button_frame, text=self.get_sensor_label(sensor_type), command=lambda st=sensor_type : self.display_sensor_info(st), padding=5)
-            sensor_type_button.pack(fill=tk.BOTH, side=tk.LEFT)
+        for sensor_type_id, quantity in globals.sensor_counts.items():
+            try:
+                conn = mysql.connector.connect(
+                    host="localhost",
+                    user="root",
+                    password="",
+                    database="prismathome"
+                )
+                cursor = conn.cursor()
+                query = "SELECT type FROM sensor_type WHERE id_type = %s"
+                cursor.execute(query, (sensor_type_id,))
+                type_result = cursor.fetchone()
+                cursor.close()
+                conn.close()
+
+                if type_result :
+                    sensor_type = type_result[0]
+                    sensor_type_button = ttk.Button(button_frame, text=self.get_sensor_label(sensor_type), command=lambda st=sensor_type : self.display_sensor_info(st), padding=5)
+                    sensor_type_button.pack(fill=tk.BOTH, side=tk.LEFT)
+            except mysql.connector.Error as err:
+                print(f"Error: {err}")
+
+
+
+
 
     def display_sensor_info(self, sensor_type):
 
@@ -56,12 +78,12 @@ class Summary:
 
         self.sensor_text.delete("1.0", tk.END)
 
-        for sensor_id in self.get_sensors_id_from_type(sensor_type):
+        for sensor_type_id, label_entry, description_entry in globals.global_sensor_entries:
             # TODO remplacer le text du label par les infos des capteurs du type de sensor_type
-            self.sensor_text.insert(0.1, sensor_type + " sensor" + sensor_id + " : \n" +
-                                    "\tLabel : " + self.get_sensor_label(sensor_id) + "\n" +
-                                    "\tDescription : " + self.get_sensor_description(sensor_id) + "\n" +
-                                    "\tStatus : " + self.get_sensor_status(sensor_id) + "\n\n")
+            self.sensor_text.insert(0.1, sensor_type + " sensor" + str(sensor_type_id) + " : \n" +
+                                    "\tLabel : " + label_entry + "\n" +
+                                    "\tDescription : " + description_entry + "\n"
+                                    )
         self.sensor_text.configure(state='disabled')
 
 
@@ -114,7 +136,7 @@ class Summary:
 
     def get_sensor_label(self, id_sensor):
         # TODO Modifier la fonction pour qu'elle retourne le label d'un capteur en fonction de son id
-        return "Label du capteur " + id_sensor
+        return  id_sensor + "sensor "
 
     def get_sensor_description(self, id_sensor):
         # TODO Modifier la fonction pour qu'elle retourne la description d'un capteur en fonction de son id
