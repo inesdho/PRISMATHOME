@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SshConfigs">
+    <configs>
+      <sshConfig authType="PASSWORD" host="paulitoprisme.ddns.net" id="d5e32e7f-4098-466d-bb44-bbcc52e32927" port="22" nameFormat="DESCRIPTIVE" username="prisme" useOpenSSHConfig="true" />
+    </configs>
+  </component>
+</project>

@@ -29,7 +29,7 @@ class Input:
     default_text : the text that will be displayed when the entry is initialized
     @return Nothing
     """
-    def __init__(self, master, min=NB_MIN_CHAR, max=NB_MAX_CHAR, is_password=None, is_fill_x=None, has_width=None,
+    def __init__(self, master, min=NB_MIN_CHAR, max=NB_MAX_CHAR, is_password=None, special_position=None, has_width=None,
                  has_special_char=None, default_text=None):
 
         # Creation of the frame that will contain the entry
@@ -55,10 +55,10 @@ class Input:
             self.is_password = False
 
         # If the user set a fill_x value it will be saved, otherwise is_fill_x is set to false
-        if not is_fill_x is None:
-            self.is_fill_x = is_fill_x
+        if not special_position is None:
+            self.special_position = special_position
         else:
-            self.is_fill_x = False
+            self.special_position = False
 
         # If the user set a has_width value it will be saved, otherwise has_width stays at None
         if not has_width is None:
@@ -107,9 +107,9 @@ class Input:
         self.entry.insert(-1, self.default_text)
 
         # Checking if the entry needs to be packed according to "x"
-        if self.is_fill_x:
+        if self.special_position:
             # If yes the entry is packed with the following parameters
-            self.entry.pack(expand=tk.TRUE, fill="x")
+            self.entry.pack(side=tk.LEFT,anchor='w')
         else:
             # Otherwise the entry is packed using some padding
             self.entry.pack(pady=10)

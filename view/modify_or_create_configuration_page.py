@@ -57,7 +57,8 @@ class ModifyOrCreateConfiguration:
         # Creates the elemtents related to the creation of a new configuration
         tk.Label(self.right_frame, text="Scenario name :").pack(anchor="nw")
         self.right_frame.update()
-        self.name_entry = Input(self.right_frame, has_width=self.right_frame.winfo_width(), min=0, max=30)
+        self.name_entry = Input(self.right_frame, has_width=self.right_frame.winfo_width(), min=1, max=30,
+                                default_text="Label")
 
         tk.Label(self.right_frame, text="Description :").pack(anchor="nw")
         # Create a Text widget for multi-line text entry

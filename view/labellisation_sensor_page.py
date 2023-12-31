@@ -78,7 +78,7 @@ class LabelisationSensor:
 
         label_label = ttk.Label(entry_frame, text="Label :", width=10)
         label_label.pack(side=tk.LEFT)
-        entry_label = Input(entry_frame, min=1, max=80, has_width=20)
+        entry_label = Input(entry_frame, min=1, max=80, has_width=20, special_position=True)
 
         description_label = ttk.Label(entry_frame, text="Description :", width=10)
         description_label.pack(side=tk.LEFT)
