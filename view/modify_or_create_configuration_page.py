@@ -95,6 +95,10 @@ class ModifyOrCreateConfiguration:
     @return Nothing
     """
     def get_number_config_create_by_admin(self, id_user):
+
+        # RETURN TRUE POUR TESTER LES REDIRECTIONS SANS LA BDD
+        # return True
+
         # Connexion to the MySQL database
         conn = mysql.connector.connect(
             host="localhost",

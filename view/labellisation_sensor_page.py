@@ -9,6 +9,7 @@ import tkinter as tk
 from tkinter import ttk
 import mysql.connector
 import globals
+from controller.input_manager import Input
 
 class LabelisationSensor:
     """!
@@ -77,13 +78,11 @@ class LabelisationSensor:
 
         label_label = ttk.Label(entry_frame, text="Label :", width=10)
         label_label.pack(side=tk.LEFT)
-        entry_label = ttk.Entry(entry_frame, width=20)
-        entry_label.pack(side=tk.LEFT, padx=5)
+        entry_label = Input(entry_frame, min=1, max=80, has_width=20)
 
         description_label = ttk.Label(entry_frame, text="Description :", width=10)
         description_label.pack(side=tk.LEFT)
-        entry_description = ttk.Entry(entry_frame, width=50)
-        entry_description.pack(side=tk.LEFT, padx=5)
+        entry_description = Input(entry_frame, min=1, max=600, has_width=50, has_special_char=True)
 
         # Append the sensor_type_id to the sensor_entries list along with label and description
         self.sensor_entries.append((sensor_type_id, entry_label, entry_description))

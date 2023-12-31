@@ -74,7 +74,7 @@ class LoginAsAdministrator:
         print(password)
 
         # POUR DEBUGGAGE SANS BDD
-        #return True
+        # return True
 
         # Connexion to the MySQL database
         conn = mysql.connector.connect(
