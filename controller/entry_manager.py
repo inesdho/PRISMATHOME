@@ -1,5 +1,5 @@
 """!
-@file input_manager.py
+@file entry_manager.py
 @brief This file allows to create a custom entry input with an input control (ex : nb of characters min and max, default
 value, password management, type of characters that are accepted etc...)
 @author Naviis-Brain
@@ -14,7 +14,7 @@ from tkinter import ttk
 NB_MIN_CHAR = 0
 NB_MAX_CHAR = 100
 
-class Input:
+class EntryManager:
     """!
     @brief The __init__ function set the variable depending on the user input and create the frame that wil contain the
     entry
@@ -25,6 +25,7 @@ class Input:
     min : maximal number of character allowed on the entry
     is_password : determine if the entry is to be considered a password entry (by dfault not)
     auto_pack : determine if the entry has to be packed by this instance or no (by default yes)
+    has_width : determine if the entry has to be of a certain width (by default no value is set)
     has_special_char : determine if the entry can allow special character or not (by dfault not)
     default_text : the text that will be displayed when the entry is initialized
     @return Nothing
@@ -106,7 +107,7 @@ class Input:
             # Otherwise the entry is packed using some padding
             self.entry.pack(pady=10)
 
-        # Checking if the entry needs to be forbid the special char
+        # Checking if the entry needs to forbid the special char
         if self.has_special_char == False:
             # If yes the entry is configured
             self.entry.configure(validate="key", validatecommand=self.check_entry)

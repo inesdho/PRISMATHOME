@@ -14,7 +14,8 @@ from ttkthemes.themed_style import ThemedStyle
 import globals
 
 from view.login_as_admin_page import LoginAsAdministrator
-from controller.input_manager import Input
+from controller.entry_manager import EntryManager
+from controller.text_manager import TextManager
 
 class ModifyOrCreateConfiguration:
 
@@ -57,13 +58,14 @@ class ModifyOrCreateConfiguration:
         # Creates the elemtents related to the creation of a new configuration
         tk.Label(self.right_frame, text="Scenario name :").pack(anchor="nw")
         self.right_frame.update()
-        self.name_entry = Input(self.right_frame, has_width=self.right_frame.winfo_width(), min=1, max=30,
-                                default_text="Label")
+        self.name_entry = EntryManager(self.right_frame, min=1, max=30, has_width=self.right_frame.winfo_width(),
+                                       default_text="Label")
 
         tk.Label(self.right_frame, text="Description :").pack(anchor="nw")
         # Create a Text widget for multi-line text entry
-        self.description_text_entry = tk.Text(self.right_frame, height=5)  # Height is set to 5 lines
-        self.description_text_entry.pack(fill="x")
+        self.description_text_entry = TextManager(self.right_frame, min=1, max=800,
+                                                  has_width=self.right_frame.winfo_width(),
+                                                  has_height=5, default_text="Description")
 
     """!
     @brief This fuctions is called when the user clicks on a button to create a new configuration and saves the label of
@@ -75,12 +77,10 @@ class ModifyOrCreateConfiguration:
 
         # Saving the variables into global variables
         globals.global_scenario_name_configuration = self.name_entry.get()
-        globals.global_description_configuration = self.description_text_entry.get("1.0", "end-1c")
+        globals.global_description_configuration = self.description_text_entry.get()
 
         print(globals.global_scenario_name_configuration)
-
-        # RETURN TRUE POUR TESTER LES REDIRECTIONS SANS LA BDD
-        # return True
+        print(globals.global_description_configuration)
 
         num_config = self.get_number_config_create_by_admin(globals.global_id_user) + 1
 

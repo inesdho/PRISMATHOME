@@ -8,7 +8,7 @@
 
 import tkinter as tk
 from tkinter import ttk
-from controller.input_manager import Input
+from controller.entry_manager import EntryManager
 
 
 class NewObservation:
@@ -40,7 +40,7 @@ class NewObservation:
         user_label = ttk.Label(self.frame, text="User")
         user_label.pack()
         # TODO paul I guess ? remplacer le default texte par la valeur que tu as crée de l'utilisateur de la session
-        self.user_entry = Input(self.frame, min=1, max=30, has_width=30, default_text="User")
+        self.user_entry = EntryManager(self.frame, min=1, max=30, has_width=30, default_text="User")
 
 
         # Configuration list
@@ -55,22 +55,22 @@ class NewObservation:
         # Observation label input
         observation_label_label = ttk.Label(self.frame, text="Observation label")
         observation_label_label.pack()
-        self.observation_label_entry = Input(self.frame, min=1, max=80, has_width=30, default_text="Label")
+        self.observation_label_entry = EntryManager(self.frame, min=1, max=80, has_width=30, default_text="Label")
 
         # Observation description input
         observation_description_label = ttk.Label(self.frame, text="Observation description")
         observation_description_label.pack()
-        self.observation_description_entry = Input(self.frame, min=1, max=200, has_width=100, default_text="Description")
+        self.observation_description_entry = EntryManager(self.frame, min=1, max=200, has_width=100, default_text="Description")
 
         # Session input
         session_label = ttk.Label(self.frame, text="Session")
         session_label.pack()
-        self.session_entry = Input(self.frame, min=1, max=100, has_width=100, default_text="Session")
+        self.session_entry = EntryManager(self.frame, min=1, max=100, has_width=100, default_text="Session")
 
         # Participant input
         participant_label = ttk.Label(self.frame, text="Participant")
         participant_label.pack()
-        self.participant_entry = Input(self.frame, min=1, max=70, has_width=70, default_text="Participant")
+        self.participant_entry = EntryManager(self.frame, min=1, max=70, has_width=70, default_text="Participant")
 
     """!
     @brief This functions clears the entire "new observation" page

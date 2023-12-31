@@ -11,7 +11,7 @@ from tkinter import ttk, messagebox
 import mysql.connector
 import globals
 
-from controller.input_manager import Input
+from controller.entry_manager import EntryManager
 
 class LoginAsAdministrator:
     """!
@@ -40,12 +40,12 @@ class LoginAsAdministrator:
         # login input
         login_label = ttk.Label(self.frame, text="Login")
         login_label.pack()
-        self.login_entry = Input(self.frame, min=1, max=30, has_width=30)
+        self.login_entry = EntryManager(self.frame, min=1, max=30, has_width=30)
 
         # password input
         password_label = ttk.Label(self.frame, text="Password")
         password_label.pack()
-        self.password_entry = Input(self.frame, min=0, max=30, has_width=30, is_password=True, has_special_char=True)
+        self.password_entry = EntryManager(self.frame, min=0, max=30, has_width=30, is_password=True, has_special_char=True)
 
         # Display the frame with all the elements
         self.frame.pack(fill=tk.BOTH, expand=True)

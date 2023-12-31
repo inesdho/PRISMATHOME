@@ -9,7 +9,7 @@ import tkinter as tk
 from tkinter import ttk
 import mysql.connector
 import globals
-from controller.input_manager import Input
+from controller.entry_manager import EntryManager
 
 class LabelisationSensor:
     """!
@@ -82,13 +82,13 @@ class LabelisationSensor:
 
         label_label = ttk.Label(entry_frame, text="Label :", width=10)
         label_label.pack(side=tk.LEFT)
-        entry_label = Input(entry_frame, min=1, max=80, has_width=20, auto_pack=False, default_text="Label")
+        entry_label = EntryManager(entry_frame, min=1, max=80, has_width=20, auto_pack=False, default_text="Label")
         entry_label.get_entry().pack(side=tk.LEFT, padx=5)
 
         description_label = ttk.Label(entry_frame, text="Description :", width=10)
         description_label.pack(side=tk.LEFT)
-        entry_description = Input(entry_frame, min=1, max=600, has_width=50, has_special_char=True, auto_pack=False,
-                                  default_text="Description")
+        entry_description = EntryManager(entry_frame, min=1, max=600, has_width=50, has_special_char=True, auto_pack=False,
+                                         default_text="Description")
         entry_description.get_entry().pack(side=tk.LEFT, padx=5)
 
         # Append the sensor_type_id to the sensor_entries list along with label and description
