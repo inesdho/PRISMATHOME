@@ -64,17 +64,16 @@ class LoginAsAdministrator:
     @brief This functions collects the login and the password entered by the user and checks if they are correct.
     This function displays message according to the result of the connexion test
     @param the instance
-    @return Nothing
+    @return the boolean connexion_allowed that will return true if the connexion is allowed else false
     """
     def connexion_admin(self):
         username = self.login_entry.get()
         password = self.password_entry.get()
 
+        connexion_allowed = False
+
         print(username)
         print(password)
-
-        # POUR DEBUGGAGE SANS BDD
-        # return True
 
         # Connexion to the MySQL database
         conn = mysql.connector.connect(
@@ -97,6 +96,7 @@ class LoginAsAdministrator:
             cursor.execute(query_update, (username, password))
             conn.commit()
             messagebox.showinfo("Connexion allowed", "Welcome, {}".format(username))
+            connexion_allowed = True
 
         else:
             messagebox.showerror("Connexion error", "Login or password incorrect")
@@ -104,4 +104,6 @@ class LoginAsAdministrator:
         # Close the connexion to the database
         cursor.close()
         conn.close()
+
+        return connexion_allowed
 

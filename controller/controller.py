@@ -67,7 +67,7 @@ class App(ThemedTk):
 
         # Redirection to login as an admin button
         ttk.Button(self.main_frame, text="Login as administrator",
-                   command=lambda: self.redirect_to_login_as_admin_from_new_observation(new_observation_page)).place(
+                   command=lambda: self.redirect_to_login_as_admin_from_anywhere(new_observation_page)).place(
             relx=0.9, rely=0.1)
 
         # Redirection to login as an admin button
@@ -123,10 +123,10 @@ class App(ThemedTk):
     @param the instance, the previous page
     @return Nothing
     """
-    def redirect_to_login_as_admin_from_new_observation(self, new_observation_page):
+    def redirect_to_login_as_admin_from_anywhere(self, page):
 
         # Clear the previous page content
-        self.clear_the_page(new_observation_page)
+        self.clear_the_page(page)
 
         # Creation of a main frame
         self.create_new_main_frame()
@@ -153,13 +153,10 @@ class App(ThemedTk):
     def connexion_button_clic(self, login_as_admin_page):
 
         # Checking if the login and password are correct
-        if login_as_admin_page.connexion_admin() == False:
-            # If they are not correct show an error message
-            showerror("Error", "The login or the password is incorrect")
-        else:
+        if login_as_admin_page.connexion_admin():
             # If they are correct the user is redirected to the "modify or create a configuration page"
             self.redirect_to_modify_or_create_configuration_from_anywhere(login_as_admin_page)
-            pass
+
 
     """!
     @brief This function clears the previous page in order to display the content of the "modify or create a 
