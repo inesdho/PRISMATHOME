@@ -32,6 +32,10 @@ class LabelisationSensor:
         self.frame = ttk.Frame(self.master)
         self.frame.pack(expand=True)
 
+        # Displays the title of the page
+        label = ttk.Label(self.frame, text="Sensor labellisation", font=16)
+        label.pack(pady=20)
+
         # Create entries for the sensors using the data from globals.sensor_counts
         for sensor_type_id, quantity in globals.sensor_counts.items():
             for i in range(quantity):
@@ -78,11 +82,14 @@ class LabelisationSensor:
 
         label_label = ttk.Label(entry_frame, text="Label :", width=10)
         label_label.pack(side=tk.LEFT)
-        entry_label = Input(entry_frame, min=1, max=80, has_width=20, special_position=True)
+        entry_label = Input(entry_frame, min=1, max=80, has_width=20, auto_pack=False, default_text="Label")
+        entry_label.get_entry().pack(side=tk.LEFT, padx=5)
 
         description_label = ttk.Label(entry_frame, text="Description :", width=10)
         description_label.pack(side=tk.LEFT)
-        entry_description = Input(entry_frame, min=1, max=600, has_width=50, has_special_char=True)
+        entry_description = Input(entry_frame, min=1, max=600, has_width=50, has_special_char=True, auto_pack=False,
+                                  default_text="Description :")
+        entry_description.get_entry().pack(side=tk.LEFT, padx=5)
 
         # Append the sensor_type_id to the sensor_entries list along with label and description
         self.sensor_entries.append((sensor_type_id, entry_label, entry_description))

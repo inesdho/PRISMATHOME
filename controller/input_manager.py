@@ -20,21 +20,20 @@ class Input:
     entry
     @param
     self : the instance
-    master : the frame in witch the entry will be located
+    frame : the frame in witch the entry will be located
     min : minimal number of character allowed on the entry
     min : maximal number of character allowed on the entry
     is_password : determine if the entry is to be considered a password entry (by dfault not)
-    is_fill_x : determine if the entry has to be packed in order to fill the x value of the frame (by dfault not)
+    auto_pack : determine if the entry has to be packed by this instance or no (by default yes)
     has_special_char : determine if the entry can allow special character or not (by dfault not)
     default_text : the text that will be displayed when the entry is initialized
     @return Nothing
     """
-    def __init__(self, master, min=NB_MIN_CHAR, max=NB_MAX_CHAR, is_password=None, special_position=None, has_width=None,
+    def __init__(self, frame, min=NB_MIN_CHAR, max=NB_MAX_CHAR, is_password=None, auto_pack=None, has_width=None,
                  has_special_char=None, default_text=None):
 
-        # Creation of the frame that will contain the entry
-        self.master = master
-        self.frame = ttk.Frame(self.master)
+        # Saving the frame in which the entry will be created
+        self.frame = frame
 
         # If the user set a minimal character value allowed, it will be saved otherwise the default value is saved
         if not min == NB_MIN_CHAR:
@@ -54,11 +53,11 @@ class Input:
         else:
             self.is_password = False
 
-        # If the user set a fill_x value it will be saved, otherwise is_fill_x is set to false
-        if not special_position is None:
-            self.special_position = special_position
+        # If the user set a auto_pack value it will be saved, otherwise auto_pack is set to true
+        if not auto_pack is None:
+            self.auto_pack = auto_pack
         else:
-            self.special_position = False
+            self.auto_pack = True
 
         # If the user set a has_width value it will be saved, otherwise has_width stays at None
         if not has_width is None:
@@ -88,10 +87,6 @@ class Input:
     @return Nothing
     """
     def create_an_entry(self):
-        # Pack this frame into the master frame
-        self.frame = ttk.Frame(self.master)
-        self.frame.pack()
-
         # Creation of a variable that will hold the value of the entry and can be modified by the code
         self.entry_var = tk.StringVar()
         self.entry_var.trace_add("write", self.on_entry_change)
@@ -106,11 +101,8 @@ class Input:
         # Insertion of the default text in the entry bar
         self.entry.insert(-1, self.default_text)
 
-        # Checking if the entry needs to be packed according to "x"
-        if self.special_position:
-            # If yes the entry is packed with the following parameters
-            self.entry.pack(side=tk.LEFT,anchor='w')
-        else:
+        # Checking if the entry needs to be packed by this function
+        if self.auto_pack:
             # Otherwise the entry is packed using some padding
             self.entry.pack(pady=10)
 
@@ -151,6 +143,15 @@ class Input:
     """
     def get(self):
         return self.entry.get()
+
+    """!
+    @brief This function returns the entry widget
+    @param 
+    self : the instance
+    @return The entry widget itself
+    """
+    def get_entry(self):
+        return self.entry
 
     """!
     @brief This function checks for each key pressing events if the length of the char chain is sufficient or too much.
