@@ -88,7 +88,7 @@ class LabelisationSensor:
         description_label = ttk.Label(entry_frame, text="Description :", width=10)
         description_label.pack(side=tk.LEFT)
         entry_description = Input(entry_frame, min=1, max=600, has_width=50, has_special_char=True, auto_pack=False,
-                                  default_text="Description :")
+                                  default_text="Description")
         entry_description.get_entry().pack(side=tk.LEFT, padx=5)
 
         # Append the sensor_type_id to the sensor_entries list along with label and description
