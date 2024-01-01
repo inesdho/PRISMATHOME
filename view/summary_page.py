@@ -4,9 +4,6 @@ from tkinter import *
 import globals
 import mysql.connector
 
-# TODO remplacer cette liste par une requête listant les différents types de capteurs stockés dans la BDD
-sensor_types_id = ["presence", "pressure", "opening", "button"]
-
 
 class Summary:
     def __init__(self, master):
@@ -72,7 +69,6 @@ class Summary:
         self.sensor_text = tk.Text(self.frame)
         self.sensor_text.pack(fill=tk.BOTH, expand=tk.TRUE)
 
-
     def display_sensor_info(self, sensor_type_id):
         # Clear existing sensor information
         self.sensor_text.configure(state='normal')
@@ -93,7 +89,6 @@ class Summary:
         # Prevent editing of the text widget by setting its state to 'disabled'
         self.sensor_text.configure(state='disabled')
 
-
     def clear_page(self):
         self.frame.destroy()
 
@@ -109,7 +104,9 @@ class Summary:
 
         # Exécutez une requête
         query = "INSERT INTO configuration (id_config, id_user, label, description)VALUES(%s, %s, %s, %s)"
-        cursor.execute(query, (globals.global_id_config, globals.global_id_user, globals.global_scenario_name_configuration, globals.global_description_configuration))
+        cursor.execute(query, (
+        globals.global_id_config, globals.global_id_user, globals.global_scenario_name_configuration,
+        globals.global_description_configuration))
         conn.commit()
 
         # Insert each sensor's data into the database
@@ -143,7 +140,7 @@ class Summary:
 
     def get_sensor_label(self, id_sensor):
         # TODO Modifier la fonction pour qu'elle retourne le label d'un capteur en fonction de son id
-        return  id_sensor + "sensor "
+        return id_sensor + "sensor "
 
     def get_sensor_description(self, id_sensor):
         # TODO Modifier la fonction pour qu'elle retourne la description d'un capteur en fonction de son id
@@ -152,4 +149,3 @@ class Summary:
     def get_sensor_status(self, id_sensor):
         # TODO Modifier la fonction pour qu'elle retourne le status d'un capteur en fonction de son id
         return "Status du capteur " + id_sensor
-
