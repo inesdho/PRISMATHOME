@@ -41,49 +41,56 @@ class Summary:
             participant_label.pack(side=tk.LEFT)
 
         button_frame = ttk.Frame(self.frame)
-        button_frame.pack(padx=5)
+        button_frame.pack(padx=5, pady=10)
+
+        # Connect to the database and retrieve sensor types
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="",
+                database="prismathome"
+            )
+            cursor = conn.cursor()
+            cursor.execute("SELECT DISTINCT id_type, type FROM sensor_type")
+            all_sensor_types = cursor.fetchall()
+
+            for sensor_type_id, sensor_type in all_sensor_types:
+                sensor_type_button = ttk.Button(
+                    button_frame,
+                    text=sensor_type,
+                    command=lambda id=sensor_type_id: self.display_sensor_info(id),
+                    padding=5
+                )
+                sensor_type_button.pack(side=tk.LEFT)
+
+            cursor.close()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
 
         self.sensor_text = tk.Text(self.frame)
         self.sensor_text.pack(fill=tk.BOTH, expand=tk.TRUE)
 
-        for sensor_type_id, quantity in globals.sensor_counts.items():
-            try:
-                conn = mysql.connector.connect(
-                    host="localhost",
-                    user="root",
-                    password="",
-                    database="prismathome"
-                )
-                cursor = conn.cursor()
-                query = "SELECT type FROM sensor_type WHERE id_type = %s"
-                cursor.execute(query, (sensor_type_id,))
-                type_result = cursor.fetchone()
-                cursor.close()
-                conn.close()
 
-                if type_result :
-                    sensor_type = type_result[0]
-                    sensor_type_button = ttk.Button(button_frame, text=self.get_sensor_label(sensor_type), command=lambda st=sensor_type : self.display_sensor_info(st), padding=5)
-                    sensor_type_button.pack(fill=tk.BOTH, side=tk.LEFT)
-            except mysql.connector.Error as err:
-                print(f"Error: {err}")
-
-
-
-
-
-    def display_sensor_info(self, sensor_type):
-
+    def display_sensor_info(self, sensor_type_id):
+        # Clear existing sensor information
         self.sensor_text.configure(state='normal')
-
         self.sensor_text.delete("1.0", tk.END)
 
-        for sensor_type_id, label_entry, description_entry in globals.global_sensor_entries:
-            # TODO remplacer le text du label par les infos des capteurs du type de sensor_type
-            self.sensor_text.insert(0.1, sensor_type + " sensor" + str(sensor_type_id) + " : \n" +
-                                    "\tLabel : " + label_entry + "\n" +
-                                    "\tDescription : " + description_entry + "\n"
-                                    )
+        # Search for entries for this sensor_type_id
+        entries_for_type = [entry for entry in globals.global_sensor_entries if entry[0] == sensor_type_id]
+        if not entries_for_type:
+            print(f"No entry found for sensor type ID: {sensor_type_id}")
+            self.sensor_text.insert(tk.END, "No information available for this sensor type.\n")
+
+        # Display information for found entries
+        for entry in entries_for_type:
+            _, label_entry, description_entry = entry
+            sensor_info = f"Sensor Type ID: {sensor_type_id}\nLabel: {label_entry}\nDescription: {description_entry}\n\n"
+            self.sensor_text.insert(tk.END, sensor_info)
+
+        # Prevent editing of the text widget by setting its state to 'disabled'
         self.sensor_text.configure(state='disabled')
 
 
