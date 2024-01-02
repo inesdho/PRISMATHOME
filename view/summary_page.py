@@ -56,7 +56,7 @@ class Summary:
                 sensor_type_button = ttk.Button(
                     button_frame,
                     text=sensor_type,
-                    command=lambda id=sensor_type_id: self.display_sensor_info(id),
+                    command=lambda id=sensor_type_id, type=sensor_type: self.display_sensor_info(id, type),
                     padding=5
                 )
                 sensor_type_button.pack(side=tk.LEFT)
@@ -69,24 +69,21 @@ class Summary:
         self.sensor_text = tk.Text(self.frame)
         self.sensor_text.pack(fill=tk.BOTH, expand=tk.TRUE)
 
-    def display_sensor_info(self, sensor_type_id):
-        # Clear existing sensor information
+    def display_sensor_info(self, sensor_type_id, sensor_type):
         self.sensor_text.configure(state='normal')
         self.sensor_text.delete("1.0", tk.END)
 
-        # Search for entries for this sensor_type_id
+        sensor_count = globals.sensor_counts.get(sensor_type_id, 0)
         entries_for_type = [entry for entry in globals.global_sensor_entries if entry[0] == sensor_type_id]
         if not entries_for_type:
-            print(f"No entry found for sensor type ID: {sensor_type_id}")
-            self.sensor_text.insert(tk.END, "No information available for this sensor type.\n")
+            self.sensor_text.insert(tk.END, f"No information available for {sensor_type} sensors.\n")
+        else:
+            for index, (sensor_id, label_entry, description_entry) in enumerate(entries_for_type, start=1):
+                if index > sensor_count:
+                    break
+                sensor_info = f"{sensor_type} sensor {index}:\nLabel: {label_entry}\nDescription: {description_entry}\n\n"
+                self.sensor_text.insert(tk.END, sensor_info)
 
-        # Display information for found entries
-        for entry in entries_for_type:
-            _, label_entry, description_entry = entry
-            sensor_info = f"Sensor Type ID: {sensor_type_id}\nLabel: {label_entry}\nDescription: {description_entry}\n\n"
-            self.sensor_text.insert(tk.END, sensor_info)
-
-        # Prevent editing of the text widget by setting its state to 'disabled'
         self.sensor_text.configure(state='disabled')
 
     def clear_page(self):
