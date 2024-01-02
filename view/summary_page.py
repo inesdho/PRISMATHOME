@@ -22,7 +22,7 @@ class Summary:
         # Information about the configuration
         scenario_frame = ttk.Frame(self.frame)
         scenario_frame.pack(fill=tk.BOTH)
-        scenario_label = ttk.Label(scenario_frame, text="Scenario : " + self.get_scenario_label(), padding=10)
+        scenario_label = ttk.Label(scenario_frame, text="Scenario : " + globals.global_scenario_name_configuration, padding=10)
         scenario_label.pack(side=tk.LEFT)
 
         # The following information need to be display only if this page is called during an observation
@@ -115,9 +115,6 @@ class Summary:
         cursor.close()
         conn.close()
 
-    def get_scenario_label(self):
-        # TODO Modifier la fonction pour qu'elle retourne le scénario de la configuration en cours
-        return "Ceci est le scénario de l'observation"
 
     def get_session(self):
         # TODO Modifier la fonction pour qu'elle retourne la session de la configuration en cours
