@@ -146,6 +146,7 @@ class Summary:
         conn.close()
 
 
+
     def get_session(self):
         # TODO Modifier la fonction pour qu'elle retourne la session de la configuration en cours
         return "Ceci est la session de l'observation"
