@@ -35,7 +35,6 @@ class EntryManager:
 
         # Saving the frame in which the entry will be created
         self.frame = frame
-
         # If the user set a minimal character value allowed, it will be saved otherwise the default value is saved
         if not min == NB_MIN_CHAR:
             self.min = min
