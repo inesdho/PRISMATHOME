@@ -1,5 +1,5 @@
 """!
-@file summary_page.py
+@file summary_admin_page.py
 @brief This file will contain all the widgets and functions related to the "summary" page itself
 @author Naviis-Brain
 @version 1.0
@@ -12,7 +12,7 @@ import globals
 import mysql.connector
 
 
-class Summary:
+class SummaryObservation:
     """!
     @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
     this page
@@ -28,32 +28,31 @@ class Summary:
     @param the instance, is_observation -> True if the page is to be displayed in the context of an observation
     @return Nothing
     """
-    def show_page(self, is_observation):
+    def show_page(self,):
         # Frame that will contain the title of the page and the data about the observation
         self.frame = ttk.Frame(self.master)
         self.frame.pack(fill=tk.BOTH)
 
         # Title of the page
-        title_label = ttk.Label(self.frame, text='Summary', font=16)
+        title_label = ttk.Label(self.frame, text='Summary running observation', font=16)
         title_label.pack(pady=10)
 
         # Information about the configuration
         scenario_frame = ttk.Frame(self.frame)
         scenario_frame.pack(fill=tk.BOTH)
-        scenario_label = ttk.Label(scenario_frame, text="Scenario : " + globals.global_scenario_name_configuration, padding=10)
+        # TODO ajouter la valeur de scenario
+        scenario_label = ttk.Label(scenario_frame, text="Scenario : ", padding=10)
         scenario_label.pack(side=tk.LEFT)
 
-        # The following information need to be display only if this page is called during an observation
-        if is_observation:
-            session_frame = ttk.Frame(self.frame)
-            session_frame.pack(fill=tk.BOTH)
-            session_label = ttk.Label(session_frame, text="Session : " + self.get_session(), padding=10)
-            session_label.pack(side=tk.LEFT)
+        session_frame = ttk.Frame(self.frame)
+        session_frame.pack(fill=tk.BOTH)
+        session_label = ttk.Label(session_frame, text="Session : " + self.get_session(), padding=10)
+        session_label.pack(side=tk.LEFT)
 
-            participant_frame = ttk.Frame(self.frame)
-            participant_frame.pack(fill=tk.BOTH)
-            participant_label = ttk.Label(participant_frame, text="Participant : " + self.get_participant(), padding=10)
-            participant_label.pack(side=tk.LEFT)
+        participant_frame = ttk.Frame(self.frame)
+        participant_frame.pack(fill=tk.BOTH)
+        participant_label = ttk.Label(participant_frame, text="Participant : " + self.get_participant(), padding=10)
+        participant_label.pack(side=tk.LEFT)
 
         # Creation of the frame that will contain the buttons
         button_frame = ttk.Frame(self.frame)
@@ -89,7 +88,17 @@ class Summary:
         self.sensor_text = tk.Text(self.frame)
         self.sensor_text.pack(fill=tk.BOTH, expand=tk.TRUE)
 
+    """!
+    @brief This function displays into the text widget all the sensors of a type selected by the user and the infos
+    related to the sensors
+    @param the instance
+    sensor_type_id -> the id of the type of sensor that needs it's info dipalyed
+    sensor_type -> the type of sensor
+    @return Nothing
+    """
     def display_sensor_info(self, sensor_type_id, sensor_type):
+
+        # Anabeling the edition of the text widget and clearing it's previous content
         self.sensor_text.configure(state='normal')
         self.sensor_text.delete("1.0", tk.END)
 
@@ -104,6 +113,7 @@ class Summary:
                 sensor_info = f"{sensor_type} sensor {index}:\nLabel: {label_entry}\nDescription: {description_entry}\n\n"
                 self.sensor_text.insert(tk.END, sensor_info)
 
+        # Disabeling the edition once the modifications are done
         self.sensor_text.configure(state='disabled')
 
     """!

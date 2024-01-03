@@ -12,6 +12,10 @@ class SensorPairingManagement:
         self.frame = tk.Frame(self.master)
         self.frame.pack(expand=True)
 
+        # Title of the page
+        title_label = ttk.Label(self.frame, text='Sensor pairing management', font=16)
+        title_label.pack(pady=10)
+
         # Create entries for sensors
         for sensor in self.get_sensors():
             self.create_labeled_entry(sensor)
