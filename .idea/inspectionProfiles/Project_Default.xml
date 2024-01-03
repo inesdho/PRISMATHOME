@@ -1,10 +1,18 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
     <option name="myName" value="Project Default" />
+    <inspection_tool class="DuplicatedCode" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <Languages>
+        <language minSize="61" name="Python" />
+      </Languages>
+    </inspection_tool>
     <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoredIdentifiers">
         <list>
-          <option value="the" />
+          <option value="mysql.connector.connect" />
+          <option value="builtins.globals.global_id_user" />
+          <option value="list.sensor_id" />
+          <option value="mysql.connector.Error" />
         </list>
       </option>
     </inspection_tool>

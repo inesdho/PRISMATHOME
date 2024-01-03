@@ -11,9 +11,6 @@ from tkinter import *
 import globals
 import mysql.connector
 
-# TODO remplacer cette liste par une requête listant les différents types de capteurs stockés dans la BDD
-sensor_types_id = ["presence", "pressure", "opening", "button"]
-
 
 class Summary:
     """!
@@ -43,7 +40,7 @@ class Summary:
         # Information about the configuration
         scenario_frame = ttk.Frame(self.frame)
         scenario_frame.pack(fill=tk.BOTH)
-        scenario_label = ttk.Label(scenario_frame, text="Scenario : " + self.get_scenario_label(), padding=10)
+        scenario_label = ttk.Label(scenario_frame, text="Scenario : " + globals.global_scenario_name_configuration, padding=10)
         scenario_label.pack(side=tk.LEFT)
 
         # The following information need to be display only if this page is called during an observation
@@ -60,42 +57,53 @@ class Summary:
 
         # Creation of the frame that will contain the buttons
         button_frame = ttk.Frame(self.frame)
-        button_frame.pack(padx=5)
+        button_frame.pack(padx=5, pady=10)
+
+        # Connect to the database and retrieve sensor types
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="",
+                database="prismathome"
+            )
+            cursor = conn.cursor()
+            cursor.execute("SELECT DISTINCT id_type, type FROM sensor_type")
+            all_sensor_types = cursor.fetchall()
+
+            for sensor_type_id, sensor_type in all_sensor_types:
+                sensor_type_button = ttk.Button(
+                    button_frame,
+                    text=sensor_type,
+                    command=lambda id=sensor_type_id, type=sensor_type: self.display_sensor_info(id, type),
+                    padding=5
+                )
+                sensor_type_button.pack(side=tk.LEFT)
+
+            cursor.close()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
 
         # Creation of the frame that will contain the datas relative to the sensors
         self.sensor_text = tk.Text(self.frame)
         self.sensor_text.pack(fill=tk.BOTH, expand=tk.TRUE)
 
-        # For each existing sensor type, a button is created in the button frame
-        for sensor_type in sensor_types_id:
-            sensor_type_button = ttk.Button(button_frame, text=self.get_sensor_label(sensor_type),
-                                            command=lambda st=sensor_type : self.display_sensor_info(st), padding=5)
-            sensor_type_button.pack(fill=tk.BOTH, side=tk.LEFT)
-
-    """!
-    @brief This function changes the content of the text widget in order to display the informations relative to a
-    chosen type of sensor. (ex : if the user clicks on the "Presence" button, all the presence sensors will have their
-    datas displayed
-    @param the instance, sensor_type -> The type of sensor that needs its sensors to be displayed
-    @return Nothing
-    """
-    def display_sensor_info(self, sensor_type):
-
-        # Allows the text widget to be edited
+    def display_sensor_info(self, sensor_type_id, sensor_type):
         self.sensor_text.configure(state='normal')
-
-        # Clears the content of the text widget
         self.sensor_text.delete("1.0", tk.END)
 
-        # For each sensor of this type in the current configuration (created yet or not), we display the information
-        for sensor_id in self.get_sensors_id_from_type(sensor_type):
-            # TODO remplacer le text du label par les infos des capteurs du type de sensor_type
-            self.sensor_text.insert(0.1, sensor_type + " sensor" + sensor_id + " : \n" +
-                                    "\tLabel : " + self.get_sensor_label(sensor_id) + "\n" +
-                                    "\tDescription : " + self.get_sensor_description(sensor_id) + "\n" +
-                                    "\tStatus : " + self.get_sensor_status(sensor_id) + "\n\n")
+        sensor_count = globals.sensor_counts.get(sensor_type_id, 0)
+        entries_for_type = [entry for entry in globals.global_sensor_entries if entry[0] == sensor_type_id]
+        if not entries_for_type:
+            self.sensor_text.insert(tk.END, f"No information available for {sensor_type} sensors.\n")
+        else:
+            for index, (sensor_id, label_entry, description_entry) in enumerate(entries_for_type, start=1):
+                if index > sensor_count:
+                    break
+                sensor_info = f"{sensor_type} sensor {index}:\nLabel: {label_entry}\nDescription: {description_entry}\n\n"
+                self.sensor_text.insert(tk.END, sensor_info)
 
-        # The edition of the text widget is disabled again
         self.sensor_text.configure(state='disabled')
 
     """!
@@ -121,25 +129,23 @@ class Summary:
         )
         cursor = conn.cursor()
 
-        # Execute a request
+        # Exécutez une requête
         query = "INSERT INTO configuration (id_config, id_user, label, description)VALUES(%s, %s, %s, %s)"
-        cursor.execute(query, (globals.global_id_config, globals.global_id_user,
-                               globals.global_scenario_name_configuration, globals.global_description_configuration))
+        cursor.execute(query, (
+        globals.global_id_config, globals.global_id_user, globals.global_scenario_name_configuration,
+        globals.global_description_configuration))
         conn.commit()
 
         # Insert each sensor's data into the database
         for sensor_type_id, label, description in globals.global_sensor_entries:
-            query = "INSERT INTO sensor_config (id_config, id_sensor_type, sensor_label, sensor_description) " \
-                    "VALUES (%s, %s, %s, %s)"
+            query = "INSERT INTO sensor_config (id_config, id_sensor_type, sensor_label, sensor_description) VALUES (%s, %s, %s, %s)"
             cursor.execute(query, (globals.global_id_config, sensor_type_id, label, description))
 
         conn.commit()
         cursor.close()
         conn.close()
 
-    def get_scenario_label(self):
-        # TODO Modifier la fonction pour qu'elle retourne le scénario de la configuration en cours
-        return "Ceci est le scénario de l'observation"
+
 
     def get_session(self):
         # TODO Modifier la fonction pour qu'elle retourne la session de la configuration en cours
@@ -159,7 +165,7 @@ class Summary:
 
     def get_sensor_label(self, id_sensor):
         # TODO Modifier la fonction pour qu'elle retourne le label d'un capteur en fonction de son id
-        return "Label du capteur " + id_sensor
+        return id_sensor + "sensor "
 
     def get_sensor_description(self, id_sensor):
         # TODO Modifier la fonction pour qu'elle retourne la description d'un capteur en fonction de son id
