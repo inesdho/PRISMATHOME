@@ -8,7 +8,7 @@ value, type of characters that are accepted etc...)
 """
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 # Default min and max value for the number of characters allowed in the text widget
 NB_MIN_CHAR = 0
@@ -71,6 +71,10 @@ class TextManager:
         else:
             self.default_text = ""
 
+        # Set the focs of the user to true so that no error message will be display yet regarding the length of the
+        # text char
+        self.focus = True
+
         # Start the creation of the entry
         self.create_a_text()
 
@@ -93,23 +97,44 @@ class TextManager:
             self.text.pack(pady=10)
 
         # Binding each key use to the function on_key_press
-        self.text.bind("<Key>", self.on_key_press)
+        self.text.bind("<Key>", self.which_key)
+
+        # Binding the focus on the entry
+        self.text.bind("<FocusOut>", self.on_text_focus_out)
+        self.text.bind("<FocusIn>", self.on_text_focus_in)
+
 
     """!
-    @brief The on_key_press checks that the number of characters is inside the limits define by the user or the default 
-    values
+    @brief This function saves the key pressing event into a variable
+    @param 
     self : the instance
+    event : the key pressing event
     @return Nothing
     """
-    def on_key_press(self, event):
-        current_text = self.text.get("1.0", "end-1c")
-        if len(current_text) < self.min:
-            # Doesn't allow to have a value under the minimum character required and so displays a message
-            self.text.insert(0.1,"Require at least " + str(self.min) + " character(s)")
-        if len(current_text) > self.max:
-            # Delete the last character if it's over the limit
-            self.text.delete("end-2c", "end-1c")
-            return "break"
+    def which_key(self, event):
+        self.key = event
+
+    """!
+   @brief This function detects when the user exit the entry and set the focus variable to False and call the 
+   on_text_change function to check if the event is allowed
+   @param 
+   self : the instance
+   event : the focus out event
+   @return Nothing
+   """
+    def on_text_focus_out(self, event):
+        self.focus = False
+        self.on_text_change()
+
+    """!
+    @brief This function detects when the user curser is in the entry and set the focus variable to True
+    @param 
+    self : the instance
+    event : the focus in event
+    @return Nothing
+    """
+    def on_text_focus_in(self, event):
+        self.focus = True
 
     """!
     @brief This function returns the text value
@@ -119,3 +144,21 @@ class TextManager:
     """
     def get(self):
         return self.text.get("1.0", "end-1c")
+
+    """!
+    @brief The on_event checks that the number of characters is inside the limits define by the user or the default 
+    values
+    self : the instance
+    @return Nothing
+    """
+    def on_text_change(self, *args):
+        current_text = self.text.get("1.0", "end-1c")
+        if len(current_text) < self.min:
+            # Doesn't allow to have a value under the minimum character required and so displays a message
+            messagebox.showerror("Input error", "At least {} char is required.".format(self.min))
+            # Set the cursor of the user back in the text widget so that it can not be left empty
+            self.text.focus_set()
+        if len(current_text) > self.max:
+            # Delete the last character if it's over the limit
+            self.text.delete("end-2c", "end-1c")
+            return "break"

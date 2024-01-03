@@ -8,7 +8,7 @@ value, password management, type of characters that are accepted etc...)
 """
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 # Default min and max value for the number of characters allowed on the entry
 NB_MIN_CHAR = 0
@@ -77,6 +77,10 @@ class EntryManager:
         else:
             self.default_text = ""
 
+        # Set the focs of the user to true so that no error message will be display yet regarding the length of the
+        # entry char
+        self.focus = True
+
         # Start the creation of the entry
         self.create_an_entry()
 
@@ -114,6 +118,10 @@ class EntryManager:
         # Binding each key use to the function which_key
         self.entry.bind("<Key>", self.which_key)
 
+        # Binding the focus on the entry
+        self.entry.bind("<FocusOut>", self.on_entry_focus_out)
+        self.entry.bind("<FocusIn>", self.on_entry_focus_in)
+
     """!
     @brief This function saves the key pressing event into a variable
     @param 
@@ -122,7 +130,29 @@ class EntryManager:
     @return Nothing
     """
     def which_key(self, event):
-        self.key=event
+        self.key = event
+
+    """!
+    @brief This function detects when the user exit the entry and set the focus variable to False and call the 
+    on_entry_change function to check if the event is allowed
+    @param 
+    self : the instance
+    event : the focus out event
+    @return Nothing
+    """
+    def on_entry_focus_out(self, event):
+        self.focus = False
+        self.on_entry_change()
+
+    """!
+    @brief This function detects when the user curser is in the entry and set the focus variable to True
+    @param 
+    self : the instance
+    event : the focus in event
+    @return Nothing
+    """
+    def on_entry_focus_in(self, event):
+        self.focus = True
 
     """!
     @brief This function checks if the key pressed is authorized or not
@@ -154,8 +184,9 @@ class EntryManager:
         return self.entry
 
     """!
-    @brief This function checks for each key pressing events if the length of the char chain is sufficient or too much.
-    If the length is not sufficient a message is displayed, if the length is too much no more characters can be added.
+    @brief This function checks for each events if the length of the char chain is sufficient or too much.
+    If the length is not sufficient a message is displayed and the user is obliged to fill the entry before their curser
+    leave, if the length is too much no more characters can be added.
     @param 
     self : the instance
     @return The entry value
@@ -163,9 +194,11 @@ class EntryManager:
     def on_entry_change(self, *args):
         entry_text = self.entry.get()
         # Checking if the length of the entry is sufficient
-        if len(entry_text) < self.min:
+        if (len(entry_text) < self.min) and (not self.focus):
             # Doesn't allow to have a value under the minimum character required and so displays a message
-            self.entry_var.set("Require at least " + str(self.min) + " character(s)")
+            messagebox.showerror("Input error", "At least {} char is required.".format(self.min))
+            # Set the cursor of the user back in the entry so that it can not be left empty
+            self.entry.focus_set()
         # Checking if the length of the entry is too much
         if len(entry_text) > self.max:
             # Doesn't allow to have a value under the minimum character required and so doesn't allow any more
