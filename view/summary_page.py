@@ -1,3 +1,10 @@
+"""!
+@file summary_page.py
+@brief This file will contain all the widgets and functions related to the "summary" page itself
+@author Naviis-Brain
+@version 1.0
+@date
+"""
 import tkinter as tk
 from tkinter import ttk
 from tkinter import *
@@ -6,10 +13,21 @@ import mysql.connector
 
 
 class Summary:
+    """!
+    @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
+    this page
+    @param the instance, the master frame (created in the controller.py file)
+    @return Nothing
+    """
     def __init__(self, master):
         self.master = master
         self.frame = ttk.Frame(self.master)
 
+    """!
+    @brief The show_page function creates and displays all the elements of the "summary" page
+    @param the instance, is_observation -> True if the page is to be displayed in the context of an observation
+    @return Nothing
+    """
     def show_page(self, is_observation):
         # Frame that will contain the title of the page and the data about the observation
         self.frame = ttk.Frame(self.master)
@@ -37,6 +55,7 @@ class Summary:
             participant_label = ttk.Label(participant_frame, text="Participant : " + self.get_participant(), padding=10)
             participant_label.pack(side=tk.LEFT)
 
+        # Creation of the frame that will contain the buttons
         button_frame = ttk.Frame(self.frame)
         button_frame.pack(padx=5, pady=10)
 
@@ -66,6 +85,7 @@ class Summary:
         except mysql.connector.Error as err:
             print(f"Error: {err}")
 
+        # Creation of the frame that will contain the datas relative to the sensors
         self.sensor_text = tk.Text(self.frame)
         self.sensor_text.pack(fill=tk.BOTH, expand=tk.TRUE)
 
@@ -86,9 +106,19 @@ class Summary:
 
         self.sensor_text.configure(state='disabled')
 
+    """!
+    @brief This functions clears the entire "new observation" page
+    @param the instance
+    @return Nothing
+    """
     def clear_page(self):
         self.frame.destroy()
 
+    """!
+    @brief This functions validated all the infos relative to the current created configuration in order to save them
+    @param the instance
+    @return Nothing
+    """
     def validate_conf(self):
         # Connect to the database
         conn = mysql.connector.connect(
@@ -143,3 +173,4 @@ class Summary:
     def get_sensor_status(self, id_sensor):
         # TODO Modifier la fonction pour qu'elle retourne le status d'un capteur en fonction de son id
         return "Status du capteur " + id_sensor
+
