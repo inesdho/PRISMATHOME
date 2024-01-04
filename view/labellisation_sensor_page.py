@@ -20,9 +20,9 @@ class LabelisationSensor:
     """
     def __init__(self, master):
         self.master = master
+        self.frame = ttk.Frame(self.master)
         self.sensor_entries = []  # List to hold the label, description entries for each sensor, and sensor type ID
 
-        self.frame = ttk.Frame(self.master)
         self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
 
         # Displays the title of the page
@@ -84,7 +84,7 @@ class LabelisationSensor:
 
     """!
     @brief This function creates label entries according to the sensor quantity of each type selected by the user in the
-    selection sensor quantity page. The user can then enter the label and description to attribute to each sensor
+    selection sensor quantity page. The user can then enter the label and descrition to attribute to each sensor
     @param the instance, label_text -> the label of the sensor, sensor_type_id
     @return Nothing
     """
@@ -129,4 +129,4 @@ class LabelisationSensor:
     @return Nothing
     """
     def clear_page(self):
-        self.canvas.destroy()
+        self.frame.destroy()
