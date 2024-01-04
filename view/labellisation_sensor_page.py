@@ -20,8 +20,24 @@ class LabelisationSensor:
     """
     def __init__(self, master):
         self.master = master
-        self.frame = ttk.Frame(self.master)
         self.sensor_entries = []  # List to hold the label, description entries for each sensor, and sensor type ID
+
+        self.frame = ttk.Frame(self.master)
+        self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
+
+        # Displays the title of the page
+        label = ttk.Label(self.frame, text="Sensor labellisation", font=16)
+        label.pack(pady=20)
+
+        # Creation of a canvas in order to add a scrollbar in case to many lines of sensors are displayed
+        self.canvas = tk.Canvas(self.frame)
+        self.scrollbar = ttk.Scrollbar(self.frame, orient="vertical", command=self.canvas.yview)
+        self.scrollbar.pack(side=tk.RIGHT, fill="y")
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        self.frame_canvas = ttk.Frame(self.canvas)
+        self.canvas.create_window((0, 0), anchor='nw', window=self.frame_canvas)
 
     """!
     @brief The show_page function creates and displays all the elements of the "labellisation sensor" page
@@ -29,12 +45,6 @@ class LabelisationSensor:
     @return Nothing
     """
     def show_page(self):
-        self.frame = ttk.Frame(self.master)
-        self.frame.pack(expand=True)
-
-        # Displays the title of the page
-        label = ttk.Label(self.frame, text="Sensor labellisation", font=16)
-        label.pack(pady=20)
 
         # Create entries for the sensors using the data from globals.sensor_counts
         for sensor_type_id, quantity in globals.sensor_counts.items():
@@ -68,14 +78,18 @@ class LabelisationSensor:
                     sensor_type_id = None
                     self.create_labeled_entry(label_text, sensor_type_id)
 
+        # Configurer la barre de défilement pour suivre la hauteur du contenu
+        self.frame_canvas.update_idletasks()
+        self.canvas.config(scrollregion=self.canvas.bbox("all"))
+
     """!
     @brief This function creates label entries according to the sensor quantity of each type selected by the user in the
-    selection sensor quantity page. The user can then enter the label and descrition to attribute to each sensor
+    selection sensor quantity page. The user can then enter the label and description to attribute to each sensor
     @param the instance, label_text -> the label of the sensor, sensor_type_id
     @return Nothing
     """
     def create_labeled_entry(self, label_text, sensor_type_id):
-        entry_frame = ttk.Frame(self.frame)
+        entry_frame = ttk.Frame(self.frame_canvas)
         entry_frame.pack(fill=tk.X, pady=5)
         label = ttk.Label(entry_frame, text=label_text, width=20, anchor='w')
         label.pack(side=tk.LEFT)
@@ -115,4 +129,4 @@ class LabelisationSensor:
     @return Nothing
     """
     def clear_page(self):
-        self.frame.destroy()
+        self.canvas.destroy()

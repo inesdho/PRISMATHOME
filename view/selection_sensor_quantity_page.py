@@ -54,6 +54,10 @@ class QuantitySensor:
         self.frame = ttk.Frame(self.master)
         self.frame.pack(expand=True)
 
+        # Displays the title of the page
+        label = ttk.Label(self.frame, text="Sensor quantity selection", font=16)
+        label.pack(pady=20)
+
         # Create a frame for the sensor selectors inside the main frame
         self.frame_sensors = tk.Frame(self.frame, padx=10, pady=10)
         self.frame_sensors.pack()
