@@ -100,7 +100,7 @@ class LabelisationSensor:
     @return Nothing
     """
     def create_labeled_entry(self, unique_id, label_text, initial_label, initial_description):
-        entry_frame = ttk.Frame(self.frame)
+        entry_frame = ttk.Frame(self.frame_canvas)
         entry_frame.pack(fill=tk.X, pady=5)
         label = ttk.Label(entry_frame, text=label_text, width=20, anchor='w')
         label.pack(side=tk.LEFT)
