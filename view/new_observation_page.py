@@ -8,6 +8,9 @@
 
 import tkinter as tk
 from tkinter import ttk
+
+import mysql
+
 from controller.entry_manager import EntryManager
 
 
@@ -44,23 +47,11 @@ class NewObservation:
 
 
         # Configuration list
-        # TODO réccupérer les noms des configurations
-        options = ["Option 1", "Option 2", "Option 3"]
+        options = self.get_config()
         configuration_label = ttk.Label(self.frame, text="Configuration")
         configuration_label.pack()
         self.configuration_combobox = ttk.Combobox(self.frame, values=options, width=29)
-        self.configuration_combobox.insert(-1, options[0])
         self.configuration_combobox.pack(pady=10)
-
-        # Observation label input
-        observation_label_label = ttk.Label(self.frame, text="Observation label")
-        observation_label_label.pack()
-        self.observation_label_entry = EntryManager(self.frame, min=1, max=80, has_width=30, default_text="Label")
-
-        # Observation description input
-        observation_description_label = ttk.Label(self.frame, text="Observation description")
-        observation_description_label.pack()
-        self.observation_description_entry = EntryManager(self.frame, min=1, max=200, has_width=100, default_text="Description")
 
         # Session input
         session_label = ttk.Label(self.frame, text="Session")
@@ -90,7 +81,34 @@ class NewObservation:
         # Print the chosen data
         print("User :", self.user_entry.get())
         print("Configuration :", self.configuration_combobox.get())
-        print("Observation label :", self.observation_label_entry.get())
-        print("Observation description :", self.observation_description_entry.get())
         print("Session :", self.session_entry.get())
         print("Participant :", self.participant_entry.get())
+
+
+
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="prismathome"
+        )
+        cursor = conn.cursor()
+
+        # Exécutez une requête
+        query = "INSERT INTO observation (id_observation, id_system, participant, id_config, id_session, session_label)VALUES('1', %s, %s, %s, %s, %s)"
+        cursor.execute(query, (self.participant_entry.get(), globals.global_id_config,  self.session_entry.get()))
+        conn.commit()
+
+    def get_config(self):
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="prisme_home_1"
+        )
+        cursor = conn.cursor()
+
+        # Execute a request
+        query = "SELECT label FROM configuration "
+        cursor.execute(query,)
+        return cursor.fetchall()

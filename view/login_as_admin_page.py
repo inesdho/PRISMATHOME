@@ -80,7 +80,7 @@ class LoginAsAdministrator:
             host="localhost",
             user="root",
             password="",
-            database="prismathome"
+            database="prisme_home_1"
         )
         cursor = conn.cursor()
 
@@ -92,7 +92,7 @@ class LoginAsAdministrator:
         # Check if the user was found in the database
         if user:
             globals.global_id_user = user[0]
-            query_update = "UPDATE prismathome.user SET connected=1 WHERE login=%s AND password=%s"
+            query_update = "UPDATE prisme_home_1.user SET connected=1 WHERE login=%s AND password=%s"
             cursor.execute(query_update, (username, password))
             conn.commit()
             messagebox.showinfo("Connexion allowed", "Welcome, {}".format(username))

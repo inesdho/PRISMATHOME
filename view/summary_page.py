@@ -65,7 +65,7 @@ class Summary:
                 host="localhost",
                 user="root",
                 password="",
-                database="prismathome"
+                database="prisme_home_1"
             )
             cursor = conn.cursor()
             cursor.execute("SELECT DISTINCT id_type, type FROM sensor_type")
@@ -133,7 +133,7 @@ class Summary:
             host="localhost",
             user="root",
             password="",
-            database="prismathome"
+            database="prisme_home_1"
         )
         cursor = conn.cursor()
 
