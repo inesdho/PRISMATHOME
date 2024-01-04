@@ -56,21 +56,15 @@ class NewObservation:
         observation_label_label = ttk.Label(self.frame, text="Observation label")
         observation_label_label.pack()
         self.observation_label_entry = EntryManager(self.frame, min=1, max=80, has_width=30, default_text="Label")
-
-        # Observation description input
-        observation_description_label = ttk.Label(self.frame, text="Observation description")
-        observation_description_label.pack()
-        self.observation_description_entry = EntryManager(self.frame, min=1, max=200, has_width=100, default_text="Description")
-
         # Session input
         session_label = ttk.Label(self.frame, text="Session")
         session_label.pack()
-        self.session_entry = EntryManager(self.frame, min=1, max=100, has_width=100, default_text="Session")
+        self.session_entry = EntryManager(self.frame, min=1, max=100, has_width=30, default_text="Session")
 
         # Participant input
         participant_label = ttk.Label(self.frame, text="Participant")
         participant_label.pack()
-        self.participant_entry = EntryManager(self.frame, min=1, max=70, has_width=70, default_text="Participant")
+        self.participant_entry = EntryManager(self.frame, min=1, max=70, has_width=30, default_text="Participant")
 
     """!
     @brief This functions clears the entire "new observation" page
@@ -91,6 +85,5 @@ class NewObservation:
         print("User :", self.user_entry.get())
         print("Configuration :", self.configuration_combobox.get())
         print("Observation label :", self.observation_label_entry.get())
-        print("Observation description :", self.observation_description_entry.get())
         print("Session :", self.session_entry.get())
         print("Participant :", self.participant_entry.get())

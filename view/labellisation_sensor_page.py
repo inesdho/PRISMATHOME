@@ -49,13 +49,13 @@ class LabelisationSensor:
         # Create entries for the sensors using the data from globals.sensor_counts
         for sensor_type_id, quantity in globals.sensor_counts.items():
             for i in range(quantity):
-                # Génère un identifiant unique pour chaque capteur
+                # Create a unique id for each sensor
                 unique_id = f"{sensor_type_id}_{i}"
 
-                # Trouve les valeurs précédemment entrées s'il y en a
+                # Find the previous values entered if they are any
                 existing_entry = next((entry for entry in globals.global_sensor_entries if entry[0] == unique_id), None)
 
-                # Vérifie si les valeurs précédentes existent
+                # Check if the previous values exist
                 initial_label = existing_entry[1] if existing_entry else "Label"
                 initial_description = existing_entry[2] if existing_entry else "Description"
 
@@ -80,7 +80,7 @@ class LabelisationSensor:
                         label_text = 'Unknown sensor'
                         sensor_type_id = None
 
-                    # Passe le sensor_type_id à la méthode create_labeled_entry
+                    # Give sensor_type_id to the method create_labeled_entry
                     self.create_labeled_entry(unique_id, label_text, initial_label, initial_description)
                 except mysql.connector.Error as err:
                     print(f"Error: {err}")
@@ -89,7 +89,7 @@ class LabelisationSensor:
                     self.create_labeled_entry(unique_id, label_text, "Label", "Description")
 
 
-        # Configurer la barre de défilement pour suivre la hauteur du contenu
+        # Configure the scroll region to follow the content of the frame
         self.frame_canvas.update_idletasks()
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
@@ -116,8 +116,9 @@ class LabelisationSensor:
                                          default_text=initial_description)
         entry_description.get_entry().pack(side=tk.LEFT, padx=5)
 
-        # Ajoute l'unique_id au lieu du sensor_type_id à la liste des sensor_entries avec le label et la description
+        # Add the unique_id instead of sensor_type_id to the list of sensor_entries with the label and description
         self.sensor_entries.append((unique_id, entry_label, entry_description))
+
     """!
     @brief This function saves the label and description entered by the user for each sensor into global variables 
     @param the instance

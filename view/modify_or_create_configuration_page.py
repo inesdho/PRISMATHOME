@@ -59,13 +59,13 @@ class ModifyOrCreateConfiguration:
         tk.Label(self.right_frame, text="Scenario name :").pack(anchor="nw")
         self.right_frame.update()
         self.name_entry = EntryManager(self.right_frame, min=1, max=30, has_width=self.right_frame.winfo_width(),
-                                       default_text="Label")
+                                       default_text="Enter label")
 
         tk.Label(self.right_frame, text="Description :").pack(anchor="nw")
         # Create a Text widget for multi-line text entry
         self.description_text_entry = TextManager(self.right_frame, min=1, max=800,
                                                   has_width=self.right_frame.winfo_width(),
-                                                  has_height=5, default_text="Description")
+                                                  has_height=5, default_text="Enter description")
 
     """!
     @brief This fuctions is called when the user clicks on a button to create a new configuration and saves the label of
