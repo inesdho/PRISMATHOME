@@ -26,11 +26,11 @@ class LabelisationSensor:
         self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
 
         # Displays the title of the page
-        label = ttk.Label(self.frame, text="Sensor labellisation", font=16)
+        label = ttk.Label(self.frame, text="Sensor labellisation", font=16, padding=10)
         label.pack(pady=20)
 
         # Creation of a canvas in order to add a scrollbar in case to many lines of sensors are displayed
-        self.canvas = tk.Canvas(self.frame)
+        self.canvas = tk.Canvas(self.frame, bd=2, relief="ridge", highlightthickness=2)
         self.scrollbar = ttk.Scrollbar(self.frame, orient="vertical", command=self.canvas.yview)
         self.scrollbar.pack(side=tk.RIGHT, fill="y")
         self.canvas.pack(fill=tk.BOTH, expand=True)
@@ -101,18 +101,18 @@ class LabelisationSensor:
     """
     def create_labeled_entry(self, unique_id, label_text, initial_label, initial_description):
         entry_frame = ttk.Frame(self.frame_canvas)
-        entry_frame.pack(fill=tk.X, pady=5)
-        label = ttk.Label(entry_frame, text=label_text, width=20, anchor='w')
-        label.pack(side=tk.LEFT)
+        entry_frame.pack(fill=tk.X)
+        label = ttk.Label(entry_frame, text=label_text, width=20)
+        label.pack(side=tk.LEFT, padx=5)
 
         label_label = ttk.Label(entry_frame, text="Label :", width=10)
         label_label.pack(side=tk.LEFT)
         entry_label = EntryManager(entry_frame, min=1, max=80, has_width=20, auto_pack=False, default_text=initial_label)
         entry_label.get_entry().pack(side=tk.LEFT, padx=5)
 
-        description_label = ttk.Label(entry_frame, text="Description :", width=10)
-        description_label.pack(side=tk.LEFT)
-        entry_description = EntryManager(entry_frame, min=1, max=600, has_width=50, has_special_char=True, auto_pack=False,
+        description_label = ttk.Label(entry_frame, text="Description :", width=15)
+        description_label.pack(side=tk.LEFT, padx=5)
+        entry_description = EntryManager(entry_frame, min=1, max=600, has_width=80, has_special_char=True, auto_pack=False,
                                          default_text=initial_description)
         entry_description.get_entry().pack(side=tk.LEFT, padx=5)
 
