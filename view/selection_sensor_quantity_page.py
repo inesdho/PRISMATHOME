@@ -72,10 +72,10 @@ class QuantitySensor:
             sensor_var = tk.StringVar()
             combobox = ttk.Combobox(sensor_frame, values=[0, 1, 2, 3, 4, 5], state="readonly", width=5,
                                     textvariable=sensor_var)
-            combobox.set(0)  # Valeur par défaut
+            combobox.set(0)  # Default values
             combobox.pack(padx=10, pady=5)
             sensor_frame.pack(side=tk.LEFT, padx=10)
-            self.sensor_vars[id] = sensor_var  # Stockez la variable pour une utilisation ultérieure
+            self.sensor_vars[id] = sensor_var  # Stock the variable for a further use
 
     """!
     @brief This functions clears the entire "new observation" page
@@ -95,10 +95,22 @@ class QuantitySensor:
     def on_next_button_click(self):
         globals.sensor_counts.clear()
 
-        # Récupérez les valeurs des StringVars et les stockez dans le dictionnaire sensor_counts de globals
+        # Get the values of the StringVars and stock them into sensor_counts of globals
         for sensor_type, sensor_var in self.sensor_vars.items():
             globals.sensor_counts[sensor_type] = int(sensor_var.get())
 
-        # Imprimez les valeurs pour vérifier
+        # Print the values to check
         for sensor_type, count in globals.sensor_counts.items():
             print(f"Number of id_type {sensor_type} Sensors selected:", count)
+
+
+    """!
+    @brief This function checks if the users has selected at least one sensor
+    @param the instance
+    @return true : if the user selected at least one sensor, false : if no sensor was selected
+    """
+    def chose_at_least_one_sensor(self):
+        for sensor_type, sensor_var in self.sensor_vars.items():
+           if int(sensor_var.get()) > 0:
+               return True
+        return False

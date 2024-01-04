@@ -7,9 +7,8 @@
 """
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
-from tkinter.messagebox import *
 from ttkthemes import ThemedTk, ThemedStyle
 from view.new_observation_page import NewObservation
 from view.login_as_admin_page import LoginAsAdministrator
@@ -241,7 +240,7 @@ class App(ThemedTk):
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         next_button = ttk.Button(self.main_frame, text="Next",
-                                 command=lambda: self.redirect_to_labellisation_sensor_from_sensor_quantity(
+                                 command=lambda: self.check_if_user_chose_at_least_one_sensor(
                                      selction_sensor_quantity_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
@@ -257,8 +256,8 @@ class App(ThemedTk):
         self.clear_the_page(page)
 
         # Creation of the "selection sensor quantity" page
-        selection_sensor_page = QuantitySensor(self)
-        selection_sensor_page.show_page()
+        selection_sensor_quantity_page = QuantitySensor(self)
+        selection_sensor_quantity_page.show_page()
 
         # Creation of a main frame
         self.create_new_main_frame()
@@ -266,13 +265,27 @@ class App(ThemedTk):
         # Add buttons
         back_button = ttk.Button(self.main_frame, text="Back",
                                  command=lambda: self.redirect_to_modify_or_create_configuration_from_anywhere(
-                                     selection_sensor_page))
+                                     selection_sensor_quantity_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         next_button = ttk.Button(self.main_frame, text="Next",
-                                 command=lambda: self.redirect_to_labellisation_sensor_from_sensor_quantity(
-                                     selection_sensor_page))
+                                 command=lambda: self.check_if_user_chose_at_least_one_sensor(
+                                     selection_sensor_quantity_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
+
+    """!
+    @brief This checks if the user selected at least one sensor before they are redirected to the labellisation page.
+    If no sensor was selected, an error message is displayed and the usr can't access to the next page.
+    @param the instance, the selection_sensor_quantity_page
+    @return Nothing
+    """
+    def check_if_user_chose_at_least_one_sensor(self, selection_sensor_quantity_page):
+        if selection_sensor_quantity_page.chose_at_least_one_sensor():
+            self.redirect_to_labellisation_sensor_from_sensor_quantity(selection_sensor_quantity_page)
+        else:
+            messagebox.showerror("Error", "Please select at least one sensor")
+
+
 
     """!
     @brief This function clears the previous page in order to display the content of the "labellisation sensor" 
