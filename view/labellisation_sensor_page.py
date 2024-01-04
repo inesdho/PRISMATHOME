@@ -32,13 +32,23 @@ class LabelisationSensor:
         self.frame = ttk.Frame(self.master)
         self.frame.pack(expand=True)
 
-        # Displays the title of the page
+        # Affiche le titre de la page
         label = ttk.Label(self.frame, text="Sensor labellisation", font=16)
         label.pack(pady=20)
 
-        # Create entries for the sensors using the data from globals.sensor_counts
+        # Crée des entrées pour les capteurs en utilisant les données de globals.sensor_counts
         for sensor_type_id, quantity in globals.sensor_counts.items():
             for i in range(quantity):
+                # Génère un identifiant unique pour chaque capteur
+                unique_id = f"{sensor_type_id}_{i}"
+
+                # Trouve les valeurs précédemment entrées s'il y en a
+                existing_entry = next((entry for entry in globals.global_sensor_entries if entry[0] == unique_id), None)
+
+                # Vérifie si les valeurs précédentes existent
+                initial_label = existing_entry[1] if existing_entry else "Label"
+                initial_description = existing_entry[2] if existing_entry else "Description"
+
                 try:
                     conn = mysql.connector.connect(
                         host="localhost",
@@ -60,13 +70,14 @@ class LabelisationSensor:
                         label_text = 'Unknown sensor'
                         sensor_type_id = None
 
-                    # Pass the sensor_type_id to the create_labeled_entry method
-                    self.create_labeled_entry(label_text, sensor_type_id)
+                    # Passe le sensor_type_id à la méthode create_labeled_entry
+                    self.create_labeled_entry(unique_id, label_text, initial_label, initial_description)
                 except mysql.connector.Error as err:
                     print(f"Error: {err}")
                     label_text = 'Error sensor'
                     sensor_type_id = None
-                    self.create_labeled_entry(label_text, sensor_type_id)
+                    self.create_labeled_entry(unique_id, label_text, "Label", "Description")
+
 
     """!
     @brief This function creates label entries according to the sensor quantity of each type selected by the user in the
@@ -74,7 +85,7 @@ class LabelisationSensor:
     @param the instance, label_text -> the label of the sensor, sensor_type_id
     @return Nothing
     """
-    def create_labeled_entry(self, label_text, sensor_type_id):
+    def create_labeled_entry(self, unique_id, label_text, initial_label, initial_description):
         entry_frame = ttk.Frame(self.frame)
         entry_frame.pack(fill=tk.X, pady=5)
         label = ttk.Label(entry_frame, text=label_text, width=20, anchor='w')
@@ -82,18 +93,17 @@ class LabelisationSensor:
 
         label_label = ttk.Label(entry_frame, text="Label :", width=10)
         label_label.pack(side=tk.LEFT)
-        entry_label = EntryManager(entry_frame, min=1, max=80, has_width=20, auto_pack=False, default_text="Label")
+        entry_label = EntryManager(entry_frame, min=1, max=80, has_width=20, auto_pack=False, default_text=initial_label)
         entry_label.get_entry().pack(side=tk.LEFT, padx=5)
 
         description_label = ttk.Label(entry_frame, text="Description :", width=10)
         description_label.pack(side=tk.LEFT)
         entry_description = EntryManager(entry_frame, min=1, max=600, has_width=50, has_special_char=True, auto_pack=False,
-                                         default_text="Description")
+                                         default_text=initial_description)
         entry_description.get_entry().pack(side=tk.LEFT, padx=5)
 
-        # Append the sensor_type_id to the sensor_entries list along with label and description
-        self.sensor_entries.append((sensor_type_id, entry_label, entry_description))
-
+        # Ajoute l'unique_id au lieu du sensor_type_id à la liste des sensor_entries avec le label et la description
+        self.sensor_entries.append((unique_id, entry_label, entry_description))
     """!
     @brief This function saves the label and description entered by the user for each sensor into global variables 
     @param the instance

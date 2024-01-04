@@ -93,8 +93,16 @@ class Summary:
         self.sensor_text.configure(state='normal')
         self.sensor_text.delete("1.0", tk.END)
 
+        # Convert sensor_type_id to str for comparison
+        sensor_type_id_str = str(sensor_type_id)
         sensor_count = globals.sensor_counts.get(sensor_type_id, 0)
-        entries_for_type = [entry for entry in globals.global_sensor_entries if entry[0] == sensor_type_id]
+
+    # Filter entries for this sensor type
+        entries_for_type = [
+            entry for entry in globals.global_sensor_entries
+            if str(entry[0]).startswith(sensor_type_id_str)  # Ensure both are strings
+        ]
+
         if not entries_for_type:
             self.sensor_text.insert(tk.END, f"No information available for {sensor_type} sensors.\n")
         else:
@@ -144,8 +152,18 @@ class Summary:
         conn.commit()
         cursor.close()
         conn.close()
+        self.clear_sensor_entries()
 
 
+    def clear_sensor_entries(self):
+        """!
+        @brief This function clears the sensor entries after validation.
+        """
+        globals.global_sensor_entries.clear()
+        # Vous pouvez également effacer les entrées visuelles ici, si nécessaire
+        for _, label_entry, description_entry in globals.global_sensor_entries:
+            label_entry.set('')
+            description_entry.set('')
 
     def get_session(self):
         # TODO Modifier la fonction pour qu'elle retourne la session de la configuration en cours
@@ -174,4 +192,3 @@ class Summary:
     def get_sensor_status(self, id_sensor):
         # TODO Modifier la fonction pour qu'elle retourne le status d'un capteur en fonction de son id
         return "Status du capteur " + id_sensor
-
