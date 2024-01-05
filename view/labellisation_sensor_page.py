@@ -64,7 +64,7 @@ class LabelisationSensor:
                         host="localhost",
                         user="root",
                         password="",
-                        database="prismathome"
+                        database="prisme_home_1"
                     )
                     cursor = conn.cursor()
                     query = "SELECT type FROM sensor_type WHERE id_type = %s"

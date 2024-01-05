@@ -105,7 +105,7 @@ class ModifyOrCreateConfiguration:
             host="localhost",
             user="root",
             password="",
-            database="prismathome"
+            database="prisme_home_1"
         )
         cursor = conn.cursor()
 

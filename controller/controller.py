@@ -100,6 +100,7 @@ class App(ThemedTk):
     """
     def redirect_to_pairing_from_anywhere(self, page):
 
+        page.on_import_button_click()
         # Clear the previous page content
         self.clear_the_page(page)
 
