@@ -4,7 +4,7 @@ db = mysql.connector.connect(
     host="localhost",
     user="root",
     password="",
-    database="prismathome"
+    database="prisme_home_1"
 )
 
 # faire quelque chose d'utile avec la connexion

@@ -76,7 +76,7 @@ class NewObservation:
     @param the instance
     @return Nothing
     """
-    def on_button_click(self):
+    def on_import_button_click(self):
 
         # Print the chosen data
         print("User :", self.user_entry.get())
@@ -84,19 +84,20 @@ class NewObservation:
         print("Session :", self.session_entry.get())
         print("Participant :", self.participant_entry.get())
 
-
+        id_system =self.get_id_system()
+        id_conf = self.get_config_by_id(self.configuration_combobox.get())
 
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
             password="",
-            database="prismathome"
+            database="prisme_home_1"
         )
         cursor = conn.cursor()
 
         # Exécutez une requête
-        query = "INSERT INTO observation (id_observation, id_system, participant, id_config, id_session, session_label)VALUES('1', %s, %s, %s, %s, %s)"
-        cursor.execute(query, (self.participant_entry.get(), globals.global_id_config,  self.session_entry.get()))
+        query = "INSERT INTO observation (id_system, participant, id_config, id_session, session_label)VALUES(%s, %s, %s, '1', %s)"
+        cursor.execute(query, (id_system, self.participant_entry.get(),id_conf,  self.session_entry.get()))
         conn.commit()
 
     def get_config(self):
@@ -109,6 +110,48 @@ class NewObservation:
         cursor = conn.cursor()
 
         # Execute a request
-        query = "SELECT label FROM configuration "
-        cursor.execute(query,)
-        return cursor.fetchall()
+        query = "SELECT label FROM configuration"
+        cursor.execute(query)
+        # Extract the first element of each tuple to get the labels as a list of strings
+        config_labels = [row[0] for row in cursor.fetchall()]
+        cursor.close()
+        conn.close()
+        return config_labels
+
+    def get_config_by_id(self, label):
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="prisme_home_1"
+        )
+        cursor = conn.cursor()
+
+        # Execute a request
+        query = "SELECT id_config FROM configuration WHERE label=%s"
+        cursor.execute(query, (label,))  # Pass label as a tuple
+        result = cursor.fetchone()  # Fetch the first result
+        cursor.close()
+        conn.close()
+        return result[0] if result else None
+
+    def get_id_system(self):
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
+
+            # Check if 'system' is a table in your database and escape it with backticks if necessary
+            query = "SELECT id_system FROM `system`"
+            cursor.execute(query)
+            result = cursor.fetchone()  # Fetch the result
+            return result[0] if result else None
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+        finally:
+            cursor.close()
+            conn.close()
