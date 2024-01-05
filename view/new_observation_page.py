@@ -86,6 +86,7 @@ class NewObservation:
 
         id_system =self.get_id_system()
         id_conf = self.get_config_by_id(self.configuration_combobox.get())
+        id_session = self.get_id_session() + 1
 
         conn = mysql.connector.connect(
             host="localhost",
@@ -96,8 +97,8 @@ class NewObservation:
         cursor = conn.cursor()
 
         # Exécutez une requête
-        query = "INSERT INTO observation (id_system, participant, id_config, id_session, session_label)VALUES(%s, %s, %s, '1', %s)"
-        cursor.execute(query, (id_system, self.participant_entry.get(),id_conf,  self.session_entry.get()))
+        query = "INSERT INTO observation (id_system, participant, id_config, id_session, session_label)VALUES(%s, %s, %s,%s, %s)"
+        cursor.execute(query, (id_system, self.participant_entry.get(),id_conf,id_session,  self.session_entry.get()))
         conn.commit()
 
     def get_config(self):
@@ -155,3 +156,23 @@ class NewObservation:
         finally:
             cursor.close()
             conn.close()
+
+    def get_id_session(self):
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="prisme_home_1"
+        )
+        cursor = conn.cursor()
+        label = self.configuration_combobox.get()
+        id_conf = self.get_config_by_id(label)  # Ensure id_conf is set correctly
+
+        # Make sure the query includes both placeholders
+        query = "SELECT COUNT(id_session) FROM observation WHERE participant=%s AND id_config=%s"
+        cursor.execute(query, (self.participant_entry.get(), id_conf))  # Pass participant and id_conf as a tuple
+        result = cursor.fetchone()  # Fetch the first result
+        cursor.close()
+        conn.close()
+        return result[0] if result else None
+
