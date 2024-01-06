@@ -11,7 +11,8 @@ class SensorPairingManagement:
         """!
        @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
        this page
-       @param the instance, the master frame (created in the controller.py file)
+       @param self : the instance
+       @param master : the master frame (created in the controller.py file)
        @return Nothing
        """
         self.master = master
@@ -21,8 +22,8 @@ class SensorPairingManagement:
         self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
 
         # Displays the title of the page
-        self.label_page = ttk.Label(self.frame, text="Sensor pairing", font=16, padding=10)
-        self.label_page.pack(pady=20)
+        label_page = ttk.Label(self.frame, text="Sensor pairing", font=16, padding=10)
+        label_page.pack(pady=10)
 
         # Creation of a canvas in order to add a scrollbar in case to many lines of sensors are displayed
         self.canvas = tk.Canvas(self.frame, bd=2, relief="ridge", highlightthickness=2)
@@ -38,11 +39,23 @@ class SensorPairingManagement:
     def show_page(self):
         """!
         @brief The show_page function creates and displays all the elements of the "Sensor pairing" page
-        @param The instance
+        @param self : The instance
         @return Nothing
         """
 
         black_list = []
+
+        # Creation of the frame tate will contain the title of the field
+        frame_title = ttk.Frame(self.frame_canvas)
+        frame_title.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
+
+        # Create the title of the different field
+        label_sensor = ttk.Label(frame_title,text="Sensor", font=16, anchor="w", width=13)
+        label_sensor.pack(side=tk.LEFT)
+        label_label = ttk.Label(frame_title,text="Label", font=16, anchor="w", width=14)
+        label_label.pack(side=tk.LEFT)
+        label_description = ttk.Label(frame_title,text="Description", font=16, anchor="w", width=80)
+        label_description.pack(side=tk.LEFT)
 
         # Create entries for sensors
         for index, sensor in enumerate(self.get_sensors(), start=1):
@@ -70,14 +83,14 @@ class SensorPairingManagement:
         label.pack(side=tk.LEFT)
 
         # Showing the label of the sensor
-        label_label = ttk.Label(data_frame, text="Label :", width=10)
-        label_label.pack(side=tk.LEFT)
+        #label_label = ttk.Label(data_frame, text="Label :", width=10)
+        #label_label.pack(side=tk.LEFT)
         # Creating a text widget tht will contain the label associated with the sensor
         self.create_an_entry_widget(sensor["label"], data_frame, 20)
 
         # Showing the description of the sensor
-        description_label = ttk.Label(data_frame, text="\tDescription :", width=20)
-        description_label.pack(side=tk.LEFT)
+        #description_label = ttk.Label(data_frame, text="\tDescription :", width=20)
+        #description_label.pack(side=tk.LEFT)
         # Creating a text widget tht will contain the description associated with the sensor
         self.create_an_entry_widget(sensor["description"], data_frame, 80)
 
