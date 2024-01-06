@@ -20,15 +20,14 @@ class TextManager:
         """!
         @brief The __init__ function set the variable depending on the user input and create the frame that wil contain the
         entry
-        @param
-        self : the instance
-        frame : the frame in witch the text will be located
-        min : minimal number of character allowed on the text
-        min : maximal number of character allowed on the text
-        auto_pack : determine if the text has to be packed by this instance or no (by default yes)
-        has_width : determine if the text has to be of a certain width (by default no width is assigned)
-        has_height : determine if the text has to be of a certain height (by default no height is assigned)
-        default_text : the text that will be displayed when the entry is initialized
+        @param self : the instance
+        @param frame : the frame in witch the text will be located
+        @param min : minimal number of character allowed on the text
+        @param min : maximal number of character allowed on the text
+        @param auto_pack : determine if the text has to be packed by this instance or no (by default yes)
+        @param has_width : determine if the text has to be of a certain width (by default no width is assigned)
+        @param has_height : determine if the text has to be of a certain height (by default no height is assigned)
+        @param default_text : the text that will be displayed when the entry is initialized
         @return Nothing
         """
 
@@ -81,8 +80,7 @@ class TextManager:
     def create_a_text(self):
         """!
         @brief The create_an_text function creates an entry based on the values set by the __init__ function
-        @param
-        self : the instance
+        @param self : the instance
         @return Nothing
         """
         # Creation of the text widget
@@ -118,9 +116,8 @@ class TextManager:
         """!
        @brief This function detects when the user exit the entry and set the focus variable to False and call the
        on_text_change function to check if the event is allowed
-       @param
-       self : the instance
-       event : the focus out event
+       @param self : the instance
+       @param event : the focus out event
        @return Nothing
        """
         self.focus = False
@@ -129,9 +126,8 @@ class TextManager:
     def on_text_focus_in(self, event):
         """!
         @brief This function detects when the user curser is in the entry and set the focus variable to True
-        @param
-        self : the instance
-        event : the focus in event
+        @param self : the instance
+        @param event : the focus in event
         @return Nothing
         """
         self.focus = True
@@ -139,8 +135,7 @@ class TextManager:
     def get(self):
         """!
         @brief This function returns the text value
-        @param
-        self : the instance
+        @param self : the instance
         @return The entry value
         """
         return self.text.get("1.0", "end-1c")
@@ -149,7 +144,7 @@ class TextManager:
         """!
         @brief The on_event checks that the number of characters is inside the limits define by the user or the default
         values
-        self : the instance
+        @param self : the instance
         @return Nothing
         """
         current_text = self.text.get("1.0", "end-1c")

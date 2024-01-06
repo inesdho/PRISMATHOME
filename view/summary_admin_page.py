@@ -17,7 +17,8 @@ class SummaryAdmin:
         """!
         @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
         this page
-        @param the instance, the master frame (created in the controller.py file)
+        @param self : the instance
+        @param master : the master frame (created in the controller.py file)
         @return Nothing
         """
         self.master = master
@@ -26,7 +27,8 @@ class SummaryAdmin:
     def show_page(self):
         """!
         @brief The show_page function creates and displays all the elements of the "summary" page
-        @param the instance, is_observation -> True if the page is to be displayed in the context of an observation
+        @param self : the instance
+        @param is_observation : True if the page is to be displayed in the context of an observation
         @return Nothing
         """
         # Frame that will contain the title of the page and the data about the observation
@@ -105,7 +107,7 @@ class SummaryAdmin:
     def clear_page(self):
         """!
         @brief This functions clears the entire "new observation" page
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
         self.frame.destroy()
@@ -113,7 +115,7 @@ class SummaryAdmin:
     def validate_conf(self):
         """!
         @brief This functions validated all the infos relative to the current created configuration in order to save them
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
         # Connect to the database

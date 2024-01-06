@@ -20,16 +20,15 @@ class EntryManager:
         """!
         @brief The __init__ function set the variable depending on the user input and create the frame that wil contain the
         entry
-        @param
-        self : the instance
-        frame : the frame in witch the entry will be located
-        min : minimal number of character allowed on the entry
-        min : maximal number of character allowed on the entry
-        is_password : determine if the entry is to be considered a password entry (by dfault not)
-        auto_pack : determine if the entry has to be packed by this instance or no (by default yes)
-        has_width : determine if the entry has to be of a certain width (by default no value is set)
-        has_special_char : determine if the entry can allow special character or not (by dfault not)
-        default_text : the text that will be displayed when the entry is initialized
+        @param self : the instance
+        @param frame : the frame in witch the entry will be located
+        @param min : minimal number of character allowed on the entry
+        @param max : maximal number of character allowed on the entry
+        @param is_password : determine if the entry is to be considered a password entry (by dfault not)
+        @param auto_pack : determine if the entry has to be packed by this instance or no (by default yes)
+        @param has_width : determine if the entry has to be of a certain width (by default no value is set)
+        @param has_special_char : determine if the entry can allow special character or not (by dfault not)
+        @param default_text : the text that will be displayed when the entry is initialized
         @return Nothing
         """
 
@@ -87,8 +86,7 @@ class EntryManager:
     def create_an_entry(self):
         """!
         @brief The create_an_entry function creates an entry based on the values set by the __init__ function
-        @param
-        self : the instance
+        @param self : the instance
         @return Nothing
         """
         # Creation of a variable that will hold the value of the entry and can be modified by the code
@@ -125,9 +123,8 @@ class EntryManager:
     def which_key(self, event):
         """!
         @brief This function saves the key pressing event into a variable
-        @param
-        self : the instance
-        event : the key pressing event
+        @param self : the instance
+        @param event : the key pressing event
         @return Nothing
         """
         self.key = event
@@ -136,9 +133,8 @@ class EntryManager:
         """!
         @brief This function detects when the user exit the entry and set the focus variable to False and call the
         on_entry_change function to check if the event is allowed
-        @param
-        self : the instance
-        event : the focus out event
+        @param self : the instance
+        @param event : the focus out event
         @return Nothing
         """
         self.focus = False
@@ -147,9 +143,8 @@ class EntryManager:
     def on_entry_focus_in(self, event):
         """!
         @brief This function detects when the user curser is in the entry and set the focus variable to True
-        @param
-        self : the instance
-        event : the focus in event
+        @param self : the instance
+        @param event : the focus in event
         @return Nothing
         """
         self.focus = True
@@ -157,8 +152,7 @@ class EntryManager:
     def check_entry(self):
         """!
         @brief This function checks if the key pressed is authorized or not
-        @param
-        self : the instance
+        @param self : the instance
         @return A char if it is allowed
         """
         # Checked if the char meets the requirements
@@ -168,8 +162,7 @@ class EntryManager:
     def get(self):
         """!
         @brief This function returns the entry value
-        @param
-        self : the instance
+        @param self : the instance
         @return The entry value
         """
         return self.entry.get()
@@ -177,8 +170,7 @@ class EntryManager:
     def get_entry(self):
         """!
         @brief This function returns the entry widget
-        @param
-        self : the instance
+        @param self : the instance
         @return The entry widget itself
         """
         return self.entry
@@ -188,8 +180,7 @@ class EntryManager:
         @brief This function checks for each events if the length of the char chain is sufficient or too much.
         If the length is not sufficient a message is displayed and the user is obliged to fill the entry before their curser
         leave, if the length is too much no more characters can be added.
-        @param
-        self : the instance
+        @param self : the instance
         @return The entry value
         """
         entry_text = self.entry.get()

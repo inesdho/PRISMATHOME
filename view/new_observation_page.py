@@ -19,7 +19,8 @@ class NewObservation:
         """!
         @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
         this page
-        @param the instance, the master frame (created in the controller.py file)
+        @param self : the instance
+        @param master : the master frame (created in the controller.py file)
         @return Nothing
         """
         self.master = master
@@ -28,7 +29,7 @@ class NewObservation:
     def show_page(self):
         """!
         @brief The show_page function creates and displays all the elements of the "new_observation" page
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
         # Main frame of the new observation window
@@ -66,7 +67,7 @@ class NewObservation:
     def clear_page(self):
         """!
         @brief This functions clears the entire "new observation" page
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
         self.frame.destroy()
@@ -74,7 +75,7 @@ class NewObservation:
     def on_import_button_click(self):
         """!
         @brief This functions collects all the datas entered by the user
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
 

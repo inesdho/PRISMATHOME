@@ -29,7 +29,7 @@ class App(ThemedTk):
         """!
         @brief The __init__ function creates and set the theme and parameter of the window that will contain the pages of the
         user interface
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
         ThemedTk.__init__(self)
@@ -46,7 +46,7 @@ class App(ThemedTk):
     def show_frame(self):
         """!
         @brief The show_frame function allows the creation of the main frame and call the new observation page
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
 
@@ -61,7 +61,7 @@ class App(ThemedTk):
         """!
         @brief This function initialises and calls new_observation_page.py in order to show the page and also adds
         navigation button
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
         # Redirecting to the login page
@@ -80,7 +80,8 @@ class App(ThemedTk):
     def redirect_to_new_observation_from_anywhere(self, page):
         """!
         @brief This function clears the previous page before calling the new observation page
-        @param the instance, the previous page
+        @param self : the instance
+        @param page : the previous page
         @return Nothing
         """
 
@@ -96,7 +97,8 @@ class App(ThemedTk):
         """!
         @brief This function clears the previous page in order to display the content of the pairing page and adds navigation
         buttons to the page
-        @param the instance, the previous page
+        @param self : the instance
+        @param new_observation_page : the previous page
         @return Nothing
         """
 
@@ -126,7 +128,8 @@ class App(ThemedTk):
         """!
         @brief This function clears the previous page in order to display the content of the pairing page and adds navigation
         buttons to the page
-        @param the instance, the previous page
+        @param self : the instance
+        @param user_summary_page : the previous page
         @return Nothing
         """
 
@@ -156,7 +159,8 @@ class App(ThemedTk):
         """!
         @brief This function clears the new observation page in order to display the content of the the login as admin page
         and adds navigations buttons to the page
-        @param the instance, the previous page
+        @param the instance
+        @param page : the previous page
         @return Nothing
         """
 
@@ -183,7 +187,8 @@ class App(ThemedTk):
         """!
         @brief This function calls the connexion_admin function located in the "login as admin page" in order to check if
         the login and password entered by the user are correct
-        @param the instance, the login as admin page
+        @param self : the instance
+        @param login_as_admin_page : the login as admin page
         @return Nothing
         """
 
@@ -197,7 +202,8 @@ class App(ThemedTk):
         """!
         @brief This function clears the previous page in order to display the content of the "modify or create a
         configuration page" and adds navigations buttons
-        @param the instance, the previous page
+        @param self : the instance
+        @param page : the previous page
         @return Nothing
         """
 
@@ -234,7 +240,8 @@ class App(ThemedTk):
         """!
         @brief This function calls the function located in summary admin that will save the config into the database and
         then calls the function that display the modify or create a configuration page
-        @param the instance, the summary admin page
+        @param self : the instance
+        @param summary_admin_page : the summary admin page
         @return Nothing
         """
 
@@ -248,7 +255,8 @@ class App(ThemedTk):
         """!
         @brief This function clears the previous page in order to display the content of the "selection sensor quantity" and
         adds navigations buttons. It also create a nex configuration in the database
-        @param the instance, the create or modify a configuration page
+        @param self: the instance
+        @param create_a_config_page : the create or modify a configuration page
         @return Nothing
         """
 
@@ -280,7 +288,8 @@ class App(ThemedTk):
         """!
         @brief This function clears the previous page in order to display the content of the "selection sensor quantity"
         page and adds navigations buttons.
-        @param the instance, the previous page
+        @param self : the instance
+        @param page : the previous page
         @return Nothing
         """
 
@@ -309,7 +318,8 @@ class App(ThemedTk):
         """!
         @brief This checks if the user selected at least one sensor before they are redirected to the labellisation page.
         If no sensor was selected, an error message is displayed and the usr can't access to the next page.
-        @param the instance, the selection_sensor_quantity_page
+        @param self : the instance
+        @param selection_sensor_quantity_page : the selection_sensor_quantity_page
         @return Nothing
         """
         if selection_sensor_quantity_page.chose_at_least_one_sensor():
@@ -324,7 +334,8 @@ class App(ThemedTk):
         @brief This function clears the previous page in order to display the content of the "labellisation sensor"
         page and adds navigations buttons. It also allows to save into global variables the data entered by the user in the
         previous page
-        @param the instance, the selection sensor quantity page
+        @param self : the instance
+        @param selection_sensor_quantity_page : the selection sensor quantity page
         @return Nothing
         """
 
@@ -356,7 +367,8 @@ class App(ThemedTk):
         """!
         @brief This function clears the previous page in order to display the content of the "labellisation sensor"
         page and adds navigations buttons.
-        @param the instance, the summary admin page
+        @param self : the instance
+        @param summary_admin_page : the summary admin page
         @return Nothing
         """
 
@@ -385,7 +397,8 @@ class App(ThemedTk):
         @brief This function clears the previous page in order to display the content of the "summary admin"
         page and adds navigations buttons. It also saves the data in the "labellisation" page
         entered by the user into global variables
-        @param the instance, the labellisation page
+        @param self : the instance
+        @param labellisation_sensor_page : the labellisation page
         @return Nothing
         """
 
@@ -423,7 +436,8 @@ class App(ThemedTk):
         """!
         @brief This function clears the previous page in order to display the content of the "summary user"
         page and adds navigations buttons.
-        @param the instance, the pairing page
+        @param self : the instance
+        @param page : the previous page
         @return Nothing
         """
 
@@ -457,7 +471,8 @@ class App(ThemedTk):
         """!
         @brief This function clears the previous page in order to display the content of the "summary obsevation"
         page and adds navigations buttons.
-        @param the instance, the pairing page
+        @param self : the instance
+        @param summary_user_page : the summary user page
         @return Nothing
         """
 
@@ -485,7 +500,8 @@ class App(ThemedTk):
         """!
         @brief This function calls the clear page function associated with each page and destroy the main frame in order to
         have a clean screen to add new elements
-        @param the instance, the page that need to be cleaned
+        @param self : the instance
+        @param page : the page that need to be cleared
         @return Nothing
         """
         # Clear the previous page content and the main frame in order to be sure that there is nothing left
@@ -495,7 +511,7 @@ class App(ThemedTk):
     def create_new_main_frame(self):
         """!
         @brief This function creates a new empty frame that will contain the elements of a new page
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
         # Creation of a main frame

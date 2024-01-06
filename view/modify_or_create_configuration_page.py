@@ -23,7 +23,8 @@ class ModifyOrCreateConfiguration:
         """!
         @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
         this page
-        @param the instance, the master frame (created in the controller.py file)
+        @param self : the instance
+        @param master : the master frame (created in the controller.py file)
         @return Nothing
         """
         self.master = master
@@ -32,7 +33,7 @@ class ModifyOrCreateConfiguration:
     def show_page(self):
         """!
         @brief The show_page function creates and displays all the elements of the "create or modify a configuration" page
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
         self.frame = ttk.Frame(self.master)
@@ -71,7 +72,7 @@ class ModifyOrCreateConfiguration:
         """!
         @brief This fuctions is called when the user clicks on a button to create a new configuration and saves the label of
         the new configuration and it's description into global variables
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
 
@@ -93,7 +94,8 @@ class ModifyOrCreateConfiguration:
         """!
         @brief This fuctions is called when the user clicks on a button to modify a configuration and fetch said
         configuration in the database
-        @param the instance, id_ser -> the id of the user wanting to modify the configuration
+        @param self : the instance
+        @param id_ser : the id of the user wanting to modify the configuration
         @return Nothing
         """
 
@@ -125,7 +127,7 @@ class ModifyOrCreateConfiguration:
     def clear_page(self):
         """!
         @brief This functions clears the entire "new observation" page
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
         # Destroy the frame

@@ -16,7 +16,8 @@ class LabelisationSensor:
         """!
         @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
         this page
-        @param the instance, the master frame (created in the controller.py file)
+        @param self : the instance
+        @param master : the master frame (created in the controller.py file)
         @return Nothing
         """
         self.master = master
@@ -42,7 +43,7 @@ class LabelisationSensor:
     def show_page(self):
         """!
         @brief The show_page function creates and displays all the elements of the "labellisation sensor" page
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
 
@@ -97,24 +98,26 @@ class LabelisationSensor:
         """!
         @brief This function creates label entries according to the sensor quantity of each type selected by the user in the
         selection sensor quantity page. The user can then enter the label and descrition to attribute to each sensor
-        @param the instance, label_text -> the label of the sensor, sensor_type_id
+        @param self : the instance
+        @param label_text : the label of the sensor, sensor_type_id
         @return Nothing
         """
         entry_frame = ttk.Frame(self.frame_canvas)
-        entry_frame.pack(fill=tk.X)
+        entry_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
+
         label = ttk.Label(entry_frame, text=label_text, width=20)
-        label.pack(side=tk.LEFT, padx=5)
+        label.pack(side=tk.LEFT)
 
         label_label = ttk.Label(entry_frame, text="Label :", width=10)
         label_label.pack(side=tk.LEFT)
         entry_label = EntryManager(entry_frame, min=1, max=80, has_width=20, auto_pack=False, default_text=initial_label)
-        entry_label.get_entry().pack(side=tk.LEFT, padx=5)
+        entry_label.get_entry().pack(side=tk.LEFT)
 
         description_label = ttk.Label(entry_frame, text="Description :", width=15)
-        description_label.pack(side=tk.LEFT, padx=5)
+        description_label.pack(side=tk.LEFT)
         entry_description = EntryManager(entry_frame, min=1, max=600, has_width=80, has_special_char=True, auto_pack=False,
                                          default_text=initial_description)
-        entry_description.get_entry().pack(side=tk.LEFT, padx=5)
+        entry_description.get_entry().pack(side=tk.LEFT)
 
         # Add the unique_id instead of sensor_type_id to the list of sensor_entries with the label and description
         self.sensor_entries.append((unique_id, entry_label, entry_description))

@@ -17,7 +17,8 @@ class QuantitySensor:
         """!
         @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
         this page
-        @param the instance, the master frame (created in the controller.py file)
+        @param self : the instance
+        @param master : the master frame (created in the controller.py file)
         @return Nothing
         """
         self.master = master
@@ -26,7 +27,7 @@ class QuantitySensor:
     def fetch_sensor_types(self):
         """!
         @brief This functions connects to the database and fetch all the existing sensor type
-        @param the instance
+        @param self : the instance
         @return all the sensors type in the database
         """
 
@@ -46,7 +47,7 @@ class QuantitySensor:
     def show_page(self):
         """!
         @brief The show_page function creates and displays all the elements of the "selection sensor quantity" page
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
 
@@ -80,7 +81,7 @@ class QuantitySensor:
     def clear_page(self):
         """!
         @brief This functions clears the entire "new observation" page
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
         self.frame.destroy()
@@ -90,7 +91,7 @@ class QuantitySensor:
         """!
         @brief This function saves the quantity of sensors for each type of sensor that the user selected into global
         variables
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
         globals.sensor_counts.clear()
@@ -107,7 +108,7 @@ class QuantitySensor:
     def chose_at_least_one_sensor(self):
         """!
         @brief This function checks if the users has selected at least one sensor
-        @param the instance
+        @param self : the instance
         @return true : if the user selected at least one sensor, false : if no sensor was selected
         """
         for sensor_type, sensor_var in self.sensor_vars.items():

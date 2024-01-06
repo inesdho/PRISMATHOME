@@ -18,7 +18,8 @@ class LoginAsAdministrator:
         """!
         @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
         this page
-        @param the instance, the master frame (created in the controller.py file)
+        @param self : the instance
+        @param master : the master frame (created in the controller.py file)
         @return Nothing
         """
         self.master = master
@@ -27,7 +28,7 @@ class LoginAsAdministrator:
     def show_page(self):
         """!
         @brief The show_page function creates and displays all the elements of the "login_as_admin" page
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
         self.frame = ttk.Frame(self.master)
@@ -53,7 +54,7 @@ class LoginAsAdministrator:
     def clear_page(self):
         """!
         @brief This functions clears the entire "new observation" page
-        @param the instance
+        @param self : the instance
         @return Nothing
         """
         # Destroy the frame
@@ -64,7 +65,7 @@ class LoginAsAdministrator:
         """!
         @brief This functions collects the login and the password entered by the user and checks if they are correct.
         This function displays message according to the result of the connexion test
-        @param the instance
+        @param self : the instance
         @return the boolean connexion_allowed that will return true if the connexion is allowed else false
         """
         username = self.login_entry.get()
