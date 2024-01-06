@@ -25,13 +25,13 @@ import webbrowser
 
 class App(ThemedTk):
 
-    """!
-    @brief The __init__ function creates and set the theme and parameter of the window that will contain the pages of the
-    user interface
-    @param the instance
-    @return Nothing
-    """
     def __init__(self):
+        """!
+        @brief The __init__ function creates and set the theme and parameter of the window that will contain the pages of the
+        user interface
+        @param the instance
+        @return Nothing
+        """
         ThemedTk.__init__(self)
         self.title("PRISM@Home")
         self.attributes('-fullscreen', True)
@@ -43,12 +43,12 @@ class App(ThemedTk):
 
         self.show_frame()
 
-    """!
-    @brief The show_frame function allows the creation of the main frame and call the new observation page
-    @param the instance
-    @return Nothing
-    """
     def show_frame(self):
+        """!
+        @brief The show_frame function allows the creation of the main frame and call the new observation page
+        @param the instance
+        @return Nothing
+        """
 
         # Creating main frame
         self.main_frame = ttk.Frame(self)
@@ -57,13 +57,13 @@ class App(ThemedTk):
         # Call the New observation window in order to
         self.call_new_observation_page()
 
-    """!
-    @brief This function initialises and calls new_observation_page.py in order to show the page and also adds 
-    navigation button
-    @param the instance 
-    @return Nothing
-    """
     def call_new_observation_page(self):
+        """!
+        @brief This function initialises and calls new_observation_page.py in order to show the page and also adds
+        navigation button
+        @param the instance
+        @return Nothing
+        """
         # Redirecting to the login page
         new_observation_page = NewObservation(self)
         new_observation_page.show_page()
@@ -75,14 +75,14 @@ class App(ThemedTk):
 
         # Redirection to login as an admin button
         ttk.Button(new_observation_page.frame, text="Import configuration",
-                   command=lambda: self.redirect_to_pairing_from_anywhere(new_observation_page)).pack()
+                   command=lambda: self.redirect_to_pairing_from_new_observation(new_observation_page)).pack()
 
-    """!
-    @brief This function clears the previous page before calling the new observation page
-    @param the instance, the previous page
-    @return Nothing
-    """
     def redirect_to_new_observation_from_anywhere(self, page):
+        """!
+        @brief This function clears the previous page before calling the new observation page
+        @param the instance, the previous page
+        @return Nothing
+        """
 
         # Clear the previous page content
         self.clear_the_page(page)
@@ -92,17 +92,17 @@ class App(ThemedTk):
 
         self.call_new_observation_page()
 
-    """!
-    @brief This function clears the previous page in order to display the content of the pairing page and adds navigation
-    buttons to the page
-    @param the instance, the previous page
-    @return Nothing
-    """
-    def redirect_to_pairing_from_anywhere(self, page):
+    def redirect_to_pairing_from_new_observation(self, new_observation_page):
+        """!
+        @brief This function clears the previous page in order to display the content of the pairing page and adds navigation
+        buttons to the page
+        @param the instance, the previous page
+        @return Nothing
+        """
 
-        page.on_import_button_click()
+        new_observation_page.on_import_button_click()
         # Clear the previous page content
-        self.clear_the_page(page)
+        self.clear_the_page(new_observation_page)
 
         # Calling the sensor pairing page
         sensor_pairing_page = SensorPairingManagement(self)
@@ -121,13 +121,44 @@ class App(ThemedTk):
                                  command=lambda: self.redirect_to_summary_user_from_anywhere(sensor_pairing_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
-    """!
-    @brief This function clears the new observation page in order to display the content of the the login as admin page 
-    and adds navigations buttons to the page
-    @param the instance, the previous page
-    @return Nothing
-    """
+
+    def redirect_to_pairing_from_user_summary(self, user_summary_page):
+        """!
+        @brief This function clears the previous page in order to display the content of the pairing page and adds navigation
+        buttons to the page
+        @param the instance, the previous page
+        @return Nothing
+        """
+
+        # Clear the previous page content
+        self.clear_the_page(user_summary_page)
+
+        # Calling the sensor pairing page
+        sensor_pairing_page = SensorPairingManagement(self)
+        sensor_pairing_page.show_page()
+
+        # Creation of a main frame
+        self.create_new_main_frame()
+
+        # Back button
+        back_button = ttk.Button(self.main_frame, text="Back",
+                                 command=lambda: self.redirect_to_new_observation_from_anywhere(sensor_pairing_page))
+        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        # Redirection to summary to confirm the configuration
+        next_button = ttk.Button(self.main_frame, text="Next",
+                                 command=lambda: self.redirect_to_summary_user_from_anywhere(sensor_pairing_page))
+        next_button.pack(side=tk.RIGHT, padx=10, expand=True)
+
+
+
     def redirect_to_login_as_admin_from_anywhere(self, page):
+        """!
+        @brief This function clears the new observation page in order to display the content of the the login as admin page
+        and adds navigations buttons to the page
+        @param the instance, the previous page
+        @return Nothing
+        """
 
         # Clear the previous page content
         self.clear_the_page(page)
@@ -148,13 +179,13 @@ class App(ThemedTk):
                    command=lambda: self.redirect_to_new_observation_from_anywhere(login_as_admin_page)).place(
             relx=0.9,rely=0.1)
 
-    """!
-    @brief This function calls the connexion_admin function located in the "login as admin page" in order to check if 
-    the login and password entered by the user are correct
-    @param the instance, the login as admin page
-    @return Nothing
-    """
     def connexion_button_clic(self, login_as_admin_page):
+        """!
+        @brief This function calls the connexion_admin function located in the "login as admin page" in order to check if
+        the login and password entered by the user are correct
+        @param the instance, the login as admin page
+        @return Nothing
+        """
 
         # Checking if the login and password are correct
         if login_as_admin_page.connexion_admin():
@@ -162,13 +193,13 @@ class App(ThemedTk):
             self.redirect_to_modify_or_create_configuration_from_anywhere(login_as_admin_page)
 
 
-    """!
-    @brief This function clears the previous page in order to display the content of the "modify or create a 
-    configuration page" and adds navigations buttons
-    @param the instance, the previous page
-    @return Nothing
-    """
     def redirect_to_modify_or_create_configuration_from_anywhere(self, page):
+        """!
+        @brief This function clears the previous page in order to display the content of the "modify or create a
+        configuration page" and adds navigations buttons
+        @param the instance, the previous page
+        @return Nothing
+        """
 
         # Clear the previous page content
         self.clear_the_page(page)
@@ -199,13 +230,13 @@ class App(ThemedTk):
                                        modify_or_create_configuration_page))
         create_button.pack(side="bottom", fill="x")
 
-    """!
-    @brief This function calls the function located in summary admin that will save the config into the database and 
-    then calls the function that display the modify or create a configuration page
-    @param the instance, the summary admin page
-    @return Nothing
-    """
     def redirect_to_modify_or_create_configuration_after_config_validation(self, summary_admin_page):
+        """!
+        @brief This function calls the function located in summary admin that will save the config into the database and
+        then calls the function that display the modify or create a configuration page
+        @param the instance, the summary admin page
+        @return Nothing
+        """
 
         # Log the data into the database
         summary_admin_page.validate_conf()
@@ -213,13 +244,13 @@ class App(ThemedTk):
         # Go back to the "modify or create a configuration page"
         self.redirect_to_modify_or_create_configuration_from_anywhere(summary_admin_page)
 
-    """!
-    @brief This function clears the previous page in order to display the content of the "selection sensor quantity" and
-    adds navigations buttons. It also create a nex configuration in the database
-    @param the instance, the create or modify a configuration page
-    @return Nothing
-    """
     def redirect_to_selection_sensor_quantity_from_create_a_config(self, create_a_config_page):
+        """!
+        @brief This function clears the previous page in order to display the content of the "selection sensor quantity" and
+        adds navigations buttons. It also create a nex configuration in the database
+        @param the instance, the create or modify a configuration page
+        @return Nothing
+        """
 
         # Create a new configuration in the database
         create_a_config_page.on_create_configuration_button_click()
@@ -245,13 +276,13 @@ class App(ThemedTk):
                                      selction_sensor_quantity_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
-    """!
-    @brief This function clears the previous page in order to display the content of the "selection sensor quantity" 
-    page and adds navigations buttons.
-    @param the instance, the previous page
-    @return Nothing
-    """
     def redirect_to_selection_sensor_quantity_from_anywhere(self, page):
+        """!
+        @brief This function clears the previous page in order to display the content of the "selection sensor quantity"
+        page and adds navigations buttons.
+        @param the instance, the previous page
+        @return Nothing
+        """
 
         # Clear the previous page content
         self.clear_the_page(page)
@@ -274,13 +305,13 @@ class App(ThemedTk):
                                      selection_sensor_quantity_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
-    """!
-    @brief This checks if the user selected at least one sensor before they are redirected to the labellisation page.
-    If no sensor was selected, an error message is displayed and the usr can't access to the next page.
-    @param the instance, the selection_sensor_quantity_page
-    @return Nothing
-    """
     def check_if_user_chose_at_least_one_sensor(self, selection_sensor_quantity_page):
+        """!
+        @brief This checks if the user selected at least one sensor before they are redirected to the labellisation page.
+        If no sensor was selected, an error message is displayed and the usr can't access to the next page.
+        @param the instance, the selection_sensor_quantity_page
+        @return Nothing
+        """
         if selection_sensor_quantity_page.chose_at_least_one_sensor():
             self.redirect_to_labellisation_sensor_from_sensor_quantity(selection_sensor_quantity_page)
         else:
@@ -288,14 +319,14 @@ class App(ThemedTk):
 
 
 
-    """!
-    @brief This function clears the previous page in order to display the content of the "labellisation sensor" 
-    page and adds navigations buttons. It also allows to save into global variables the data entered by the user in the
-    previous page
-    @param the instance, the selection sensor quantity page
-    @return Nothing
-    """
     def redirect_to_labellisation_sensor_from_sensor_quantity(self, selection_sensor_quantity_page):
+        """!
+        @brief This function clears the previous page in order to display the content of the "labellisation sensor"
+        page and adds navigations buttons. It also allows to save into global variables the data entered by the user in the
+        previous page
+        @param the instance, the selection sensor quantity page
+        @return Nothing
+        """
 
         # Calls this function in order to store into global variables the datas entered by the user in the sensor
         # quantity page
@@ -321,13 +352,13 @@ class App(ThemedTk):
                                  command=lambda: self.redirect_to_summary_admin_from_labellisation(labellisation_sensor_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
-    """!
-    @brief This function clears the previous page in order to display the content of the "labellisation sensor" 
-    page and adds navigations buttons. 
-    @param the instance, the summary admin page
-    @return Nothing
-    """
     def redirect_to_labellisation_sensor_from_summary_admin(self, summary_admin_page):
+        """!
+        @brief This function clears the previous page in order to display the content of the "labellisation sensor"
+        page and adds navigations buttons.
+        @param the instance, the summary admin page
+        @return Nothing
+        """
 
         # Clear the previous page content
         self.clear_the_page(summary_admin_page)
@@ -349,14 +380,14 @@ class App(ThemedTk):
                                  command=lambda: self.redirect_to_summary_admin_from_labellisation(labellisation_sensor_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
-    """!
-    @brief This function clears the previous page in order to display the content of the "summary admin" 
-    page and adds navigations buttons. It also saves the data in the "labellisation" page
-    entered by the user into global variables
-    @param the instance, the labellisation page
-    @return Nothing
-    """
     def redirect_to_summary_admin_from_labellisation(self, labellisation_sensor_page):
+        """!
+        @brief This function clears the previous page in order to display the content of the "summary admin"
+        page and adds navigations buttons. It also saves the data in the "labellisation" page
+        entered by the user into global variables
+        @param the instance, the labellisation page
+        @return Nothing
+        """
 
         # Saves the data entered by the user in the labellisation page into global variables
         labellisation_sensor_page.get_sensor_data()
@@ -388,13 +419,13 @@ class App(ThemedTk):
                                      (summary_admin_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
-    """!
-    @brief This function clears the previous page in order to display the content of the "summary user" 
-    page and adds navigations buttons.
-    @param the instance, the pairing page
-    @return Nothing
-    """
     def redirect_to_summary_user_from_anywhere(self, page):
+        """!
+        @brief This function clears the previous page in order to display the content of the "summary user"
+        page and adds navigations buttons.
+        @param the instance, the pairing page
+        @return Nothing
+        """
 
         # Clear the previous page content
         self.clear_the_page(page)
@@ -413,7 +444,7 @@ class App(ThemedTk):
 
         # Back button
         back_button = ttk.Button(self.main_frame, text="Back",
-                                 command=lambda: self.redirect_to_pairing_from_anywhere(summary_user_page))
+                                 command=lambda: self.redirect_to_pairing_from_user_summary(summary_user_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Start observation button
@@ -422,13 +453,13 @@ class App(ThemedTk):
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
 
-    """!
-    @brief This function clears the previous page in order to display the content of the "summary obsevation" 
-    page and adds navigations buttons.
-    @param the instance, the pairing page
-    @return Nothing
-    """
     def redirect_to_summary_observation_from_summary_user(self, summary_user_page):
+        """!
+        @brief This function clears the previous page in order to display the content of the "summary obsevation"
+        page and adds navigations buttons.
+        @param the instance, the pairing page
+        @return Nothing
+        """
 
         # Clear the previous page content
         self.clear_the_page(summary_user_page)
@@ -450,23 +481,23 @@ class App(ThemedTk):
                                  command=lambda: self.redirect_to_summary_user_from_anywhere(summary_observation_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
-    """!
-    @brief This function calls the clear page function associated with each page and destroy the main frame in order to
-    have a clean screen to add new elements
-    @param the instance, the page that need to be cleaned
-    @return Nothing
-    """
     def clear_the_page(self, page):
+        """!
+        @brief This function calls the clear page function associated with each page and destroy the main frame in order to
+        have a clean screen to add new elements
+        @param the instance, the page that need to be cleaned
+        @return Nothing
+        """
         # Clear the previous page content and the main frame in order to be sure that there is nothing left
         page.clear_page()
         self.main_frame.destroy()
 
-    """!
-    @brief This function creates a new empty frame that will contain the elements of a new page
-    @param the instance
-    @return Nothing
-    """
     def create_new_main_frame(self):
+        """!
+        @brief This function creates a new empty frame that will contain the elements of a new page
+        @param the instance
+        @return Nothing
+        """
         # Creation of a main frame
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True)

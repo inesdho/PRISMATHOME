@@ -15,22 +15,22 @@ from controller.entry_manager import EntryManager
 
 
 class NewObservation:
-    """!
-    @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
-    this page
-    @param the instance, the master frame (created in the controller.py file)
-    @return Nothing
-    """
     def __init__(self, master):
+        """!
+        @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
+        this page
+        @param the instance, the master frame (created in the controller.py file)
+        @return Nothing
+        """
         self.master = master
         self.frame = ttk.Frame(self.master)
 
-    """!
-    @brief The show_page function creates and displays all the elements of the "new_observation" page
-    @param the instance
-    @return Nothing
-    """
     def show_page(self):
+        """!
+        @brief The show_page function creates and displays all the elements of the "new_observation" page
+        @param the instance
+        @return Nothing
+        """
         # Main frame of the new observation window
         self.frame = ttk.Frame(self.master)
         self.frame.pack(fill=tk.BOTH, expand=True)
@@ -63,20 +63,20 @@ class NewObservation:
         participant_label.pack()
         self.participant_entry = EntryManager(self.frame, min=1, max=70, has_width=30, default_text="Participant")
 
-    """!
-    @brief This functions clears the entire "new observation" page
-    @param the instance
-    @return Nothing
-    """
     def clear_page(self):
+        """!
+        @brief This functions clears the entire "new observation" page
+        @param the instance
+        @return Nothing
+        """
         self.frame.destroy()
 
-    """!
-    @brief This functions collects all the datas entered by the user
-    @param the instance
-    @return Nothing
-    """
     def on_import_button_click(self):
+        """!
+        @brief This functions collects all the datas entered by the user
+        @param the instance
+        @return Nothing
+        """
 
         # Print the chosen data
         print("User :", self.user_entry.get())
@@ -91,7 +91,7 @@ class NewObservation:
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="",
+            password="Q3fhllj2",
             database="prisme_home_1"
         )
         cursor = conn.cursor()
@@ -105,7 +105,7 @@ class NewObservation:
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="",
+            password="Q3fhllj2",
             database="prisme_home_1"
         )
         cursor = conn.cursor()
@@ -123,7 +123,7 @@ class NewObservation:
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="",
+            password="Q3fhllj2",
             database="prisme_home_1"
         )
         cursor = conn.cursor()
@@ -141,7 +141,7 @@ class NewObservation:
             conn = mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password="",
+                password="Q3fhllj2",
                 database="prisme_home_1"
             )
             cursor = conn.cursor()
@@ -161,7 +161,7 @@ class NewObservation:
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="",
+            password="Q3fhllj2",
             database="prisme_home_1"
         )
         cursor = conn.cursor()

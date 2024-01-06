@@ -15,23 +15,23 @@ NB_MIN_CHAR = 0
 NB_MAX_CHAR = 100
 
 class EntryManager:
-    """!
-    @brief The __init__ function set the variable depending on the user input and create the frame that wil contain the
-    entry
-    @param
-    self : the instance
-    frame : the frame in witch the entry will be located
-    min : minimal number of character allowed on the entry
-    min : maximal number of character allowed on the entry
-    is_password : determine if the entry is to be considered a password entry (by dfault not)
-    auto_pack : determine if the entry has to be packed by this instance or no (by default yes)
-    has_width : determine if the entry has to be of a certain width (by default no value is set)
-    has_special_char : determine if the entry can allow special character or not (by dfault not)
-    default_text : the text that will be displayed when the entry is initialized
-    @return Nothing
-    """
     def __init__(self, frame, min=NB_MIN_CHAR, max=NB_MAX_CHAR, is_password=None, auto_pack=None, has_width=None,
                  has_special_char=None, default_text=None):
+        """!
+        @brief The __init__ function set the variable depending on the user input and create the frame that wil contain the
+        entry
+        @param
+        self : the instance
+        frame : the frame in witch the entry will be located
+        min : minimal number of character allowed on the entry
+        min : maximal number of character allowed on the entry
+        is_password : determine if the entry is to be considered a password entry (by dfault not)
+        auto_pack : determine if the entry has to be packed by this instance or no (by default yes)
+        has_width : determine if the entry has to be of a certain width (by default no value is set)
+        has_special_char : determine if the entry can allow special character or not (by dfault not)
+        default_text : the text that will be displayed when the entry is initialized
+        @return Nothing
+        """
 
         # Saving the frame in which the entry will be created
         self.frame = frame
@@ -84,13 +84,13 @@ class EntryManager:
         # Start the creation of the entry
         self.create_an_entry()
 
-    """!
-    @brief The create_an_entry function creates an entry based on the values set by the __init__ function
-    @param 
-    self : the instance
-    @return Nothing
-    """
     def create_an_entry(self):
+        """!
+        @brief The create_an_entry function creates an entry based on the values set by the __init__ function
+        @param
+        self : the instance
+        @return Nothing
+        """
         # Creation of a variable that will hold the value of the entry and can be modified by the code
         self.entry_var = tk.StringVar()
         self.entry_var.trace_add("write", self.on_entry_change)
@@ -122,76 +122,76 @@ class EntryManager:
         self.entry.bind("<FocusOut>", self.on_entry_focus_out)
         self.entry.bind("<FocusIn>", self.on_entry_focus_in)
 
-    """!
-    @brief This function saves the key pressing event into a variable
-    @param 
-    self : the instance
-    event : the key pressing event
-    @return Nothing
-    """
     def which_key(self, event):
+        """!
+        @brief This function saves the key pressing event into a variable
+        @param
+        self : the instance
+        event : the key pressing event
+        @return Nothing
+        """
         self.key = event
 
-    """!
-    @brief This function detects when the user exit the entry and set the focus variable to False and call the 
-    on_entry_change function to check if the event is allowed
-    @param 
-    self : the instance
-    event : the focus out event
-    @return Nothing
-    """
     def on_entry_focus_out(self, event):
+        """!
+        @brief This function detects when the user exit the entry and set the focus variable to False and call the
+        on_entry_change function to check if the event is allowed
+        @param
+        self : the instance
+        event : the focus out event
+        @return Nothing
+        """
         self.focus = False
         self.on_entry_change()
 
-    """!
-    @brief This function detects when the user curser is in the entry and set the focus variable to True
-    @param 
-    self : the instance
-    event : the focus in event
-    @return Nothing
-    """
     def on_entry_focus_in(self, event):
+        """!
+        @brief This function detects when the user curser is in the entry and set the focus variable to True
+        @param
+        self : the instance
+        event : the focus in event
+        @return Nothing
+        """
         self.focus = True
 
-    """!
-    @brief This function checks if the key pressed is authorized or not
-    @param 
-    self : the instance
-    @return A char if it is allowed
-    """
     def check_entry(self):
+        """!
+        @brief This function checks if the key pressed is authorized or not
+        @param
+        self : the instance
+        @return A char if it is allowed
+        """
         # Checked if the char meets the requirements
-        return (self.key.char in "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ") \
+        return (self.key.char in "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ _-,.;:!?()'") \
             or (self.key.keysym == "BackSpace")
 
-    """!
-    @brief This function returns the entry value
-    @param 
-    self : the instance
-    @return The entry value
-    """
     def get(self):
+        """!
+        @brief This function returns the entry value
+        @param
+        self : the instance
+        @return The entry value
+        """
         return self.entry.get()
 
-    """!
-    @brief This function returns the entry widget
-    @param 
-    self : the instance
-    @return The entry widget itself
-    """
     def get_entry(self):
+        """!
+        @brief This function returns the entry widget
+        @param
+        self : the instance
+        @return The entry widget itself
+        """
         return self.entry
 
-    """!
-    @brief This function checks for each events if the length of the char chain is sufficient or too much.
-    If the length is not sufficient a message is displayed and the user is obliged to fill the entry before their curser
-    leave, if the length is too much no more characters can be added.
-    @param 
-    self : the instance
-    @return The entry value
-    """
     def on_entry_change(self, *args):
+        """!
+        @brief This function checks for each events if the length of the char chain is sufficient or too much.
+        If the length is not sufficient a message is displayed and the user is obliged to fill the entry before their curser
+        leave, if the length is too much no more characters can be added.
+        @param
+        self : the instance
+        @return The entry value
+        """
         entry_text = self.entry.get()
         # Checking if the length of the entry is sufficient
         if (len(entry_text) < self.min) and (not self.focus):

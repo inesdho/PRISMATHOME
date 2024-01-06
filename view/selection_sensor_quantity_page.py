@@ -13,28 +13,28 @@ import globals
 import mysql.connector
 
 class QuantitySensor:
-    """!
-    @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
-    this page
-    @param the instance, the master frame (created in the controller.py file)
-    @return Nothing
-    """
     def __init__(self, master):
+        """!
+        @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
+        this page
+        @param the instance, the master frame (created in the controller.py file)
+        @return Nothing
+        """
         self.master = master
         self.frame = ttk.Frame(self.master)
 
-    """!
-    @brief This functions connects to the database and fetch all the existing sensor type
-    @param the instance
-    @return all the sensors type in the database
-    """
     def fetch_sensor_types(self):
+        """!
+        @brief This functions connects to the database and fetch all the existing sensor type
+        @param the instance
+        @return all the sensors type in the database
+        """
 
         # Connexion to the database
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="",
+            password="Q3fhllj2",
             database="prisme_home_1"
         )
         cursor = conn.cursor()
@@ -43,12 +43,12 @@ class QuantitySensor:
         cursor.execute("SELECT id_type, type FROM sensor_type")  # Adaptez cette requête à votre BDD
         return cursor.fetchall()
 
-    """!
-    @brief The show_page function creates and displays all the elements of the "selection sensor quantity" page
-    @param the instance
-    @return Nothing
-    """
     def show_page(self):
+        """!
+        @brief The show_page function creates and displays all the elements of the "selection sensor quantity" page
+        @param the instance
+        @return Nothing
+        """
 
         # Create a main frame which will be centered in the window
         self.frame = ttk.Frame(self.master)
@@ -77,22 +77,22 @@ class QuantitySensor:
             sensor_frame.pack(side=tk.LEFT, padx=10)
             self.sensor_vars[id] = sensor_var  # Stock the variable for a further use
 
-    """!
-    @brief This functions clears the entire "new observation" page
-    @param the instance
-    @return Nothing
-    """
     def clear_page(self):
+        """!
+        @brief This functions clears the entire "new observation" page
+        @param the instance
+        @return Nothing
+        """
         self.frame.destroy()
         self.frame_sensors.destroy()
 
-    """!
-    @brief This function saves the quantity of sensors for each type of sensor that the user selected into global 
-    variables
-    @param the instance
-    @return Nothing
-    """
     def on_next_button_click(self):
+        """!
+        @brief This function saves the quantity of sensors for each type of sensor that the user selected into global
+        variables
+        @param the instance
+        @return Nothing
+        """
         globals.sensor_counts.clear()
 
         # Get the values of the StringVars and stock them into sensor_counts of globals
@@ -104,12 +104,12 @@ class QuantitySensor:
             print(f"Number of id_type {sensor_type} Sensors selected:", count)
 
 
-    """!
-    @brief This function checks if the users has selected at least one sensor
-    @param the instance
-    @return true : if the user selected at least one sensor, false : if no sensor was selected
-    """
     def chose_at_least_one_sensor(self):
+        """!
+        @brief This function checks if the users has selected at least one sensor
+        @param the instance
+        @return true : if the user selected at least one sensor, false : if no sensor was selected
+        """
         for sensor_type, sensor_var in self.sensor_vars.items():
            if int(sensor_var.get()) > 0:
                return True

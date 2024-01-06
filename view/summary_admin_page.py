@@ -23,12 +23,12 @@ class SummaryAdmin:
         self.master = master
         self.frame = ttk.Frame(self.master)
 
-    """!
-    @brief The show_page function creates and displays all the elements of the "summary" page
-    @param the instance
-    @return Nothing
-    """
     def show_page(self):
+        """!
+        @brief The show_page function creates and displays all the elements of the "summary" page
+        @param the instance
+        @return Nothing
+        """
         # Frame that will contain the title of the page and the data about the observation
         self.frame = ttk.Frame(self.master)
         self.frame.pack(fill=tk.BOTH)
@@ -52,8 +52,8 @@ class SummaryAdmin:
             conn = mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password="",
-                database="prismathome"
+                password="Q3fhllj2",
+                database="prisme_home_1"
             )
             cursor = conn.cursor()
             cursor.execute("SELECT DISTINCT id_type, type FROM sensor_type")
@@ -77,17 +77,17 @@ class SummaryAdmin:
         self.sensor_text = tk.Text(self.frame)
         self.sensor_text.pack(fill=tk.BOTH, expand=tk.TRUE)
 
-    """!
-    @brief This function displays into the text widget all the sensors of a type selected by the user and the infos
-    related to the sensors
-    @param the instance
-    sensor_type_id -> the id of the type of sensor that needs it's info dipalyed
-    sensor_type -> the type of sensor
-    @return Nothing
-    """
     def display_sensor_info(self, sensor_type_id, sensor_type):
+        """!
+        @brief This function displays into the text widget all the sensors of a type selected by the user and the infos
+        related to the sensors
+        @param the instance
+        sensor_type_id -> the id of the type of sensor that needs its info displayed
+        sensor_type -> the type of sensor
+        @return Nothing
+        """
 
-        # Anabeling the edition of the text widget and clearing it's previous content
+        # Labeling the edition of the text widget and clearing its previous content
         self.sensor_text.configure(state='normal')
         self.sensor_text.delete("1.0", tk.END)
 
@@ -105,26 +105,26 @@ class SummaryAdmin:
         # Disabeling the edition once the modifications are done
         self.sensor_text.configure(state='disabled')
 
-    """!
-    @brief This functions clears the entire "new observation" page
-    @param the instance
-    @return Nothing
-    """
     def clear_page(self):
+        """!
+        @brief This functions clears the entire "new observation" page
+        @param the instance
+        @return Nothing
+        """
         self.frame.destroy()
 
-    """!
-    @brief This functions validated all the infos relative to the current created configuration in order to save them
-    @param the instance
-    @return Nothing
-    """
     def validate_conf(self):
+        """!
+        @brief This functions validated all the infos relative to the current created configuration in order to save them
+        @param the instance
+        @return Nothing
+        """
         # Connect to the database
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="",
-            database="prismathome"
+            password="Q3fhllj2",
+            database="prisme_home_1"
         )
         cursor = conn.cursor()
 

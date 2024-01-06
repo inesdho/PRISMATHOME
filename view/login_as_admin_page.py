@@ -14,22 +14,22 @@ import globals
 from controller.entry_manager import EntryManager
 
 class LoginAsAdministrator:
-    """!
-    @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
-    this page
-    @param the instance, the master frame (created in the controller.py file)
-    @return Nothing
-    """
     def __init__(self, master):
+        """!
+        @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
+        this page
+        @param the instance, the master frame (created in the controller.py file)
+        @return Nothing
+        """
         self.master = master
         self.frame = ttk.Frame(self.master)
 
-    """!
-    @brief The show_page function creates and displays all the elements of the "login_as_admin" page
-    @param the instance
-    @return Nothing
-    """
     def show_page(self):
+        """!
+        @brief The show_page function creates and displays all the elements of the "login_as_admin" page
+        @param the instance
+        @return Nothing
+        """
         self.frame = ttk.Frame(self.master)
         self.frame.pack(fill=tk.BOTH, expand=True)
 
@@ -50,23 +50,23 @@ class LoginAsAdministrator:
         # Display the frame with all the elements
         self.frame.pack(fill=tk.BOTH, expand=True)
 
-    """!
-    @brief This functions clears the entire "new observation" page
-    @param the instance
-    @return Nothing
-    """
     def clear_page(self):
+        """!
+        @brief This functions clears the entire "new observation" page
+        @param the instance
+        @return Nothing
+        """
         # Destroy the frame
         self.frame.destroy()
 
 
-    """!
-    @brief This functions collects the login and the password entered by the user and checks if they are correct.
-    This function displays message according to the result of the connexion test
-    @param the instance
-    @return the boolean connexion_allowed that will return true if the connexion is allowed else false
-    """
     def connexion_admin(self):
+        """!
+        @brief This functions collects the login and the password entered by the user and checks if they are correct.
+        This function displays message according to the result of the connexion test
+        @param the instance
+        @return the boolean connexion_allowed that will return true if the connexion is allowed else false
+        """
         username = self.login_entry.get()
         password = self.password_entry.get()
 
@@ -79,7 +79,7 @@ class LoginAsAdministrator:
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="",
+            password="Q3fhllj2",
             database="prisme_home_1"
         )
         cursor = conn.cursor()

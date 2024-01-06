@@ -19,22 +19,22 @@ from controller.text_manager import TextManager
 
 class ModifyOrCreateConfiguration:
 
-    """!
-    @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
-    this page
-    @param the instance, the master frame (created in the controller.py file)
-    @return Nothing
-    """
     def __init__(self, master):
+        """!
+        @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
+        this page
+        @param the instance, the master frame (created in the controller.py file)
+        @return Nothing
+        """
         self.master = master
         self.frame = ttk.Frame(self.master)
 
-    """!
-    @brief The show_page function creates and displays all the elements of the "create or modify a configuration" page
-    @param the instance
-    @return Nothing
-    """
     def show_page(self):
+        """!
+        @brief The show_page function creates and displays all the elements of the "create or modify a configuration" page
+        @param the instance
+        @return Nothing
+        """
         self.frame = ttk.Frame(self.master)
         self.frame.pack(fill=tk.BOTH, expand=True)
 
@@ -67,13 +67,13 @@ class ModifyOrCreateConfiguration:
                                                   has_width=self.right_frame.winfo_width(),
                                                   has_height=5, default_text="Enter description")
 
-    """!
-    @brief This fuctions is called when the user clicks on a button to create a new configuration and saves the label of
-    the new configuration and it's description into global variables
-    @param the instance
-    @return Nothing
-    """
     def on_create_configuration_button_click(self):
+        """!
+        @brief This fuctions is called when the user clicks on a button to create a new configuration and saves the label of
+        the new configuration and it's description into global variables
+        @param the instance
+        @return Nothing
+        """
 
         # Saving the variables into global variables
         globals.global_scenario_name_configuration = self.name_entry.get()
@@ -89,13 +89,13 @@ class ModifyOrCreateConfiguration:
         print("valeur de l'id user")
         print(globals.global_id_user)
 
-    """!
-    @brief This fuctions is called when the user clicks on a button to modify a configuration and fetch said 
-    configuration in the database
-    @param the instance, id_ser -> the id of the user wanting to modify the configuration
-    @return Nothing
-    """
     def get_number_config_create_by_admin(self, id_user):
+        """!
+        @brief This fuctions is called when the user clicks on a button to modify a configuration and fetch said
+        configuration in the database
+        @param the instance, id_ser -> the id of the user wanting to modify the configuration
+        @return Nothing
+        """
 
         # RETURN TRUE POUR TESTER LES REDIRECTIONS SANS LA BDD
         # return True
@@ -104,7 +104,7 @@ class ModifyOrCreateConfiguration:
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="",
+            password="Q3fhllj2",
             database="prisme_home_1"
         )
         cursor = conn.cursor()
@@ -122,12 +122,12 @@ class ModifyOrCreateConfiguration:
 
         return count
 
-    """!
-    @brief This functions clears the entire "new observation" page
-    @param the instance
-    @return Nothing
-    """
     def clear_page(self):
+        """!
+        @brief This functions clears the entire "new observation" page
+        @param the instance
+        @return Nothing
+        """
         # Destroy the frame
         self.frame.destroy()
         self.right_frame.destroy()
