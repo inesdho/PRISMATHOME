@@ -97,8 +97,8 @@ class NewObservation:
         cursor = conn.cursor()
 
         # Exécutez une requête
-        query = "INSERT INTO observation (id_system, participant, id_config, id_session, session_label)VALUES(%s, %s, %s,%s, %s)"
-        cursor.execute(query, (id_system, self.participant_entry.get(),id_conf,id_session,  self.session_entry.get()))
+        query = "INSERT INTO observation (id_system, participant, id_config, id_session, session_label, active)VALUES(%s, %s, %s,%s, %s, %s)"
+        cursor.execute(query, (id_system, self.participant_entry.get(),id_conf,id_session,  self.session_entry.get(), 0))
         conn.commit()
 
     def get_config(self):
