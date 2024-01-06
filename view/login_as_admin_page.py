@@ -79,7 +79,7 @@ class LoginAsAdministrator:
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="",
+            password="Q3fhllj2",
             database="prisme_home_1"
         )
         cursor = conn.cursor()
