@@ -21,8 +21,8 @@ class SensorPairingManagement:
         self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
 
         # Displays the title of the page
-        label = ttk.Label(self.frame, text="Sensor pairing", font=16, padding=10)
-        label.pack(pady=20)
+        self.label_page = ttk.Label(self.frame, text="Sensor pairing", font=16, padding=10)
+        self.label_page.pack(pady=20)
 
         # Creation of a canvas in order to add a scrollbar in case to many lines of sensors are displayed
         self.canvas = tk.Canvas(self.frame, bd=2, relief="ridge", highlightthickness=2)
@@ -41,10 +41,6 @@ class SensorPairingManagement:
         @param The instance
         @return Nothing
         """
-
-        # Create a main frame which will be centered in the window
-        self.frame = tk.Frame(self.master)
-        self.frame.pack(expand=True)
 
         black_list = []
 
@@ -409,6 +405,12 @@ class SensorPairingManagement:
         return sensors
 
     def clear_page(self):
+        """!
+        @brief this function clears the content of the page
+        @param self : The instance
+        @return : None
+        """
+        self.canvas.destroy()
         self.frame.destroy()
 
 
