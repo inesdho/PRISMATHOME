@@ -1,5 +1,5 @@
 """!
-@file summary_admin_page.py
+@file summary_page.py
 @brief This file will contain all the widgets and functions related to the "summary" page itself
 @author Naviis-Brain
 @version 1.0
@@ -13,20 +13,20 @@ import mysql.connector
 
 
 class SummaryAdmin:
-    """!
-    @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
-    this page
-    @param the instance, the master frame (created in the controller.py file)
-    @return Nothing
-    """
     def __init__(self, master):
+        """!
+        @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
+        this page
+        @param the instance, the master frame (created in the controller.py file)
+        @return Nothing
+        """
         self.master = master
         self.frame = ttk.Frame(self.master)
 
     def show_page(self):
         """!
         @brief The show_page function creates and displays all the elements of the "summary" page
-        @param the instance
+        @param the instance, is_observation -> True if the page is to be displayed in the context of an observation
         @return Nothing
         """
         # Frame that will contain the title of the page and the data about the observation
@@ -78,21 +78,19 @@ class SummaryAdmin:
         self.sensor_text.pack(fill=tk.BOTH, expand=tk.TRUE)
 
     def display_sensor_info(self, sensor_type_id, sensor_type):
-        """!
-        @brief This function displays into the text widget all the sensors of a type selected by the user and the infos
-        related to the sensors
-        @param the instance
-        sensor_type_id -> the id of the type of sensor that needs its info displayed
-        sensor_type -> the type of sensor
-        @return Nothing
-        """
-
-        # Labeling the edition of the text widget and clearing its previous content
         self.sensor_text.configure(state='normal')
         self.sensor_text.delete("1.0", tk.END)
 
+        # Convert sensor_type_id to str for comparison
+        sensor_type_id_str = str(sensor_type_id)
         sensor_count = globals.sensor_counts.get(sensor_type_id, 0)
-        entries_for_type = [entry for entry in globals.global_sensor_entries if entry[0] == sensor_type_id]
+
+        # Filter entries for this sensor type
+        entries_for_type = [
+            entry for entry in globals.global_sensor_entries
+            if str(entry[0]).startswith(sensor_type_id_str)  # Ensure both are strings
+        ]
+
         if not entries_for_type:
             self.sensor_text.insert(tk.END, f"No information available for {sensor_type} sensors.\n")
         else:
@@ -102,7 +100,6 @@ class SummaryAdmin:
                 sensor_info = f"{sensor_type} sensor {index}:\nLabel: {label_entry}\nDescription: {description_entry}\n\n"
                 self.sensor_text.insert(tk.END, sensor_info)
 
-        # Disabeling the edition once the modifications are done
         self.sensor_text.configure(state='disabled')
 
     def clear_page(self):
@@ -131,8 +128,8 @@ class SummaryAdmin:
         # Exécutez une requête
         query = "INSERT INTO configuration (id_config, id_user, label, description)VALUES(%s, %s, %s, %s)"
         cursor.execute(query, (
-        globals.global_id_config, globals.global_id_user, globals.global_scenario_name_configuration,
-        globals.global_description_configuration))
+            globals.global_id_config, globals.global_id_user, globals.global_scenario_name_configuration,
+            globals.global_description_configuration))
         conn.commit()
 
         # Insert each sensor's data into the database
@@ -143,3 +140,43 @@ class SummaryAdmin:
         conn.commit()
         cursor.close()
         conn.close()
+        self.clear_sensor_entries()
+
+
+    def clear_sensor_entries(self):
+        """!
+        @brief This function clears the sensor entries after validation.
+        """
+        globals.global_sensor_entries.clear()
+        # Vous pouvez également effacer les entrées visuelles ici, si nécessaire
+        for _, label_entry, description_entry in globals.global_sensor_entries:
+            label_entry.set('')
+            description_entry.set('')
+
+    def get_session(self):
+        # TODO Modifier la fonction pour qu'elle retourne la session de la configuration en cours
+        return "Ceci est la session de l'observation"
+
+    def get_participant(self):
+        # TODO Modifier la fonction pour qu'elle retourne le particpant de la configuration en cours
+        return "Ceci est le participant de l'observation"
+
+    def exist_in_this_config(self, sensor_type):
+        # TODO Modifier la fonction pour qu'elle retourne true si ce type de capteur est présent dans la configuration en cours sinon false
+        return True
+
+    def get_sensors_id_from_type(self, sensor_type):
+        # TODO Modifier la fonction pour qu'elle retourne la liste des capteurs de type 'sensor_type' présent dans la configuration
+        return ["id_sensor1", "id_sensor2", "id_sensor3", "id_sensor4", "id_sensor5", "id_sensor6"]
+
+    def get_sensor_label(self, id_sensor):
+        # TODO Modifier la fonction pour qu'elle retourne le label d'un capteur en fonction de son id
+        return id_sensor + "sensor "
+
+    def get_sensor_description(self, id_sensor):
+        # TODO Modifier la fonction pour qu'elle retourne la description d'un capteur en fonction de son id
+        return "Description du capteur " + id_sensor
+
+    def get_sensor_status(self, id_sensor):
+        # TODO Modifier la fonction pour qu'elle retourne le status d'un capteur en fonction de son id
+        return "Status du capteur " + id_sensor
