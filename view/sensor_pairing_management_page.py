@@ -161,9 +161,9 @@ class SensorPairingManagement:
         @return : None
         """
         # TODO : modifier "button" en sensor_elt["type"]
-        model.local_mqtt.rename_sensor(sensor_selected['name'], "button"+"/"+sensor_elt['label'])
-        sensor_selected['name'] = "button"+"/"+sensor_elt['label']
-        # If an edit_sensor is specified we need to remove it from the list because it wont be in use anymore
+        model.local_mqtt.rename_sensor(sensor_selected['name'], sensor_elt["type"]+"/"+sensor_elt['label'])
+        sensor_selected['name'] = sensor_elt["type"]+"/"+sensor_elt['label']
+        # If an edit_sensor is specified we need to remove it from the list because it won't be in use anymore
         if edit_sensor:
             self.black_list.remove(edit_sensor["ieee_address"])
             children = button_pairing.master.winfo_children()
@@ -181,16 +181,16 @@ class SensorPairingManagement:
         button_pairing.master.winfo_children()[0].configure(text=sensor_selected["label"])
 
         match sensor_elt["type"]:
-            case "Pressure":
+            case "Button":
                 label_sensor_value = ttk.Label(button_pairing.master, text="Action : Unknown")
                 label_sensor_value.pack(side=tk.LEFT, padx=10)
-            case "Opening":
+            case "Door":
                 label_sensor_value = ttk.Label(button_pairing.master, text="Contact : Unknown")
                 label_sensor_value.pack(side=tk.LEFT, padx=10)
-            case "Presence":
+            case "Motion":
                 label_sensor_value = ttk.Label(button_pairing.master, text="Occupancy : Unknown")
                 label_sensor_value.pack(side=tk.LEFT, padx=10)
-            case "Activity":
+            case "Vibration":
                 label_sensor_value = ttk.Label(button_pairing.master, text="Vibration : Unknown")
                 label_sensor_value.pack(side=tk.LEFT, padx=10)
 
@@ -198,6 +198,7 @@ class SensorPairingManagement:
         my_thread.start()
 
         showinfo("Capteur sélectionné", f"Vous avez sélectionné le capteur {sensor_selected}")
+
 
     def allow_sensor_join_management(self, button_pairing, sensor_elt, popup, edit_sensor):
         """!
@@ -211,6 +212,8 @@ class SensorPairingManagement:
 
         @return : None
         """
+        flag = False
+
         # Clear the popup
         for widget in popup.winfo_children():
             widget.destroy()
@@ -237,6 +240,13 @@ class SensorPairingManagement:
         my_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=400)
 
         model.local_mqtt.change_permit_join(True)
+
+        def on_click_new_sensor(event):
+            nonlocal flag
+            global new_sensor
+            flag = True
+            self.choose_sensor(button_pairing, new_sensor, sensor_elt, popup, edit_sensor)
+
         def display_new_sensor():
             """!
             @brief display_new_sensor is used to display the new sensor on the popup. This function is called as a
@@ -244,43 +254,40 @@ class SensorPairingManagement:
 
             @return : None
             """
+            nonlocal flag
+            global new_sensor
 
-            # TODO : Faire un while True
-            new_sensor = model.local_mqtt.get_new_sensors()
-            # New sensor test
-            """new_sensor = {
-                'name': "Test",
-                'ieee_address': "123456789",
-                'label': "Je suis un capteur aqara"
-            }"""
+            while not flag:
 
-            # Create a box frame to the sensor_label
-            sensor_frame = tk.Frame(scrollable_frame, cursor="hand2", bg="white", pady=0)
-            sensor_frame.pack(fill=tk.X, padx=10, pady=(5, 0), expand=True)
+                new_sensor = model.local_mqtt.get_new_sensors()
+                # New sensor test TODO remove
+                """new_sensor = {
+                    'name': "Test",
+                    'ieee_address': "123456789",
+                    'label': "Je suis un capteur aqara"
+                }"""
 
-            # Display the sensor label
-            sensor_label = tk.Label(sensor_frame, text=new_sensor["label"], padx=10, pady=10, bg="white")
-            sensor_label.pack(fill=tk.X)
+                # Create a box frame to the sensor_label
+                sensor_frame = tk.Frame(scrollable_frame, cursor="hand2", bg="white", pady=0)
+                sensor_frame.pack(fill=tk.X, padx=10, pady=(5, 0), expand=True)
 
-            # Add event click on the labbel
-            # If the label is clicked the function "choose_sensor" will be called
-            sensor_label.bind("<Button-1>", lambda event, name=new_sensor, button=button_pairing,
-                                                   sensor=sensor_elt, popup_join=popup,
-                                                   editing=edit_sensor: self.choose_sensor(
-                button, name, sensor, popup_join, editing))
+                # Display the sensor label
+                sensor_label = tk.Label(sensor_frame, text=new_sensor["label"], padx=10, pady=10, bg="white")
+                sensor_label.pack(fill=tk.X)
 
-            # Add event enter and leave for style
-            sensor_label.bind("<Enter>", self.on_enter_sensor_label)
-            sensor_label.bind("<Leave>", self.on_leave_sensor_label)
+                # Add event click on the labbel
+                # If the label is clicked the function "choose_sensor" will be called
+                sensor_label.bind("<Button-1>", on_click_new_sensor)
+
+                # Add event enter and leave for style
+                sensor_label.bind("<Enter>", self.on_enter_sensor_label)
+                sensor_label.bind("<Leave>", self.on_leave_sensor_label)
 
         # Create a thread for display_new_sensor function
         # Because display_new_sensor block the program while waiting for a new sensor
         # it allows the program to display label_title and label_message before the end of the function
         thread_display = threading.Thread(target=display_new_sensor)
         thread_display.start()
-
-        # If we get the sensor : then call the function choose_sensor(self, button_pairing, sensor_selected, sensor_elt, popup)
-        # Else showerror("Error", "The sensor could not connect to the system")
 
     def pairing_a_sensor(self, button_pairing, sensor, edit_sensor):
         """!
@@ -295,10 +302,10 @@ class SensorPairingManagement:
         # Dictionary of sensor label related to their description in zigbee2mqtt
         # You must add the sensor description in this dictionary for every new sensor reference you add
         sensor_type_dictionary = {
-            "Pressure": ["Aqara T1 wireless mini switch"],
-            "Opening": ["Aqara T1 door & window contact sensor"],
-            "Activity": ["Vibration sensor","Aqara vibration sensor"],
-            "Presence": ["Aqara P1 human body movement and illuminance sensor"]
+            "Button": ["Aqara T1 wireless mini switch"],
+            "Door": ["Aqara T1 door & window contact sensor"],
+            "Vibration": ["Vibration sensor","Aqara vibration sensor"],
+            "Motion": ["Aqara P1 human body movement and illuminance sensor"]
         }
 
         # Get the sensors paired to zigbee2mqtt
@@ -400,10 +407,10 @@ class SensorPairingManagement:
         """
         # Fake result for test
         results = [
-            ("Capteur1", "Description du capteur 1", "Pressure"),
-            ("Capteur2", "Description du capteur 2", "Opening"),
-            ("Capteur3", "Description du capteur 3", "Activity"),
-            ("Capteur4", "Description du capteur 4", "Presence"),
+            ("Capteur1", "Description du capteur 1", "Button"),
+            ("Capteur2", "Description du capteur 2", "Door"),
+            ("Capteur3", "Description du capteur 3", "Button"),
+            ("Capteur4", "Description du capteur 4", "Vibration"),
             ("Capteur5", "Description du capteur 5", "Motion")
         ]
         # The list of sensors' dictionary
