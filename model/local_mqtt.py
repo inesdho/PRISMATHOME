@@ -170,7 +170,6 @@ def change_permit_join(state_wanted):
 
     return transmission_state
 
-
 def rename_sensor(previous_name, new_name):
     """!
     Function that is called when a sensor is renamed on Zigbee2MQTT
@@ -302,6 +301,43 @@ def get_sensor_value(sensor_friendly_name, label_widget):
     mqtt_client.subscribe("zigbee2mqtt/"+sensor_friendly_name)
 
     mqtt_client.loop_forever()
+
+
+def get_new_sensors():
+
+    sensor_details = {}
+    def on_message(client, userdata, msg):
+        """!
+        Function that is called when a message is received from a topic
+        In that case, it is zigbee2mqtt/bridge/devices
+
+        @param client: Client
+        @param userdata: Unused
+        @param msg: JSON message, which contains all of the informations of the sensors
+
+        @return None
+        """
+        nonlocal sensor_details
+        sensor_data = json.loads(msg.payload.decode())
+
+        if sensor_data.get('data').get('definition'):
+            sensor_details = {
+                'name': sensor_data.get('data', {}).get('friendly_name', 'Unknown'),
+                'ieee_address': sensor_data.get('data', {}).get('ieee_address', 'Unknown'),
+                'label': sensor_data.get('data', {}).get('definition', {}).get('description', 'Unknown')
+            }
+            client.loop_stop()
+            client.disconnect()
+
+    # Connection to the MQTT CLient
+    client = mqtt.Client("get_new_sensors_client")
+    client.on_message = on_message
+    connect_to_mqtt_broker(client)
+
+    client.subscribe("zigbee2mqtt/bridge/event")
+
+    client.loop_forever()
+    return sensor_details
 
 
 if __name__ == "__main__":
