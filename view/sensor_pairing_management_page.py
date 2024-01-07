@@ -50,12 +50,10 @@ class SensorPairingManagement:
         frame_title.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
         # Create the title of the different field
-        label_sensor = ttk.Label(frame_title,text="Sensor", font=16, anchor="w", width=13)
-        label_sensor.pack(side=tk.LEFT)
-        label_label = ttk.Label(frame_title,text="Label", font=16, anchor="w", width=14)
-        label_label.pack(side=tk.LEFT)
-        label_description = ttk.Label(frame_title,text="Description", font=16, anchor="w", width=80)
-        label_description.pack(side=tk.LEFT)
+        ttk.Label(frame_title, background="lightgrey", width=20, text="Sensor", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
+        ttk.Label(frame_title, background="lightgrey", width=20, text="Label", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
+        ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
+
 
         # Create entries for sensors
         for index, sensor in enumerate(self.get_sensors(), start=1):
@@ -78,20 +76,15 @@ class SensorPairingManagement:
         data_frame = ttk.Frame(self.frame_canvas)
         data_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
-        label = ttk.Label(data_frame, text=sensor["type"] + " " + str(index), width=20, anchor='w', wraplength=140)
-        label.pack(side=tk.LEFT)
+        # Showing the type of the sensor
+        label = ttk.Label(data_frame, text=sensor["type"] + " " + str(index), width=20, anchor='w', wraplength=140, background="white", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
 
-        # Showing the label of the sensor
-        #label_label = ttk.Label(data_frame, text="Label :", width=10)
-        #label_label.pack(side=tk.LEFT)
         # Creating a text widget tht will contain the label associated with the sensor
-        self.create_an_entry_widget(sensor["label"], data_frame, 20)
+        ttk.Label(data_frame, background="white", width=20, text=sensor["label"], borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
 
         # Showing the description of the sensor
-        #description_label = ttk.Label(data_frame, text="\tDescription :", width=20)
-        #description_label.pack(side=tk.LEFT)
-        # Creating a text widget tht will contain the description associated with the sensor
-        self.create_an_entry_widget(sensor["description"], data_frame, 80)
+        ttk.Label(data_frame, background="white", width=80, text=sensor["description"], borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
+
 
         button_pairing = ttk.Button(data_frame, text=" ")
         button_pairing.pack(side=tk.LEFT, padx=5)
@@ -100,19 +93,17 @@ class SensorPairingManagement:
         self.button_init(button_pairing, sensor)
 
     # Create a text widget that will contain the text in the parameter of the function
-    def create_an_entry_widget(self, text, frame, width):
+    def create_a_label(self, text, frame, width):
         """!
-        @brief Create a text widget that will contain the text in the parameter of the function
+        @brief Create a label that will contain the text in the parameter of the function
         @param text : the text that needs to be displayed
         @param frame : the frame that will contain the widget
         @param width : the width of the widget
         @return None
         """
-        sensor_entry = ttk.Entry(frame, width=width)
+        sensor_label = ttk.Label(frame, background="white", width=width, text=text, borderwidth=1, relief="solid", padding=5)
         # Adding the content of the text widget
-        sensor_entry.insert(-1, text)
-        sensor_entry.configure(state='readonly')
-        sensor_entry.pack(side=tk.LEFT)
+        sensor_label.pack(side=tk.LEFT)
 
     def center_window(self, window):
         """!
