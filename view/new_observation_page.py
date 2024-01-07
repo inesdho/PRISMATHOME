@@ -103,6 +103,11 @@ class NewObservation:
         conn.commit()
 
     def get_config(self):
+        """!
+        @brief This functions returns the label of the configurations stored in the database
+        @param self : the instance
+        @return the label of the configurations stored in the database
+        """
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
@@ -121,6 +126,12 @@ class NewObservation:
         return config_labels
 
     def get_config_by_id(self, label):
+        """!
+        @brief This functions returns the id of the configuration that was selected by the user depending on its label.
+        @param self : the instance
+        @param label : the label of the configuration
+        @return the id of the configuration selected by the user
+        """
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
@@ -139,6 +150,11 @@ class NewObservation:
         return globals.global_id_config_selectionned if result else None
 
     def get_id_system(self):
+        """!
+        @brief This functions returns the id of the system
+        @param self : the instance
+        @return the id of the system
+        """
         try:
             conn = mysql.connector.connect(
                 host="localhost",
@@ -160,6 +176,11 @@ class NewObservation:
             conn.close()
 
     def get_id_session(self):
+        """!
+        @brief This functions returns the id of the last session created in the database
+        @param self : the instance
+        @return the id of the last session created in the database
+        """
         conn = mysql.connector.connect(
             host="localhost",
             user="root",
