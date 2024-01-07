@@ -25,6 +25,7 @@ class NewObservation:
         """
         self.master = master
         self.frame = ttk.Frame(self.master)
+        self.configuration_combobox = ttk.Combobox(self.frame)
 
     def show_page(self):
         """!

@@ -75,7 +75,7 @@ class App(ThemedTk):
 
         # Redirection to login as an admin button
         ttk.Button(new_observation_page.frame, text="Import configuration",
-                   command=lambda: self.redirect_to_pairing_from_new_observation(new_observation_page)).pack()
+                   command=lambda: self.is_a_config_chosen(new_observation_page)).pack()
 
     def redirect_to_new_observation_from_anywhere(self, page):
         """!
@@ -93,6 +93,20 @@ class App(ThemedTk):
 
         self.call_new_observation_page()
 
+    def is_a_config_chosen(self, new_observation_page):
+        """!
+        @brief This function checks that the user has chosen a configuration for the observation. If no configuration
+        was chosen, an error pop up is displayed else the user can access the pairing page
+        @param self : the instance
+        @param new_observation_page : the previous page
+        @return Nothing
+        """
+        if new_observation_page.configuration_combobox.get() == "":
+            messagebox.showerror("Error", "Please select a configuration")
+        else:
+            self.redirect_to_pairing_from_new_observation(new_observation_page)
+
+
     def redirect_to_pairing_from_new_observation(self, new_observation_page):
         """!
         @brief This function clears the previous page in order to display the content of the pairing page and adds navigation
@@ -103,6 +117,7 @@ class App(ThemedTk):
         """
 
         new_observation_page.on_import_button_click()
+
         # Clear the previous page content
         self.clear_the_page(new_observation_page)
 
@@ -239,7 +254,7 @@ class App(ThemedTk):
     def redirect_to_modify_or_create_configuration_after_config_validation(self, summary_admin_page):
         """!
         @brief This function calls the function located in summary admin that will save the config into the database and
-        then calls the function that display the modify or create a configuration page
+        then calls the function that display the "modify or create a configuration" page
         @param self : the instance
         @param summary_admin_page : the summary admin page
         @return Nothing
@@ -254,7 +269,7 @@ class App(ThemedTk):
     def redirect_to_selection_sensor_quantity_from_create_a_config(self, create_a_config_page):
         """!
         @brief This function clears the previous page in order to display the content of the "selection sensor quantity" and
-        adds navigations buttons. It also create a nex configuration in the database
+        adds navigations buttons. It also creates a nex configuration in the database
         @param self: the instance
         @param create_a_config_page : the create or modify a configuration page
         @return Nothing
@@ -266,9 +281,9 @@ class App(ThemedTk):
         # Clear the previous page content
         self.clear_the_page(create_a_config_page)
 
-        # Creattion of the "selection sensor quantity" page
-        selction_sensor_quantity_page = QuantitySensor(self)
-        selction_sensor_quantity_page.show_page()
+        # Creation of the "selection sensor quantity" page
+        selection_sensor_quantity_page = QuantitySensor(self)
+        selection_sensor_quantity_page.show_page()
 
         # Creation of a main frame
         self.create_new_main_frame()
@@ -276,12 +291,12 @@ class App(ThemedTk):
         # Add buttons
         back_button = ttk.Button(self.main_frame, text="Back",
                                  command=lambda: self.redirect_to_modify_or_create_configuration_from_anywhere(
-                                     selction_sensor_quantity_page))
+                                     selection_sensor_quantity_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         next_button = ttk.Button(self.main_frame, text="Next",
                                  command=lambda: self.check_if_user_chose_at_least_one_sensor(
-                                     selction_sensor_quantity_page))
+                                     selection_sensor_quantity_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
     def redirect_to_selection_sensor_quantity_from_anywhere(self, page):
