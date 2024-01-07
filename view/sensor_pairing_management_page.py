@@ -160,8 +160,9 @@ class SensorPairingManagement:
 
         @return : None
         """
-        # TODO : Call rename sensor
-
+        # TODO : modifier "button" en sensor_elt["type"]
+        model.local_mqtt.rename_sensor(sensor_selected['name'], "button"+"/"+sensor_elt['label'])
+        sensor_selected['name'] = "button"+"/"+sensor_elt['label']
         # If an edit_sensor is specified we need to remove it from the list because it wont be in use anymore
         if edit_sensor:
             self.black_list.remove(edit_sensor["ieee_address"])
@@ -235,7 +236,7 @@ class SensorPairingManagement:
         scrollable_frame = ttk.Frame(my_canvas)
         my_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=400)
 
-        #model.local_mqtt.change_permit_join(True)
+        model.local_mqtt.change_permit_join(True)
         def display_new_sensor():
             """!
             @brief display_new_sensor is used to display the new sensor on the popup. This function is called as a
@@ -245,13 +246,13 @@ class SensorPairingManagement:
             """
 
             # TODO : Faire un while True
-            #new_sensor=model.local_mqtt.get_new_sensor()
+            new_sensor = model.local_mqtt.get_new_sensors()
             # New sensor test
-            new_sensor = {
+            """new_sensor = {
                 'name': "Test",
                 'ieee_address': "123456789",
                 'label': "Je suis un capteur aqara"
-            }
+            }"""
 
             # Create a box frame to the sensor_label
             sensor_frame = tk.Frame(scrollable_frame, cursor="hand2", bg="white", pady=0)
