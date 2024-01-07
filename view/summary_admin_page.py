@@ -42,7 +42,7 @@ class SummaryAdmin:
         # Information about the configuration
         scenario_frame = ttk.Frame(self.frame)
         scenario_frame.pack(fill=tk.BOTH)
-        scenario_label = ttk.Label(scenario_frame, text="Scenario : " + globals.global_scenario_name_configuration, padding=10)
+        scenario_label = ttk.Label(scenario_frame, text="Configuration : " + globals.global_scenario_name_configuration, padding=10)
         scenario_label.pack(side=tk.LEFT)
 
         # Creation of the frame that will contain the buttons

@@ -23,6 +23,7 @@ class SummaryUser:
         """
         self.master = master
         self.frame = ttk.Frame(self.master)
+        self.frame.pack(fill=tk.BOTH)
 
     def show_page(self):
         """!
@@ -31,10 +32,6 @@ class SummaryUser:
         @param is_observation : True if the page is to be displayed in the context of an observation
         @return Nothing
         """
-        # Frame that will contain the title of the page and the data about the observation
-        self.frame = ttk.Frame(self.master)
-        self.frame.pack(fill=tk.BOTH)
-
         # Title of the page
         title_label = ttk.Label(self.frame, text='Summary', font=16)
         title_label.pack(pady=10)
@@ -42,8 +39,9 @@ class SummaryUser:
         # Information about the configuration
         scenario_frame = ttk.Frame(self.frame)
         scenario_frame.pack(fill=tk.BOTH)
-        # TODO ajouter la valeur de scenario
-        scenario_label = ttk.Label(scenario_frame, text="Scenario : ", padding=10)
+
+        # TODO ajouter le label de la configuration
+        scenario_label = ttk.Label(scenario_frame, text="Configuration : ", padding=10)
         scenario_label.pack(side=tk.LEFT)
 
         session_frame = ttk.Frame(self.frame)
