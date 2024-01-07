@@ -8,9 +8,9 @@
 
 import tkinter as tk
 from tkinter import ttk
+import globals
 
 import mysql
-
 from controller.entry_manager import EntryManager
 
 
@@ -135,7 +135,8 @@ class NewObservation:
         result = cursor.fetchone()  # Fetch the first result
         cursor.close()
         conn.close()
-        return result[0] if result else None
+        globals.global_id_config_selectionned=result[0]
+        return globals.global_id_config_selectionned if result else None
 
     def get_id_system(self):
         try:
