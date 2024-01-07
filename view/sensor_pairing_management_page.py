@@ -1,6 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import *
+
+import mysql
+import globals
+
 import model.local_mqtt
 import time
 import threading
@@ -56,7 +60,7 @@ class SensorPairingManagement:
 
 
         # Create entries for sensors
-        for index, sensor in enumerate(self.get_sensors(), start=1):
+        for index, sensor in enumerate(self.get_sensors(globals.global_id_config_selectionned), start=1):
             self.create_labeled_entry(sensor, index)
 
 
@@ -380,35 +384,34 @@ class SensorPairingManagement:
 
         # self.button_init(button_pairing, sensor_elt)
 
-    # TODO INES A voir comment tu le sens INES mais certianes des fonctions ci-dessous sont les mêmes que dans summary_window, est ce que ça vaudrait le coup de faire un fichier
-    # TODO spécial qui fait que retourner des résultats de requêtes comme ça ?
+    # TODO INES C'est fait
 
-    def get_sensors(self):
-        # TODO INES la fonction doit retourner la liste des capteurs associés à la configuration en cours
-        """
-        query = (
-            "SELECT sc.label AS sensor_label, sc.description AS sensor_description, st.type AS sensor_type "
-            "FROM Sensor_config sc "
-            "JOIN Sensor_type st ON sc.id_sensor_type = st.id_type "
-            "WHERE sc.id_config = %s "
-            "ORDER BY st.type"  # Tri par le type de capteurs
+    def get_sensors(self, id_config):
+        # This id_config should be passed to the method or obtained from the class/global scope.
+
+        # Start a connection to the database
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="Q3fhllj2",
+            database="prisme_home_1"
         )
+        cursor = conn.cursor()
 
+        # Define the SQL query
+        query = (
+            "SELECT sensor_config.sensor_label, sensor_config.sensor_description, sensor_type.type FROM sensor_config, sensor_type  WHERE sensor_config.id_config = %s  AND sensor_config.id_sensor_type = sensor_type.id_type")
+
+        # Execute the query with the provided id_config
         cursor.execute(query, (id_config,))
+
+        # Fetch the results
         results = cursor.fetchall()
-        """
-        # Fake result for test
-        results = [
-            ("Capteur1", "Description du capteur 1", "Pressure"),
-            ("Capteur2", "Description du capteur 2", "Opening"),
-            ("Capteur3", "Description du capteur 3", "Activity"),
-            ("Capteur4", "Description du capteur 4", "Presence"),
-            ("Capteur5", "Description du capteur 5", "Motion")
-        ]
+
         # The list of sensors' dictionary
         sensors = []
 
-        # Fill the sensor list from result
+        # Fill the sensor list from the result
         for row in results:
             sensor_label = row[0]
             sensor_description = row[1]
@@ -419,6 +422,10 @@ class SensorPairingManagement:
                 "description": sensor_description,
                 "type": sensor_type
             })
+
+        # Close the cursor and connection
+        cursor.close()
+        conn.close()
 
         return sensors
 
