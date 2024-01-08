@@ -163,8 +163,13 @@ class SensorPairingManagement:
 
         @return : None
         """
-        # TODO : modifier "button" en sensor_elt["type"]
-        model.local_mqtt.rename_sensor(sensor_selected['name'], sensor_elt["type"]+"/"+sensor_elt['label'])
+
+        if(model.local_mqtt.rename_sensor(sensor_selected['name'], sensor_elt["type"]+"/"+sensor_elt['label'])!=1):
+            showinfo("Problem", "A problem occured while renaming")
+            popup.grab_release()
+            popup.destroy()
+            return
+
         sensor_selected['name'] = sensor_elt["type"]+"/"+sensor_elt['label']
         # If an edit_sensor is specified we need to remove it from the list because it won't be in use anymore
         if edit_sensor:
@@ -175,7 +180,7 @@ class SensorPairingManagement:
 
         self.black_list.append(sensor_selected["ieee_address"])
         # TODO : Ajouter l'adresse mac à sensor elt
-        print("the sensor " + sensor_selected["label"] + "was paired")
+
         popup.grab_release()
         popup.destroy()
         button_pairing.config(text="Edit",
@@ -199,9 +204,6 @@ class SensorPairingManagement:
 
         my_thread = threading.Thread(target=model.local_mqtt.get_sensor_value, args=(sensor_selected["name"], label_sensor_value))
         my_thread.start()
-
-        showinfo("Capteur sélectionné", f"Vous avez sélectionné le capteur {sensor_selected}")
-
 
     def allow_sensor_join_management(self, button_pairing, sensor_elt, popup, edit_sensor):
         """!
@@ -242,7 +244,11 @@ class SensorPairingManagement:
         scrollable_frame = ttk.Frame(my_canvas)
         my_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=400)
 
-        model.local_mqtt.change_permit_join(True)
+        if(model.local_mqtt.change_permit_join(True)!=1):
+            showinfo("Error","A problem occurred while changing the permit_join state")
+            popup.grab_release()
+            popup.destroy()
+            return
 
         def on_click_new_sensor(event):
             nonlocal flag
@@ -263,12 +269,6 @@ class SensorPairingManagement:
             while not flag:
 
                 new_sensor = model.local_mqtt.get_new_sensors()
-                # New sensor test TODO remove
-                """new_sensor = {
-                    'name': "Test",
-                    'ieee_address': "123456789",
-                    'label': "Je suis un capteur aqara"
-                }"""
 
                 # Create a box frame to the sensor_label
                 sensor_frame = tk.Frame(scrollable_frame, cursor="hand2", bg="white", pady=0)
@@ -301,7 +301,7 @@ class SensorPairingManagement:
 
         @return : None
         """
-
+        print('Paring a sensor')
         # Dictionary of sensor label related to their description in zigbee2mqtt
         # You must add the sensor description in this dictionary for every new sensor reference you add
         sensor_type_dictionary = {
@@ -326,7 +326,7 @@ class SensorPairingManagement:
         # Freeze the master window
         popup_pairing.grab_set()
 
-        # Display a labbel
+        # Display a label
         label_message = tk.Label(popup_pairing, text="Please select a sensor", font=("Arial", 14, "bold"), padx=20,
                                  pady=10)
         label_message.pack(padx=5, pady=5)
@@ -375,7 +375,6 @@ class SensorPairingManagement:
                 sensor_label.bind("<Enter>", self.on_enter_sensor_label)
                 sensor_label.bind("<Leave>", self.on_leave_sensor_label)
 
-    # TODO INDUS same ici, mais pour modifier l'appairage du capteur et donc le désappairé, pas besoin de retourner quoi que ce soit (enfin je crois)
     def edit_the_pairing(self, button_pairing, sensor_selected, sensor_elt):
         """!
         @brief edit_the_pairing : Call the pairing_a_sensor function with the param edit_sensor=sensor_selected to edit
