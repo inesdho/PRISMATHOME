@@ -155,30 +155,3 @@ class SummaryAdmin:
             label_entry.set('')
             description_entry.set('')
 
-    def get_session(self):
-        # TODO Modifier la fonction pour qu'elle retourne la session de la configuration en cours
-        return "Ceci est la session de l'observation"
-
-    def get_participant(self):
-        # TODO Modifier la fonction pour qu'elle retourne le particpant de la configuration en cours
-        return "Ceci est le participant de l'observation"
-
-    def exist_in_this_config(self, sensor_type):
-        # TODO Modifier la fonction pour qu'elle retourne true si ce type de capteur est présent dans la configuration en cours sinon false
-        return True
-
-    def get_sensors_id_from_type(self, sensor_type):
-        # TODO Modifier la fonction pour qu'elle retourne la liste des capteurs de type 'sensor_type' présent dans la configuration
-        return ["id_sensor1", "id_sensor2", "id_sensor3", "id_sensor4", "id_sensor5", "id_sensor6"]
-
-    def get_sensor_label(self, id_sensor):
-        # TODO Modifier la fonction pour qu'elle retourne le label d'un capteur en fonction de son id
-        return id_sensor + "sensor "
-
-    def get_sensor_description(self, id_sensor):
-        # TODO Modifier la fonction pour qu'elle retourne la description d'un capteur en fonction de son id
-        return "Description du capteur " + id_sensor
-
-    def get_sensor_status(self, id_sensor):
-        # TODO Modifier la fonction pour qu'elle retourne le status d'un capteur en fonction de son id
-        return "Status du capteur " + id_sensor

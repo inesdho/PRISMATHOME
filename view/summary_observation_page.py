@@ -53,7 +53,7 @@ class SummaryObservation:
 
         participant_frame = ttk.Frame(self.frame)
         participant_frame.pack(fill=tk.BOTH)
-        participant_label = ttk.Label(participant_frame, text="Participant : " + self.get_participant(), padding=10)
+        participant_label = ttk.Label(participant_frame, text="Participant : " + self.get_participant(globals.global_new_id_observation), padding=10)
         participant_label.pack(side=tk.LEFT)
 
         # Creation of the frame that will contain the buttons
@@ -191,9 +191,37 @@ class SummaryObservation:
             cursor.close()
             conn.close()
 
-    def get_participant(self):
-        # TODO Modifier la fonction pour qu'elle retourne le particpant de la configuration en cours
-        return "Ceci est le participant de l'observation"
+    def get_participant(self, id_observation):
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
+
+            # Execute a request
+            query = "SELECT participant FROM observation WHERE id_observation=%s"
+            cursor.execute(query, (id_observation,))  # Pass label as a tuple
+
+            # Fetch the first result
+            result = cursor.fetchone()
+
+            # Make sure to fetch all results to clear the cursor before closing it, even if you don't use them.
+            while cursor.fetchone() is not None:
+                pass
+
+            return result[0] if result else None
+
+        except mysql.connector.Error as err:
+            print(f"Database error: {err}")
+            return None
+
+        finally:
+            # Closing the cursor and connection
+            cursor.close()
+            conn.close()
 
     def exist_in_this_config(self, sensor_type):
         # TODO Modifier la fonction pour qu'elle retourne true si ce type de capteur est présent dans la configuration en cours sinon false
