@@ -124,6 +124,31 @@ class ModifyOrCreateConfiguration:
 
         return count
 
+    def log_out_the_admin(self):
+        """!
+        @brief This functions is called when the admin logs out and will change the connection status to False
+        @param self : the instance
+        @return Nothing
+        """
+        # Connexion to the MySQL database
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="Q3fhllj2",
+            database="prisme_home_1"
+        )
+        cursor = conn.cursor()
+
+        # Update the connexion status in the database
+        query_update = "UPDATE prisme_home_1.user SET connected=0 WHERE login=%s AND password=%s"
+        cursor.execute(query_update, (globals.global_connected_admin_login, globals.global_connected_admin_password))
+        conn.commit()
+
+
+        # Close the connexion to the database
+        cursor.close()
+        conn.close()
+
     def clear_page(self):
         """!
         @brief This functions clears the entire "new observation" page

@@ -91,6 +91,20 @@ class App(ThemedTk):
 
         self.call_new_observation_page()
 
+    def redirect_to_new_observation_from_modify_or_create_a_config(self, modify_or_create_configuration_page):
+        """!
+        @brief This function logs the admins out before redirecting to the nex observation page
+        @param self : the instance
+        @param modify_or_create_configuration_page : the "modify or create a config" page
+        @return Nothing
+        """
+        # Logging out the admin
+        modify_or_create_configuration_page.log_out_the_admin()
+
+        # Redirecting to the new observation page
+        self.redirect_to_new_observation_from_anywhere(modify_or_create_configuration_page)
+
+
     def is_a_config_chosen(self, new_observation_page):
         """!
         @brief This function checks that the user has chosen a configuration for the observation. If no configuration
@@ -197,7 +211,7 @@ class App(ThemedTk):
 
         # Logout Button
         logout_button = ttk.Button(self.main_frame, text="Log out",
-                                   command=lambda: self.redirect_to_new_observation_from_anywhere(
+                                   command=lambda: self.redirect_to_new_observation_from_modify_or_create_a_config(
                                        modify_or_create_configuration_page))
         logout_button.place(relx=0.9, rely=0.01)
 
