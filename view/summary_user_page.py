@@ -43,7 +43,7 @@ class SummaryUser:
         scenario_frame = ttk.Frame(self.frame)
         scenario_frame.pack(fill=tk.BOTH)
         # TODO ajouter la valeur de scenario
-        scenario_label = ttk.Label(scenario_frame, text="Scenario : ", padding=10)
+        scenario_label = ttk.Label(scenario_frame, text="Scenario : " + self.get_scenario(globals.global_new_id_observation), padding=10)
         scenario_label.pack(side=tk.LEFT)
 
         session_frame = ttk.Frame(self.frame)
@@ -177,7 +177,6 @@ class SummaryUser:
             label_entry.set('')
             description_entry.set('')
 
-#TODO faire plutot avec l'id de l'observation
     def get_session(self, id_observation):
         try:
             conn = mysql.connector.connect(
@@ -222,6 +221,38 @@ class SummaryUser:
 
             # Execute a request
             query = "SELECT participant FROM observation WHERE id_observation=%s"
+            cursor.execute(query, (id_observation,))  # Pass label as a tuple
+
+            # Fetch the first result
+            result = cursor.fetchone()
+
+            # Make sure to fetch all results to clear the cursor before closing it, even if you don't use them.
+            while cursor.fetchone() is not None:
+                pass
+
+            return result[0] if result else None
+
+        except mysql.connector.Error as err:
+            print(f"Database error: {err}")
+            return None
+
+        finally:
+            # Closing the cursor and connection
+            cursor.close()
+            conn.close()
+
+    def get_scenario(self, id_observation):
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
+
+            # Execute a request
+            query = "SELECT configuration.label FROM configuration, observation WHERE observation.id_config=configuration.id_config AND observation.id_observation=%s"
             cursor.execute(query, (id_observation,))  # Pass label as a tuple
 
             # Fetch the first result
