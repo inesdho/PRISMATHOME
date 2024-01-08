@@ -11,20 +11,24 @@ import threading
 
 
 class SensorPairingManagement:
-    ## List of sensors already paired
-    black_list = []
     def __init__(self, master):
         """!
        @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
-       this page
+       this page and the variable that will be used
        @param self : the instance
        @param master : the master frame (created in the controller.py file)
        @return Nothing
        """
+
+        # List of sensors already paired
+        self.black_list = []
+
+        # List to hold the label, description entries for each sensor, and sensor type ID
+        self.sensor_entries = []
+
+        # Set the master frame and creates the frame that will hold all the content of the page
         self.master = master
         self.frame = ttk.Frame(self.master)
-        self.sensor_entries = []  # List to hold the label, description entries for each sensor, and sensor type ID
-
         self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
 
         # Displays the title of the page
@@ -38,6 +42,7 @@ class SensorPairingManagement:
         self.canvas.pack(fill=tk.BOTH, expand=True)
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
 
+        # Creation of the frame that will hold the values of the sensors
         self.frame_canvas = ttk.Frame(self.canvas)
         self.canvas.create_window((0, 0), anchor='nw', window=self.frame_canvas)
 
@@ -58,11 +63,9 @@ class SensorPairingManagement:
         ttk.Label(frame_title, background="lightgrey", width=20, text="Label", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
         ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
 
-
         # Create entries for sensors
         for index, sensor in enumerate(self.get_sensors(globals.global_id_config_selectionned), start=1):
             self.create_labeled_entry(sensor, index)
-
 
         # Configure the scroll region to follow the content of the frame
         self.frame_canvas.update_idletasks()
@@ -81,33 +84,22 @@ class SensorPairingManagement:
         data_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
         # Showing the type of the sensor
-        label = ttk.Label(data_frame, text=sensor["type"] + " " + str(index), width=20, anchor='w', wraplength=140, background="white", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
+        ttk.Label(data_frame, text=sensor["type"] + " " + str(index), width=20, anchor='w', wraplength=140,
+                  background="white", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
 
         # Creating a text widget tht will contain the label associated with the sensor
-        ttk.Label(data_frame, background="white", width=20, text=sensor["label"], borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
+        ttk.Label(data_frame,text=sensor["label"], borderwidth=1,  background="white", width=20,
+                  relief="solid", padding=5).pack(side=tk.LEFT)
 
         # Showing the description of the sensor
-        ttk.Label(data_frame, background="white", width=80, text=sensor["description"], borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
-
+        ttk.Label(data_frame, background="white", width=80, text=sensor["description"], borderwidth=1,
+                  relief="solid", padding=5).pack(side=tk.LEFT)
 
         button_pairing = ttk.Button(data_frame, text=" ")
         button_pairing.pack(side=tk.LEFT, padx=5)
 
         # Adding the controll button for the management of the sensor connexion
         self.button_init(button_pairing, sensor)
-
-    # Create a text widget that will contain the text in the parameter of the function
-    def create_a_label(self, text, frame, width):
-        """!
-        @brief Create a label that will contain the text in the parameter of the function
-        @param text : the text that needs to be displayed
-        @param frame : the frame that will contain the widget
-        @param width : the width of the widget
-        @return None
-        """
-        sensor_label = ttk.Label(frame, background="white", width=width, text=text, borderwidth=1, relief="solid", padding=5)
-        # Adding the content of the text widget
-        sensor_label.pack(side=tk.LEFT)
 
     def center_window(self, window):
         """!
@@ -130,6 +122,13 @@ class SensorPairingManagement:
 
     # Initialise the button to offer the user the option to pair a physical sensor
     def button_init(self, button_pairing, sensor):
+        """!
+        @brief button_init : THis functions edit the button in order to change the text that it displays and the function
+        associated to it.
+        @param self : The instance
+
+        @return : None
+        """
         button_pairing.config(text="Pairing", command=lambda: self.pairing_a_sensor(button_pairing, sensor, None))
 
     # Function to change the background while entering the label
