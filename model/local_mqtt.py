@@ -7,7 +7,6 @@ BROKER_PORT = 1883
 ## Constant for the broker addr
 BROKER_ADDR = "127.0.0.1"
 
-
 def connect_to_mqtt_broker(client):
     """!
     Create a connection to mqtt broker
@@ -23,14 +22,12 @@ def connect_to_mqtt_broker(client):
         # Loop until the connection works
         connect_to_mqtt_broker(client)
 
-
 def get_all_sensors_on_zigbee2mqtt(details_wanted):
     """!
     Gets all sensors that are paired with Zigbee2Mqtt 
 
-    @param details_wanted: The details needed by the user. 
-    all : everything will be included in the sensors_list (will be usable to know the limits of a 
-    sensor)
+    @param details_wanted: The details needed by the user : all, fname, ieee or label.
+    all : everything will be included in the connected_sensors_list (fname, ieee and label)
     fname : Only the friendly names
     ieee : Only the ieee address
     label : only the label of the sensor
@@ -38,23 +35,8 @@ def get_all_sensors_on_zigbee2mqtt(details_wanted):
     @return sensors_list: The list of sensors currently paired with Zigbee2Mqtt
     """
 
+    # The list of sensors to return
     connected_sensors_list = []
-
-    # Database of every type of sensors available. Their names are obtained in the MQTT Message
-    # It is also possible to get this information on the Zigbee2Mqtt website, in the description 
-    # field of the corresponding device
-
-    ## TODO A IMPORTER D'UN FICHIER GLOBAL PLUS TARD
-    type_of_sensor_list = [
-        "Aqara T1 wireless mini switch", "Aqara T1 door & window contact sensor",
-        "Aqara P1 human body movement and illuminance sensor", "Vibration sensor",
-        "Aqara vibration sensor"
-    ]
-
-    # This function is called when a message is received. Because we subscribe to the
-    # zigbee2mqtt/bridge/devices topic, a message is immediately received. 
-    # When the function is called, it will display all of the sensors currently connected to Zigbee2Mqtt 
-    # Whenever a change is made, the new or deleted sensor will be printed.
 
     def on_message(client, userdata, msg):
         """!
@@ -109,7 +91,7 @@ def get_all_sensors_on_zigbee2mqtt(details_wanted):
         client.disconnect()
 
     # Connection to the MQTT CLient
-    client = mqtt.Client("Coordinator")
+    client = mqtt.Client("get_all_sensors_on_zigbee2mqtt")
     client.on_message = on_message
     connect_to_mqtt_broker(client)
 
@@ -118,7 +100,6 @@ def get_all_sensors_on_zigbee2mqtt(details_wanted):
 
     client.loop_forever()
     return connected_sensors_list
-
 
 def change_permit_join(state_wanted):
     """!
@@ -129,7 +110,7 @@ def change_permit_join(state_wanted):
 
     @return transmission_state: if the change was correctly made
     """
-    transmission_state = ""
+    transmission_state = 0
 
     def on_message(client, userdata, msg):
         """!
@@ -142,17 +123,13 @@ def change_permit_join(state_wanted):
 
         @return None
         """
+        nonlocal transmission_state
         message = str(msg.payload)
 
         if "ok" in message:
-            if "false" in message:
-                transmission_state = "L'appairage de capteurs est desactive"
-            elif "true" in message:
-                transmission_state = "L'appairage de capteurs est active"
-            else:
-                transmission_state = "Il y a eu une erreur"
+            transmission_state = 1
         elif "error" in message:
-            transmission_state = "Il y a eu une erreur"
+            transmission_state = 0
         client.disconnect()
         client.loop_stop()
 
@@ -178,8 +155,12 @@ def rename_sensor(previous_name, new_name):
     @param new_name: The new name of the sensor
 
     @return transmission_state: If the rename was correctly done, if not the cause of what happened
+            # 1 : The rename was correctly done
+            # 2 : Targeted sensor does not exist
+            # 3 : Unknown
     """
-    transmission_state = ""
+    transmission_state = 3
+    cpt=0
 
     # This function allows the user to rename a sensor, using the currently known firendly name (or
     # the IEEE address) and the new name
@@ -199,24 +180,59 @@ def rename_sensor(previous_name, new_name):
         @return None
         """
 
-        message = str(msg.payload)
 
-        if '"status":"error"' in message:
-            if "does not exist" in message:
-                transmission_state = "Le nom precedent (ou l'adresse IEEE) n'existe pas."
-            elif "is already in use" in message:
-                transmission_state = "Un capteur dans le systeme a deja ce nom"
-        elif '"status":"ok"':
-            transmission_state = "Le capteur a ete renomme correctement."
+        nonlocal transmission_state
+        nonlocal cpt
+
+        # Do not execute twice the on_message function to avoid problem with the recursive call
+        if cpt == 0:
+            cpt = 1
+        else:
+            print("coucou")
+            return
+
+        # Convert the feedback in json
+        rename_feedback = json.loads(msg.payload)
+        print("feeedback: ", rename_feedback)
+        if 'ok' in rename_feedback["status"]:
+            transmission_state = 1
+        elif 'error' in rename_feedback:
+            if 'does not exist' in rename_feedback['error']:
+                transmission_state = 2
+            elif 'is already in use' in rename_feedback['error']:
+                # Get the list of sensors
+                sensors = get_all_sensors_on_zigbee2mqtt("all")
+
+                for device in sensors:
+                    # Seek for the sensor which use the name we want
+                    if device["name"] == new_name:
+                        # Rename the sensor with his ieee_addres + x
+                        rename_sensor(new_name, device["ieee_address"] + "x")
+                        break
+                # Call the function again to rename the sensor now that new_name is not used
+                transmission_state = rename_sensor(previous_name, new_name)
+
+            else:
+                print("WTF 1 : ",rename_feedback)
+                transmission_state = 3
+        else:
+            print("WTF 2 : ", rename_feedback)
+            transmission_state = 3
 
         client.disconnect()
         client.loop_stop()
 
+    # Connection to the MQTT Client
     client = mqtt.Client("Coordinator")
     client.on_message = on_message
     connect_to_mqtt_broker(client)
 
-    if new_name != previous_name:
+    # Check if it is the same name, there is no need to rename it
+    if new_name == previous_name:
+        transmission_state = 1
+        client.disconnect()
+        client.loop_stop()
+    else:
         # Conversion of the message
         message = json.dumps({"from": previous_name, "to": new_name})
 
@@ -226,10 +242,7 @@ def rename_sensor(previous_name, new_name):
         # The message is then published on the appropriate topic
         client.publish("zigbee2mqtt/bridge/request/device/rename", message)
 
-        client.loop_forever()
-    else:
-        transmission_state = "OK"
-
+    client.loop_forever()
     return transmission_state
 
 def get_sensor_value(sensor_friendly_name, label_widget):
@@ -290,7 +303,7 @@ def get_sensor_value(sensor_friendly_name, label_widget):
             client.loop_stop()
 
     # The mqtt client to collect the data from the broker
-    mqtt_client = mqtt.Client("Client"+sensor_friendly_name)
+    mqtt_client = mqtt.Client("get_sensor_value"+sensor_friendly_name)
 
     # The on_message function of the mqtt client
     mqtt_client.on_message = on_message
@@ -301,7 +314,6 @@ def get_sensor_value(sensor_friendly_name, label_widget):
     mqtt_client.subscribe("zigbee2mqtt/"+sensor_friendly_name)
 
     mqtt_client.loop_forever()
-
 
 def get_new_sensors():
     """!
@@ -337,8 +349,8 @@ def get_new_sensors():
             client.loop_stop()
             client.disconnect()
 
-    # Connection to the MQTT CLient
-    client = mqtt.Client("get_new_sensors_client")
+    # Connection to the MQTT Client
+    client = mqtt.Client("get_new_sensors")
     client.on_message = on_message
     connect_to_mqtt_broker(client)
 
@@ -346,10 +358,3 @@ def get_new_sensors():
 
     client.loop_forever()
     return sensor_details
-
-
-if __name__ == "__main__":
-    print("test")
-    print(get_sensor_value("door/door_room"))
-    time.sleep(3)
-    print(get_sensor_value("door/door_room"))
