@@ -256,25 +256,25 @@ def get_sensor_value(sensor_friendly_name, label_widget):
         print("Reception message ", sensor_friendly_name)
 
         match sensor_type:
-            case "button":
+            case "Button":
                 if 'action' in sensor_datas:
                     value = "Action : "+str(sensor_datas["action"])
                 else:
                     value = "Unknown"
                 
-            case "door" :
+            case "Door" :
                 if 'contact' in sensor_datas:  
                     value = "Contact : "+str(sensor_datas["contact"])
                 else:
                     value = "Unknown"
 
-            case "motion" :
+            case "Motion" :
                 if 'occupancy' in sensor_datas: 
                     value = "Occupancy : "+str(sensor_datas["occupancy"])
                 else:
                     value = "Unknown"
 
-            case "vibration" : 
+            case "Vibration" :
                 if 'vibration' in sensor_datas: 
                     value = "Vibration : "+str(sensor_datas["vibration"])
                 else:
@@ -304,16 +304,24 @@ def get_sensor_value(sensor_friendly_name, label_widget):
 
 
 def get_new_sensors():
+    """!
+    This function is used to get the new sensors that joined zigbee2mqtt after a permit join
 
+    @param client: Client
+    @param userdata: Unused
+    @param msg: Message from topic
+
+    @return None
+    """
     sensor_details = {}
     def on_message(client, userdata, msg):
         """!
         Function that is called when a message is received from a topic
-        In that case, it is zigbee2mqtt/bridge/devices
+        In that case, it is zigbee2mqtt/bridge/event
 
         @param client: Client
         @param userdata: Unused
-        @param msg: JSON message, which contains all of the informations of the sensors
+        @param msg: Message from topic
 
         @return None
         """
