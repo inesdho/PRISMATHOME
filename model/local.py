@@ -12,11 +12,10 @@
 import mysql.connector
 import time
 
-import remote
+import model.remote
 
 local_db = None
 local_cursor = None
-
 
 def connect_to_local_db():
     """!
@@ -28,10 +27,10 @@ def connect_to_local_db():
         global local_db, local_cursor
         # Connexion to the database
         local_db = mysql.connector.connect(
-            host="192.168.1.122",
-            user="prisme",
+            host="127.0.0.1",
+            user="root",
             password="Q3fhllj2",
-            database="prisme@home"
+            database="prisme_home_1"
         )
         local_cursor = local_db.cursor()
     except Exception as e:
@@ -39,17 +38,17 @@ def connect_to_local_db():
         # Loop until the connection works
         connect_to_local_db()
 
-
 def get_system_id():
     """!
     Gets the id of the current system from the local database
     @return the system's ID
     """
+    # TODO : Ajouter try except comme dans les autres fonctions
     global local_db, local_cursor
 
     query = """
         SELECT s.id_system 
-        FROM System s
+        FROM system s
         """
     local_cursor.execute(query)
     result = local_cursor.fetchone()
@@ -61,7 +60,6 @@ def get_system_id():
         print("System not found")
         return None
 
-
 def add_system_id(local_id):
     """!
     Prepends the system's ID to any local ID provided in order to store them into the distant database
@@ -71,7 +69,6 @@ def add_system_id(local_id):
     system_id = get_system_id()
     concat_id = f"syst{system_id}_{local_id}"
     return concat_id
-
 
 def find_sensor_by_type_label(sensor_type, label):
     """!
@@ -86,9 +83,10 @@ def find_sensor_by_type_label(sensor_type, label):
 
     query = """
     SELECT s.id_sensor 
-    FROM Sensor s 
-    JOIN Sensor_type st ON s.id_type = st.id_type 
-    WHERE s.label = %s AND st.type = %s;
+    FROM sensor s 
+    JOIN sensor_type st ON s.id_type = st.id_type
+    JOIN observation o ON s.id_observation = o.id_observation
+    WHERE s.label = %s AND st.type = %s AND o.active = 1;
     """
 
     values = (label, sensor_type)
@@ -111,7 +109,6 @@ def find_sensor_by_type_label(sensor_type, label):
             return find_sensor_by_type_label(sensor_type, label)
         else:
             return False
-
 
 def send_query(query_type, table, fields=None, values=None, condition=None):
     """!
@@ -207,8 +204,6 @@ def send_query(query_type, table, fields=None, values=None, condition=None):
         #     query += f" ({', '.join(fields)}) VALUES ({', '.join(['%s'] * len(remote_values))})"
         print(f"Trying to execute this query in distant DB: {remote_query, remote_values}")
 
-
-
         # Attempting to send to remote DB
         if remote.execute_remote_query(query, remote_values) == 1:  # Success
             return 1
@@ -225,7 +220,6 @@ def send_query(query_type, table, fields=None, values=None, condition=None):
             print("Unexpected error while storing to local DB!!!")
             print("Error (local):", error)
             return 0
-
 
 def cache_query(remote_query, remote_values):
     """!
@@ -250,7 +244,6 @@ def cache_query(remote_query, remote_values):
     local_cursor.execute(caching_query, (remote_query_as_text,))
     local_db.commit()
 
-
 def save_data(sensor_id, data, timestamp):
     """!
         Inserts into the database the data from the sensor
@@ -262,34 +255,7 @@ def save_data(sensor_id, data, timestamp):
         @return None
         """
     values = [sensor_id, data, timestamp]
-    send_query('insert', 'Data', ['id_sensor', 'data', 'timestamp'], values)
-
-
-def set_battery_low(sensor_id, datetime):
-    """!
-    Insert the monitoring message "Sensor battery low"
-
-    @param sensor_id: The ID of the sensor.
-    @param datetime : The datetime when the datas had been received.
-    """
-    query = """
-        INSERT INTO Monitoring (id_sensor, id_system, timestamp, id_error)
-        VALUES (%s, %s, %s, (SELECT id_error FROM Error_message WHERE label = 'Sensor battery low'));
-        """
-    data = (sensor_id, get_system_id(), datetime)
-    try:
-        local_cursor.execute(query, data)
-        local_db.commit()
-        return True
-    except mysql.connector.Error as error:
-        if error.errno == 2013:
-            # CBD : Monitoring "Lost local DB connection at [datetime]"
-            connect_to_local_db()
-            # CBD : Monitoring "local DB connection at [datetime]"
-            return set_battery_low(sensor_id, datetime)
-        else:
-            return False
-
+    send_query('insert', 'data', ['id_sensor', 'data', 'timestamp'], values)
 
 def save_sensor_battery(sensor_id, battery, datetime):
     """!
@@ -299,8 +265,9 @@ def save_sensor_battery(sensor_id, battery, datetime):
     @param battery: The new battery percentage value.
     @param datetime: The timestamp when the data had been received
     """
+    # TODO : (Matteo) Ajouter la gestion pour la BDD distante dans cette fonction
     query = """
-    UPDATE Sensor
+    UPDATE sensor
     SET battery_percentage = %s
     WHERE id_sensor = %s;
     """
@@ -323,4 +290,97 @@ def save_sensor_battery(sensor_id, battery, datetime):
         set_battery_low(sensor_id, datetime)
 
     return True
+
+def get_active_observation():
+    """!
+    Select and return the ID of the active observation.
+
+    @return A list of ID of active observations. Empty list if no active observations are found.
+    """
+
+    query = "SELECT id_observation FROM observation WHERE active = 1;"
+
+    try:
+        local_cursor.execute(query)
+        rows = local_cursor.fetchall()
+        if rows:
+            return rows[0]
+        else:
+            return None
+    except mysql.connector.Error as error:
+        # 2013 is the error code for connection lost
+        if error.errno == 2013:
+            # CBD : Monitoring "Lost local DB connection at [datetime]"
+            # Wait until the connection is back
+            connect_to_local_db()
+            # CBD : Monitoring "local DB connection at [datetime]"
+            # Loop to retry the query
+            return find_active_observation()
+        else:
+            return False
+
+def get_sensors_from_observation(id_observation):
+    """
+    Retrieve all sensor labels and their associated types for a given observation ID.
+
+    @param id_observation : The ID of the observation.
+
+    @return A list of dictionaries with keys "type" and "label" for each sensor. None list if no sensors are found.
+    """
+
+    query = """
+    SELECT s.label, st.type 
+    FROM sensor s 
+    JOIN sensor_type st ON s.id_type = st.id_type 
+    WHERE s.id_observation = %s;
+    """
+
+    try:
+        local_cursor.execute(query, id_observation)
+        rows = local_cursor.fetchall()
+        if rows:
+            return [{"label": row[0], "type": row[1]} for row in rows]
+        else:
+            return None
+    except mysql.connector.Error as error:
+        # 2013 is the error code for connection lost
+        if error.errno == 2013:
+            # CBD : Monitoring "Lost local DB connection at [datetime]"
+            # Wait until the connection is back
+            connect_to_local_db()
+            # CBD : Monitoring "local DB connection at [datetime]"
+            # Loop to retry the query
+            return get_sensors_from_observation(id_observation)
+        else:
+            return False
+
+"""********* Monitoring functions **********"""
+def set_battery_low(sensor_id, datetime):
+    """!
+    Insert the monitoring message "Sensor battery low"
+
+    @param sensor_id: The ID of the sensor.
+    @param datetime : The datetime when the datas had been received.
+    """
+    # TODO : (Matteo) Ajouter la gestion pour la BDD distante dans cette fonction
+    query = """
+        INSERT INTO monitoring (id_sensor, id_system, timestamp, id_error)
+        VALUES (%s, %s, %s, (SELECT id_error FROM Error_message WHERE label = 'Sensor battery low'));
+        """
+    data = (sensor_id, get_system_id(), datetime)
+    try:
+        local_cursor.execute(query, data)
+        local_db.commit()
+        return True
+    except mysql.connector.Error as error:
+        if error.errno == 2013:
+            # CBD : Monitoring "Lost local DB connection at [datetime]"
+            connect_to_local_db()
+            # CBD : Monitoring "local DB connection at [datetime]"
+            return set_battery_low(sensor_id, datetime)
+        else:
+            return False
+
+
+
 
