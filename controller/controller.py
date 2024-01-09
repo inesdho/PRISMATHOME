@@ -22,7 +22,6 @@ from view.sensor_pairing_management_page import SensorPairingManagement
 import webbrowser
 
 
-
 class App(ThemedTk):
 
     def __init__(self):
@@ -104,7 +103,6 @@ class App(ThemedTk):
         # Redirecting to the new observation page
         self.redirect_to_new_observation_from_anywhere(modify_or_create_configuration_page)
 
-
     def is_a_config_chosen(self, new_observation_page):
         """!
         @brief This function checks that the user has chosen a configuration for the observation. If no configuration
@@ -118,7 +116,6 @@ class App(ThemedTk):
         else:
             new_observation_page.on_import_button_click()
             self.redirect_to_pairing_from_anywhere(new_observation_page)
-
 
     def redirect_to_pairing_from_anywhere(self, page):
         """!
@@ -173,12 +170,12 @@ class App(ThemedTk):
         # Cancel button to redirect to the new observation page
         ttk.Button(self.main_frame, text="Cancel",
                    command=lambda: self.redirect_to_new_observation_from_anywhere(login_as_admin_page)).place(
-            relx=0.9,rely=0.1)
+            relx=0.9, rely=0.1)
 
     def connexion_button_clic(self, login_as_admin_page):
         """!
-        @brief This function calls the connexion_admin function located in the "login as admin page" in order to check if
-        the login and password entered by the user are correct
+        @brief This function calls the connexion_admin function located in the "login as admin page" in order to check
+        if the login and password entered by the user are correct
         @param self : the instance
         @param login_as_admin_page : the login as admin page
         @return Nothing
@@ -187,7 +184,6 @@ class App(ThemedTk):
         if login_as_admin_page.connexion_admin():
             # If they are correct the user is redirected to the "modify or create a configuration page"
             self.redirect_to_modify_or_create_configuration_from_anywhere(login_as_admin_page)
-
 
     def redirect_to_modify_or_create_configuration_from_anywhere(self, page):
         """!
@@ -252,7 +248,7 @@ class App(ThemedTk):
         """
 
         # Checks if the user has chosen a unique name for the configuration
-        if modify_or_create_a_config_page.does_label_config_already_exists() == True:
+        if modify_or_create_a_config_page.does_label_config_already_exists():
             # Display a message asking the user to choose another name
             messagebox.showerror("Error", "This configuration's name already exists. Please choose another one.")
         else:
@@ -261,7 +257,6 @@ class App(ThemedTk):
 
             # Redirection to the "selection sensor quantity" page
             self.redirect_to_selection_sensor_quantity_from_anywhere(modify_or_create_a_config_page)
-
 
     def redirect_to_selection_sensor_quantity_from_anywhere(self, page):
         """!
@@ -308,7 +303,6 @@ class App(ThemedTk):
         else:
             messagebox.showerror("Error", "Please select at least one sensor")
 
-
     def redirect_to_labellisation_sensor_from_anywhere(self, page):
         """!
         @brief This function clears the previous page in order to display the content of the "labellisation sensor"
@@ -335,9 +329,9 @@ class App(ThemedTk):
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         next_button = ttk.Button(self.main_frame, text="Next",
-                                 command=lambda: self.redirect_to_summary_admin_from_labellisation(labellisation_sensor_page))
+                                 command=lambda: self.redirect_to_summary_admin_from_labellisation(
+                                     labellisation_sensor_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
-
 
     def redirect_to_summary_admin_from_labellisation(self, labellisation_sensor_page):
         """!
@@ -362,20 +356,21 @@ class App(ThemedTk):
         self.create_new_main_frame()
 
         # Cancel button
-        concenl_button = ttk.Button(self.main_frame, text="Cancel",
-                                    command=lambda: self.redirect_to_modify_or_create_configuration_from_anywhere(
-                                        summary_admin_page))
-        concenl_button.pack(side=tk.LEFT, padx=10, expand=True)
+        cancel_button = ttk.Button(self.main_frame, text="Cancel",
+                                   command=lambda: self.redirect_to_modify_or_create_configuration_from_anywhere(
+                                       summary_admin_page))
+        cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Back button
         back_button = ttk.Button(self.main_frame, text="Back",
-                                 command=lambda: self.redirect_to_labellisation_sensor_from_anywhere(summary_admin_page))
+                                 command=lambda: self.redirect_to_labellisation_sensor_from_anywhere(
+                                     summary_admin_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Validate configuration button
         back_button = ttk.Button(self.main_frame, text="Validate configuration",
                                  command=lambda: self.redirect_to_modify_or_create_configuration_after_config_validation
-                                     (summary_admin_page))
+                                 (summary_admin_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
     def redirect_to_summary_user_from_anywhere(self, page):
@@ -398,7 +393,7 @@ class App(ThemedTk):
 
         # Cancel button
         cancel_button = ttk.Button(self.main_frame, text="Exit",
-                                    command=lambda: self.redirect_to_new_observation_from_anywhere(summary_user_page))
+                                   command=lambda: self.redirect_to_new_observation_from_anywhere(summary_user_page))
         cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Back button
@@ -408,9 +403,9 @@ class App(ThemedTk):
 
         # Start observation button
         back_button = ttk.Button(self.main_frame, text="Start observation",
-                                 command=lambda: self.redirect_to_summary_observation_from_summary_user(summary_user_page))
+                                 command=lambda: self.redirect_to_summary_observation_from_summary_user(
+                                     summary_user_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
-
 
     def redirect_to_summary_observation_from_summary_user(self, summary_user_page):
         """!
