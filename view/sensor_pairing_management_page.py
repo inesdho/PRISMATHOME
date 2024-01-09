@@ -46,7 +46,6 @@ class SensorPairingManagement:
         self.frame_canvas = ttk.Frame(self.canvas)
         self.canvas.create_window((0, 0), anchor='nw', window=self.frame_canvas)
 
-
     def show_page(self):
         """!
         @brief The show_page function creates and displays all the elements of the "Sensor pairing" page
@@ -62,6 +61,29 @@ class SensorPairingManagement:
         ttk.Label(frame_title, background="lightgrey", width=20, text="Sensor", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
         ttk.Label(frame_title, background="lightgrey", width=20, text="Label", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
         ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
+
+        """
+        ****** POUR INES PETIT GUIDE POUR L'INSERT********
+        
+        sensor_entries = self.get_sensors(globals.global_id_config_selectionned)
+        
+        # ici une boucle pour ajouter des MAC_ADDRESS bidons
+        # Attention, le format sera certainement celui ecrit ici
+        # avec "0x" au début, il faut compté 18 dans la bdd plutot que 16
+        for index, sensor in sensor_entries):
+            sensor["ieee_address"]="0x1234567891237894"
+        
+        # A mettre à la place de la boucle actuelle
+        for index, sensor in sensor_entries, start=1):
+            self.create_labeled_entry(sensor, index)
+        
+        Pour ta requête : 
+        i c'est un index
+        sensors_global[i]["label"]
+        sensors_global[i]["description"]
+        sensors_global[i]["type"]
+        sensors_global[i]["ieee_address"]
+        """
 
         # Create entries for sensors
         for index, sensor in enumerate(self.get_sensors(globals.global_id_config_selectionned), start=1):
@@ -156,7 +178,7 @@ class SensorPairingManagement:
         sensor in zigbee2mqtt with the correct label
         @param button_pairing : The button which has been clicked to open the popup
         @param sensor_selected : The dictionary of the real sensor from zigbee2mqtt containing the sensor details
-        (iee_address, name, ...)
+        (ieee_address, name, ...)
         @param sensor_elt : The dictionary containing the sensor details filled by the user (label, description, type)
         @param popup : The popup created by pairing_a_sensor function
         @param edit_sensor : The name of the sensor being edited
@@ -179,10 +201,14 @@ class SensorPairingManagement:
                 children[-1].destroy()
 
         self.black_list.append(sensor_selected["ieee_address"])
-        # TODO : Ajouter l'adresse mac à sensor elt
 
+        # Add the ieee_address to the sensor_elt to save it for the db insert
+        sensor_elt["ieee_address"] = sensor_selected["ieee_address"]
+
+        # Popup close
         popup.grab_release()
         popup.destroy()
+
         button_pairing.config(text="Edit",
                               command=lambda: self.edit_the_pairing(button_pairing, sensor_selected, sensor_elt))
 
@@ -426,7 +452,7 @@ class SensorPairingManagement:
             sensors.append({
                 "label": sensor_label,
                 "description": sensor_description,
-                "type": sensor_type
+                "type": sensor_type,
             })
 
         # Close the cursor and connection
