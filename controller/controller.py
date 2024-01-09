@@ -148,8 +148,6 @@ class App(ThemedTk):
                                  command=lambda: self.redirect_to_summary_user_from_anywhere(sensor_pairing_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
-
-
     def redirect_to_login_as_admin_from_anywhere(self, page):
         """!
         @brief This function clears the new observation page in order to display the content of the the login as admin page
@@ -242,19 +240,27 @@ class App(ThemedTk):
         # Go back to the "modify or create a configuration page"
         self.redirect_to_modify_or_create_configuration_from_anywhere(summary_admin_page)
 
-    def redirect_to_selection_sensor_quantity_from_create_a_config(self, create_a_config_page):
+    def redirect_to_selection_sensor_quantity_from_create_a_config(self, modify_or_create_a_config_page):
         """!
-        @brief This function calls the function allows the config to be saved locally and then calls the redirection to
-        the "selection sensor quantity" page
+        @brief This function first checks if the label of the config chosen by the user is not already taken. In that
+        case, it will display an error message asking the user to choose another name for the configuration.
+        If the name doesn't already exist, the function allows the inputs of the user to be saved locally and then calls
+        the redirection to the "selection sensor quantity" page
         @param self: the instance
-        @param create_a_config_page : the create or modify a configuration page
+        @param modify_or_create_a_config_page : the create or modify a configuration page
         @return Nothing
         """
-        # Create a new configuration in the database
-        create_a_config_page.on_create_configuration_button_click()
 
-        # Redirection to the "selection sensor quantity" page
-        self.redirect_to_selection_sensor_quantity_from_anywhere(create_a_config_page)
+        # Checks if the user has chosen a unique name for the configuration
+        if modify_or_create_a_config_page.does_label_config_already_exists() == True:
+            # Display a message asking the user to choose another name
+            messagebox.showerror("Error", "This configuration's name already exists. Please choose another one.")
+        else:
+            # Create a new configuration in the database
+            modify_or_create_a_config_page.save_label_description_id_of_config_into_globals()
+
+            # Redirection to the "selection sensor quantity" page
+            self.redirect_to_selection_sensor_quantity_from_anywhere(modify_or_create_a_config_page)
 
 
     def redirect_to_selection_sensor_quantity_from_anywhere(self, page):
