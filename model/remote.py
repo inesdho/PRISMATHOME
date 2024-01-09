@@ -14,7 +14,7 @@ import time
 
 import mysql.connector
 
-import local
+import model.local
 
 # Connexion to the database
 db = None
