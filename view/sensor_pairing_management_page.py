@@ -65,10 +65,6 @@ class SensorPairingManagement:
         ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid",
                   padding=5).pack(side=tk.LEFT)
 
-        # TODO mettre au propre
-        # ici une boucle pour ajouter des MAC_ADDRESS bidons
-        # Attention, le format sera certainement celui ecrit ici
-        # avec "0x" au début, il faut compté 18 dans la bdd plutot que 16
         self.sensor_entries = self.get_sensors(globals.global_id_config_selectionned)
 
         for index, sensor in enumerate(self.sensor_entries, start=1):
