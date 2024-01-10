@@ -141,7 +141,7 @@ class NewObservation:
         conn.close()
         return config_labels
 
-    def get_config_by_id(self, label):
+    def get_config_by_id(self, label):  #TODO changer ça (par "get_config_id_by_label")
         """!
         @brief This functions returns the id of the configuration that was selected by the user depending on its label.
         @param self : the instance
@@ -208,7 +208,7 @@ class NewObservation:
         id_conf = self.get_config_by_id(label)  # Ensure id_conf is set correctly
 
         # Make sure the query includes both placeholders
-        query = "SELECT COUNT(id_session) FROM observation WHERE participant=%s AND id_config=%s"
+        query = "SELECT COUNT(id_session) FROM observation WHERE participant=%s AND id_config=%s" # TODO enlever count
         cursor.execute(query, (self.participant_entry.get(), id_conf))  # Pass participant and id_conf as a tuple
         result = cursor.fetchone()  # Fetch the first result
         cursor.close()

@@ -51,7 +51,7 @@ def connect_to_remote_db():
             print(e)
             time.sleep(2)
     else:
-        print("Not allowed to join")
+        print("Disconnect request")
         time.sleep(2)
 
 
@@ -87,8 +87,6 @@ def execute_remote_query(query, values=None):
     if db is not None and db.is_connected():  # checks if connected to the remote DB
         try:
             if values is not None:
-                print("try execute_remote_query : ")
-                print("query", query, "values", values)
                 cursor.execute(query, values)
             else:
                 cursor.execute(query)
@@ -130,20 +128,18 @@ def synchronise_queries():
             queries = local.local_cursor.fetchall()
             for query_entry in queries:
                 print("Query: ", query_entry[1])
-                query = query_entry[1]  # Assuming the query is in the first column
+                query = query_entry[1]
                 success = execute_remote_query(query)
                 if success:
                     # If the query was executed successfully, delete the entry from the local table
                     local.local_cursor.execute("DELETE FROM remote_queries WHERE query = %s", (query,))
                     local.local_db.commit()
-                    print("YEEEESSSSS")
         except Exception as e:
             print(f"Error syncing failed queries: {e}")
-            # Error syncing failed queries: No result set to fetch from.
-    else:
-        print("Distant database not connected")
-        # Create thread to check on the database
-        if thread_active == 0:
-            connection_thread = threading.Thread(target=connect_to_remote_db)
-            connection_thread.start()
-        return 0
+        else:
+            print("Distant database not connected")
+            # Create thread to check on the database
+            if thread_active == 0:
+                connection_thread = threading.Thread(target=connect_to_remote_db)
+                connection_thread.start()
+            return 0

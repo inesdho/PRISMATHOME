@@ -66,7 +66,7 @@ class SummaryUser:
                 database="prisme_home_1"
             )
             cursor = conn.cursor()
-            cursor.execute("SELECT DISTINCT id_type, type FROM sensor_type")
+            cursor.execute("SELECT DISTINCT id_type, type FROM sensor_type")    # get_sensor_type_list()
             all_sensor_types = cursor.fetchall()
 
             for sensor_type_id, sensor_type in all_sensor_types:
@@ -132,6 +132,7 @@ class SummaryUser:
         self.frame.destroy()
 
     def validate_conf(self):
+        # TODO: virer du controller et faire un appel à model.create_configuration et model.save_sensor_configs
         """!
         @brief This functions validated all the infos relative to the current created configuration in order to save them
         @param self : the instance
