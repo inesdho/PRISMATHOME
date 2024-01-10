@@ -58,36 +58,20 @@ class SensorPairingManagement:
         frame_title.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
         # Create the title of the different field
-        ttk.Label(frame_title, background="lightgrey", width=20, text="Sensor", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
-        ttk.Label(frame_title, background="lightgrey", width=20, text="Label", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
-        ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
+        ttk.Label(frame_title, background="lightgrey", width=20, text="Sensor", borderwidth=1, relief="solid",
+                  padding=5).pack(side=tk.LEFT)
+        ttk.Label(frame_title, background="lightgrey", width=20, text="Label", borderwidth=1, relief="solid",
+                  padding=5).pack(side=tk.LEFT)
+        ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid",
+                  padding=5).pack(side=tk.LEFT)
 
-        """
-        ****** POUR INES PETIT GUIDE POUR L'INSERT********
-        
-        sensor_entries = self.get_sensors(globals.global_id_config_selectionned)
-        
+        # TODO mettre au propre
         # ici une boucle pour ajouter des MAC_ADDRESS bidons
         # Attention, le format sera certainement celui ecrit ici
         # avec "0x" au début, il faut compté 18 dans la bdd plutot que 16
-        for index, sensor in sensor_entries):
-            sensor["ieee_address"]="0x1234567891237894"
-        
-        # A mettre à la place de la boucle actuelle
-        for index, sensor in sensor_entries, start=1):
-            self.create_labeled_entry(sensor, index)
-        
-        Pour ta requête : 
-        i c'est un index
-        sensors_global[i]["label"]
-        sensors_global[i]["description"]
-        sensors_global[i]["type"]
-        sensors_global[i]["ieee_address"]
-        """
-
-        # Create entries for sensors
-        for index, sensor in enumerate(self.get_sensors(globals.global_id_config_selectionned), start=1):
-            self.create_labeled_entry(sensor, index)
+        sensor_entries = self.get_sensors(globals.global_id_config_selectionned)
+        for sensor in sensor_entries:
+            self.create_labeled_entry(sensor, sensor_entries.index(sensor) + 1)
 
         # Configure the scroll region to follow the content of the frame
         self.frame_canvas.update_idletasks()
@@ -110,7 +94,7 @@ class SensorPairingManagement:
                   background="white", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
 
         # Creating a text widget tht will contain the label associated with the sensor
-        ttk.Label(data_frame,text=sensor["label"], borderwidth=1,  background="white", width=20,
+        ttk.Label(data_frame, text=sensor["label"], borderwidth=1, background="white", width=20,
                   relief="solid", padding=5).pack(side=tk.LEFT)
 
         # Showing the description of the sensor
@@ -120,7 +104,7 @@ class SensorPairingManagement:
         button_pairing = ttk.Button(data_frame, text=" ")
         button_pairing.pack(side=tk.LEFT, padx=5)
 
-        # Adding the controll button for the management of the sensor connexion
+        # Adding the control button for the management of the sensor connection
         self.button_init(button_pairing, sensor)
 
     def center_window(self, window):
@@ -186,13 +170,14 @@ class SensorPairingManagement:
         @return : None
         """
 
-        if(model.local_mqtt.rename_sensor(sensor_selected['name'], sensor_elt["type"]+"/"+sensor_elt['label'])!=1):
+        if (model.local_mqtt.rename_sensor(sensor_selected['name'],
+                                           sensor_elt["type"] + "/" + sensor_elt['label']) != 1):
             showinfo("Problem", "A problem occured while renaming")
             popup.grab_release()
             popup.destroy()
             return
 
-        sensor_selected['name'] = sensor_elt["type"]+"/"+sensor_elt['label']
+        sensor_selected['name'] = sensor_elt["type"] + "/" + sensor_elt['label']
         # If an edit_sensor is specified we need to remove it from the list because it won't be in use anymore
         if edit_sensor:
             self.black_list.remove(edit_sensor["ieee_address"])
@@ -228,7 +213,8 @@ class SensorPairingManagement:
                 label_sensor_value = ttk.Label(button_pairing.master, text="Vibration : Unknown")
                 label_sensor_value.pack(side=tk.LEFT, padx=10)
 
-        my_thread = threading.Thread(target=model.local_mqtt.get_sensor_value, args=(sensor_selected["name"], label_sensor_value))
+        my_thread = threading.Thread(target=model.local_mqtt.get_sensor_value,
+                                     args=(sensor_selected["name"], label_sensor_value))
         my_thread.start()
 
     def allow_sensor_join_management(self, button_pairing, sensor_elt, popup, edit_sensor):
@@ -270,8 +256,8 @@ class SensorPairingManagement:
         scrollable_frame = ttk.Frame(my_canvas)
         my_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=400)
 
-        if(model.local_mqtt.change_permit_join(True)!=1):
-            showinfo("Error","A problem occurred while changing the permit_join state")
+        if (model.local_mqtt.change_permit_join(True) != 1):
+            showinfo("Error", "A problem occurred while changing the permit_join state")
             popup.grab_release()
             popup.destroy()
             return
@@ -293,7 +279,6 @@ class SensorPairingManagement:
             global new_sensor
 
             while not flag:
-
                 new_sensor = model.local_mqtt.get_new_sensors()
 
                 # Create a box frame to the sensor_label
@@ -333,7 +318,7 @@ class SensorPairingManagement:
         sensor_type_dictionary = {
             "Button": ["Aqara T1 wireless mini switch"],
             "Door": ["Aqara T1 door & window contact sensor"],
-            "Vibration": ["Vibration sensor","Aqara vibration sensor"],
+            "Vibration": ["Vibration sensor", "Aqara vibration sensor"],
             "Motion": ["Aqara P1 human body movement and illuminance sensor"]
         }
 
@@ -381,7 +366,8 @@ class SensorPairingManagement:
         # Fill the scrollable frame with the available sensors
         for i in range(len(sensor_list)):
             # Check if the sensor is not already chosen
-            if sensor_list[i]["ieee_address"] not in self.black_list and sensor_list[i]["label"] in sensor_type_dictionary[sensor["type"]]:
+            if sensor_list[i]["ieee_address"] not in self.black_list and sensor_list[i]["label"] in \
+                    sensor_type_dictionary[sensor["type"]]:
                 # Create a box frame to the sensor_label
                 sensor_frame = tk.Frame(scrollable_frame, cursor="hand2", bg="white", pady=0)
                 sensor_frame.pack(fill=tk.X, padx=10, pady=(5, 0), expand=True)
@@ -469,3 +455,46 @@ class SensorPairingManagement:
         """
         self.canvas.destroy()
         self.frame.destroy()
+
+    def save_sensor_info(self, sensor_entries):
+        conn = None
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
+            query = """
+            INSERT INTO sensor (MAC_address_sensor, id_type, id_observation, label, description)
+            VALUES (%s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+            id_type=VALUES(id_type), description=VALUES(description), label=VALUES(label);
+            """
+            for sensor in sensor_entries:
+                # TODO recuperer
+                id_type = '1'
+                id_observation = globals.global_new_id_observation
+                data = (sensor["ieee_address"], id_type, id_observation, sensor["label"], sensor["description"])
+                cursor.execute(query, data)
+            conn.commit()
+        except mysql.connector.Error as e:
+            print("Error: ", e)
+            if conn:
+                conn.rollback()
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+
+    def on_validate_button_click(self):
+        # Récupérer les entrées des capteurs sans l'adresse IEEE
+        sensor_entries = self.get_sensors(globals.global_id_config_selectionned)
+
+        for sensor in sensor_entries:
+            sensor["ieee_address"] = "0x1234567891237894"  # Adresse IEEE fictive pour les tests
+
+        # Sauvegarder les informations dans la base de données
+        self.save_sensor_info(sensor_entries)

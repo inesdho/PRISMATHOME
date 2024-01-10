@@ -365,6 +365,8 @@ class App(ThemedTk):
         @param page : the previous page
         @return Nothing
         """
+
+        page.on_validate_button_click()
         # Clear the previous page content
         self.clear_the_page(page)
 
