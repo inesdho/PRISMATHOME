@@ -141,6 +141,8 @@ if __name__ == "__main__":
     # Initialise the GPIO pins
     init_GPIO_pins()
 
+    # TODO : Faire clignoter la led ici
+
     model.local.connect_to_local_db()
 
     id_observation = model.local.get_active_observation()

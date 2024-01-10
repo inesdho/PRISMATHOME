@@ -79,10 +79,10 @@ class SensorPairingManagement:
         
         Pour ta requête : 
         i c'est un index
-        sensors_global[i]["label"]
-        sensors_global[i]["description"]
-        sensors_global[i]["type"]
-        sensors_global[i]["ieee_address"]
+        sensor_entries[i]["label"]
+        sensor_entries[i]["description"]
+        sensor_entries[i]["type"]
+        sensor_entries[i]["ieee_address"]
         """
 
         # Create entries for sensors
