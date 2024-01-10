@@ -473,7 +473,7 @@ class SensorPairingManagement:
             id_type=VALUES(id_type), description=VALUES(description), label=VALUES(label);
             """
             for sensor in sensor_entries:
-                # TODO recuperer
+                # TODO recuperer le vrai id_type
                 id_type = '1'
                 id_observation = globals.global_new_id_observation
                 data = (sensor["ieee_address"], id_type, id_observation, sensor["label"], sensor["description"])
