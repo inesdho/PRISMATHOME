@@ -86,7 +86,7 @@ class NewObservation:
         print("Session :", self.session_entry.get())
         print("Participant :", self.participant_entry.get())
 
-        id_system =self.get_id_system()
+        id_system = self.get_id_system()
         id_conf = self.get_config_by_id(self.configuration_combobox.get())
         id_session = self.get_id_session() + 1
 
@@ -98,10 +98,25 @@ class NewObservation:
         )
         cursor = conn.cursor()
 
-        # Exécutez une requête
-        query = "INSERT INTO observation (id_system, participant, id_config, id_session, session_label, active)VALUES(%s, %s, %s,%s, %s, %s)"
-        cursor.execute(query, (id_system, self.participant_entry.get(),id_conf,id_session,  self.session_entry.get(), 0))
+        # Exécutez une requête d'insertion
+        query = """
+        INSERT INTO observation (id_system, participant, id_config, id_session, session_label, active)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(query, (id_system, self.participant_entry.get(), id_conf, id_session, self.session_entry.get(), 0))
+
+        # Récupérez l'ID de la nouvelle observation
+        globals.global_new_id_observation = cursor.lastrowid
+
+        # Confirmez les modifications dans la base de données
         conn.commit()
+
+        # Affichez l'ID de la nouvelle observation
+        print("L'ID de la nouvelle observation est :", globals.global_new_id_observation)
+
+        # Assurez-vous de fermer le curseur et la connexion
+        cursor.close()
+        conn.close()
 
     def get_config(self):
         """!

@@ -105,7 +105,6 @@ class App(ThemedTk):
             new_observation_page.on_import_button_click()
             self.redirect_to_pairing_from_anywhere(new_observation_page)
 
-
     def redirect_to_pairing_from_anywhere(self, page):
         """!
         @brief This function clears the previous page in order to display the content of the pairing page and adds
@@ -130,7 +129,7 @@ class App(ThemedTk):
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Redirection to summary to confirm the configuration
-        next_button = ttk.Button(self.main_frame, text="Next",
+        next_button = ttk.Button(self.main_frame, text="Validate",
                                  command=lambda: self.redirect_to_summary_user_from_anywhere(sensor_pairing_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
@@ -366,6 +365,8 @@ class App(ThemedTk):
         @param page : the previous page
         @return Nothing
         """
+
+        page.on_validate_button_click()
         # Clear the previous page content
         self.clear_the_page(page)
 
