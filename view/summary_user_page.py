@@ -40,7 +40,7 @@ class SummaryUser:
         scenario_frame = ttk.Frame(self.frame)
         scenario_frame.pack(fill=tk.BOTH)
         # TODO ajouter la valeur de scenario
-        scenario_label = ttk.Label(scenario_frame, text="Scenario : " + self.get_scenario(globals.global_new_id_observation), padding=10)
+        scenario_label = ttk.Label(scenario_frame, text="Configuration : " + self.get_scenario(globals.global_new_id_observation), padding=10)
         scenario_label.pack(side=tk.LEFT)
 
         session_frame = ttk.Frame(self.frame)

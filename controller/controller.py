@@ -141,7 +141,7 @@ class App(ThemedTk):
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Redirection to summary to confirm the configuration
-        next_button = ttk.Button(self.main_frame, text="Next",
+        next_button = ttk.Button(self.main_frame, text="Validate",
                                  command=lambda: self.redirect_to_summary_user_from_anywhere(sensor_pairing_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
@@ -381,6 +381,8 @@ class App(ThemedTk):
         @param page : the previous page
         @return Nothing
         """
+
+        page.save_sensor_info()
         # Clear the previous page content
         self.clear_the_page(page)
 
