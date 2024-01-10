@@ -79,9 +79,9 @@ def data_treatment(client, userdata, mqtt_msg):
                         return
 
                 # Save the data in the db
-                local.save_data(sensor_id, temp, datetime_now)
+                local.save_sensor_data(sensor_id, temp, datetime_now)
 
-                if (sensor_datas["battery"]):
+                if sensor_datas["battery"]:
                     # Update the sensor battery in db
                     local.save_sensor_battery(sensor_id, sensor_datas["battery"], datetime_now)
 
@@ -89,8 +89,8 @@ def data_treatment(client, userdata, mqtt_msg):
             print("Un capteur a envoyé des données")
             if 'contact' in sensor_datas:
                 # Save the data in the db
-                local.save_data(sensor_id, sensor_datas["contact"], datetime_now)
-                if (sensor_datas["battery"]):
+                local.save_sensor_data(sensor_id, sensor_datas["contact"], datetime_now)
+                if sensor_datas["battery"]:
                     # Update the sensor battery in db
                     local.save_sensor_battery(sensor_id, sensor_datas["battery"], datetime_now)
 
@@ -98,8 +98,8 @@ def data_treatment(client, userdata, mqtt_msg):
             print("Un capteur a envoyé des données")
             if 'occupancy' in sensor_datas:
                 # Save the data in the db
-                local.save_data(sensor_id, sensor_datas["occupancy"], datetime_now)
-                if (sensor_datas["battery"]):
+                local.save_sensor_data(sensor_id, sensor_datas["occupancy"], datetime_now)
+                if sensor_datas["battery"]:
                     # Update the sensor battery in db
                     local.save_sensor_battery(sensor_id, sensor_datas["battery"], datetime_now)
 
@@ -107,8 +107,8 @@ def data_treatment(client, userdata, mqtt_msg):
             print("Un capteur de vibration a envoyé des datas")
             if 'vibration' in sensor_datas:
                 # Save the data in the db
-                local.save_data(sensor_id, sensor_datas["vibration"], datetime_now)
-                if (sensor_datas["battery"]):
+                local.save_sensor_data(sensor_id, sensor_datas["vibration"], datetime_now)
+                if sensor_datas["battery"]:
                     # Update the sensor battery in db
                     local.save_sensor_battery(sensor_id, sensor_datas["battery"], datetime_now)
 

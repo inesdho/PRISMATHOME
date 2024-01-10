@@ -42,7 +42,6 @@ def connect_to_local_db():
         # Loop until the connection works
         connect_to_local_db()
 
-
 def get_system_id():
     """!
     Gets the id of the current system from the local database
@@ -52,7 +51,7 @@ def get_system_id():
     global local_db, local_cursor
     try:
         # Check if the local database connection is established
-        if db is not None and db.is_connected():
+        if local_db is not None and local_db.is_connected():
             query = """SELECT s.id_system FROM system s"""
             local_cursor.execute(query)
 
@@ -63,7 +62,7 @@ def get_system_id():
 
         else:
             # If not connected to the local database, attempt to reconnect and retry
-            print("Error while executing select statement : database is not connected, retrying")
+            print("get_system_id Error while executing select statement : database is not connected, retrying")
             connect_to_local_db()
             return get_system_id()
 
@@ -74,7 +73,6 @@ def get_system_id():
     # Return None if the sensor type is not found or there are errors
     return None
 
-
 def add_system_id(local_id):
     """!
     Prepends the system's ID to any local ID provided in order to store them into the distant database
@@ -84,7 +82,6 @@ def add_system_id(local_id):
     system_id = get_system_id()
     concat_id = f"syst{system_id}_{local_id}"
     return concat_id
-
 
 def find_sensor_by_type_label(sensor_type, label):
     """!
@@ -99,32 +96,31 @@ def find_sensor_by_type_label(sensor_type, label):
 
     query = """
     SELECT s.id_sensor 
-    FROM Sensor s 
-    JOIN Sensor_type st ON s.id_type = st.id_type 
-    WHERE s.label = %s AND st.type = %s;
+    FROM sensor s 
+    JOIN sensor_type st ON s.id_type = st.id_type
+    JOIN observation o ON s.id_observation = o.id_observation
+    WHERE s.label = %s AND st.type = %s AND o.active = 1;
     """
 
     values = (label, sensor_type)
 
     try:
-        local_cursor.execute(query, values)
-        rows = local_cursor.fetchone()
-        if rows[0] is not None:
-            return rows[0]
+        if local_db is not None and local_db.is_connected():
+            local_cursor.execute(query, values)
+            rows = local_cursor.fetchone()
+            if rows[0] is not None:
+                return rows[0]
+            else:
+                return False
         else:
-            return False
-    except mysql.connector.Error as error:
-        # 2013 is the error code for connection lost
-        if error.errno == 2013:
-            # CBD : Monitoring "Lost local DB connection at [datetime]"
-            # Wait until the connection is back
+            # If not connected to the local database, attempt to reconnect and retry
+            print("Error while executing select statement : database is not connected, retrying")
             connect_to_local_db()
-            # CBD : Monitoring "local DB connection at [datetime]"
-            # Loop to retry the query
             return find_sensor_by_type_label(sensor_type, label)
-        else:
-            return False
-
+    except Exception as e:
+        # Handle any exceptions that may occur during the query execution
+        print(f"Error finding id sensor : {e}")
+        return False
 
 def send_query(query_type, table, fields=None, values=None, condition=None):
     """!
@@ -150,6 +146,7 @@ def send_query(query_type, table, fields=None, values=None, condition=None):
             raise ValueError(f"Values and fields are required for {query_type} queries.")
         query = f"{query_type} INTO `{table}`"
         query += f" ({', '.join(fields)}) VALUES ({', '.join(['%s'] * len(values))})"
+        print("Query dans send_query (local) = ", query)
 
     elif query_type.upper() == "UPDATE":
         if condition is None:
@@ -184,8 +181,8 @@ def send_query(query_type, table, fields=None, values=None, condition=None):
         # Building remote query
         # Appending system id to specific ids before sending to remote DB storing function
         if fields is not None and values is not None:
-            remote_values = [add_system_id(value) if field in remote.ids_to_modify
-                             else value for field, value in zip(fields, values)]
+            remote_values = tuple(add_system_id(value) if field in remote.ids_to_modify
+                                  else value for field, value in zip(fields, values))
         # Check if the condition's id needs to be modified
         if condition is not None:
             left, right = map(str.strip, condition.split('='))
@@ -193,11 +190,14 @@ def send_query(query_type, table, fields=None, values=None, condition=None):
                 right = str(add_system_id(right))  # Modifying the id to look for to prepend the system's id
             modified_condition = f"{left} = '{right}'"
 
-        if query_type.upper() == "INSERT" and table.upper() == 'DATA':     # Need to add the data id in the remote base
+        if query_type.upper() == "INSERT" and table.upper() == 'DATA':  # Need to add the data id in the remote base
+            print("Lenght fields before add : ", len(fields))
             fields = ['id_data'] + fields
-            remote_values = [add_system_id(local_cursor.lastrowid)] + remote_values
+            print("Lenght fields after add : ", len(fields))
+            remote_values = (add_system_id(local_cursor.lastrowid),) + remote_values
             remote_query = f"{query_type} INTO `{table}`"
-            remote_query += f" ({', '.join(fields)}) VALUES ({', '.join(['%s'] * len(remote_values))})"
+            remote_query += f" ({', '.join(fields)}) VALUES ({', '.join(['%s'] * len(fields))})"
+            print("Query dans send_query (remote) = ", remote_query)
 
         elif query_type.upper() == "UPDATE":
             remote_query = f"{query_type} `{table}` SET "
@@ -220,10 +220,8 @@ def send_query(query_type, table, fields=None, values=None, condition=None):
         #     query += f" ({', '.join(fields)}) VALUES ({', '.join(['%s'] * len(remote_values))})"
         print(f"Trying to execute this query in distant DB: {remote_query, remote_values}")
 
-
-
         # Attempting to send to remote DB
-        if remote.execute_remote_query(query, remote_values) == 1:  # Success
+        if remote.execute_remote_query(remote_query, remote_values) == 1:  # Success
             return 1
         else:
             cache_query(remote_query, remote_values)
@@ -239,7 +237,6 @@ def send_query(query_type, table, fields=None, values=None, condition=None):
             print("Error (local):", error)
             return 0
 
-
 def cache_query(remote_query, remote_values):
     """!
     Caches the query that couldn't be sent to the remote database, in the local database as plain text
@@ -247,6 +244,7 @@ def cache_query(remote_query, remote_values):
     @param remote_values: the values of said query
     """
     print("Caching")
+    global caching
     global local_db, local_cursor
     remote_query_as_text = None
     # Store the remote query in the cache table as plain text
@@ -262,7 +260,7 @@ def cache_query(remote_query, remote_values):
     print("remote_query_as_text  = ", remote_query_as_text)
     local_cursor.execute(caching_query, (remote_query_as_text,))
     local_db.commit()
-
+    caching = False
 
 def save_sensor_data(sensor_id, data, timestamp):
     """!
@@ -278,7 +276,6 @@ def save_sensor_data(sensor_id, data, timestamp):
     values = (sensor_id, data, timestamp)
     return send_query('insert', 'data', ['id_sensor', 'data', 'timestamp'], values)
 
-
 def set_battery_low(sensor_id, datetime):
     """!
     Insert the monitoring message "Sensor battery low"
@@ -292,7 +289,6 @@ def set_battery_low(sensor_id, datetime):
     values = (sensor_id, get_system_id(), timestamp, get_error_id_from_label('Sensor battery low'))
     return send_query('insert', 'monitoring', ['id_sensor', 'id_system', 'timestamp', 'id_error'], values)
 
-
 def save_sensor_battery(sensor_id, battery, datetime):
     """!
     Update the battery percentage of a sensor in the database
@@ -303,7 +299,7 @@ def save_sensor_battery(sensor_id, battery, datetime):
     @return True if successful, False if not
     """
     global local_db, local_cursor
-    values = (battery, sensor_id)
+    values = (battery,)
     condition = 'id_sensor = ' + str(sensor_id)
     if send_query('update', 'sensor', ['battery_percentage'], values, condition) == 0:
         return False
@@ -314,7 +310,6 @@ def save_sensor_battery(sensor_id, battery, datetime):
             return False
 
     return True
-
 
 def get_sensor_type_from_id_type(id_type):
     """!
@@ -336,7 +331,7 @@ def get_sensor_type_from_id_type(id_type):
                 return result[0]
         else:
             # If not connected to the local database, attempt to reconnect and retry
-            print("Error while executing select statement : database is not connected, retrying")
+            print("get_sensor_type_from_id_type Error while executing select statement : database is not connected, retrying")
             connect_to_local_db()
             return get_sensor_type_from_id_type(id_type)
 
@@ -346,7 +341,6 @@ def get_sensor_type_from_id_type(id_type):
 
     # Return None if the sensor type is not found or there are errors
     return None
-
 
 def get_sensor_type_list():
     """!
@@ -367,7 +361,7 @@ def get_sensor_type_list():
                 return result
         else:
             # If not connected to the local database, attempt to reconnect and retry
-            print("Error while executing select statement : database is not connected, retrying")
+            print("get_sensor_type_list Error while executing select statement : database is not connected, retrying")
             connect_to_local_db()
             return get_sensor_type_list()
 
@@ -377,7 +371,6 @@ def get_sensor_type_list():
 
     # Return None if no sensor types were found or there are errors
     return None
-
 
 def get_sensor_from_type_label(sensor_type, label):
     """!
@@ -401,7 +394,7 @@ def get_sensor_from_type_label(sensor_type, label):
                 return rows[0]
         else:
             # If not connected to the local database, attempt to reconnect and retry
-            print("Error while executing select statement : database is not connected, retrying")
+            print("get_sensor_from_type_label Error while executing select statement : database is not connected, retrying")
             connect_to_local_db()
             return get_sensor_type_from_id_type(id_type)
 
@@ -411,7 +404,6 @@ def get_sensor_from_type_label(sensor_type, label):
 
     # Return None if the sensor is not found or there are errors
     return None
-
 
 def get_sensors_from_configuration(id_config):
     """!
@@ -447,7 +439,7 @@ def get_sensors_from_configuration(id_config):
                 return sensors
         else:
             # If not connected to the local database, attempt to reconnect and retry
-            print("Error while executing select statement : database is not connected, retrying")
+            print("get_sensors_from_configuration Error while executing select statement : database is not connected, retrying")
             connect_to_local_db()
             return get_sensors_from_configuration(id_config)
 
@@ -457,7 +449,6 @@ def get_sensors_from_configuration(id_config):
 
     # Return None if no sensors found or if an error occurred
     return None
-
 
 def get_error_id_from_label(label):
     """!
@@ -479,7 +470,7 @@ def get_error_id_from_label(label):
                 return result[0]
         else:
             # If not connected to the local database, attempt to reconnect and retry
-            print("Error while executing select statement : database is not connected, retrying")
+            print("get_error_id_from_label Error while executing select statement : database is not connected, retrying")
             connect_to_local_db()
             return get_error_id_from_label(label)
 
@@ -489,7 +480,6 @@ def get_error_id_from_label(label):
 
     # Return None if the sensor type is not found or there are errors
     return None
-
 
 def get_user_from_login_and_password(login, password):
     """!
@@ -513,7 +503,7 @@ def get_user_from_login_and_password(login, password):
                 return result
 
         else:
-            print("Error while executing select statement : database is not connected, retrying")
+            print("get_user_from_login_and_password Error while executing select statement : database is not connected, retrying")
             connect_to_local_db()
             return get_user_from_login_and_password(login, password)
 
@@ -523,7 +513,6 @@ def get_user_from_login_and_password(login, password):
 
     # Return None if the user is not found or there are errors
     return None
-
 
 def update_user_connexion_status(login, password, connexion_status):
     """!
@@ -554,7 +543,6 @@ def update_user_connexion_status(login, password, connexion_status):
     # Return None if the user is not found or there are errors
     return None
 
-
 def get_new_config_number_for_user(id_user):    # TODO : modifier pour avoir l'id user dedans ?
     """!
     Gives the config number to be used to create a new config for the given user by looking in the local database and
@@ -566,7 +554,7 @@ def get_new_config_number_for_user(id_user):    # TODO : modifier pour avoir l'i
     global local_db, local_cursor
     try:
         # Check if the local database connection is established
-        if db is not None and db.is_connected():
+        if local_db is not None and local_db.is_connected():
             query = "SELECT MAX(id_config) FROM configuration WHERE id_user = %s"
             local_cursor.execute(query, (id_user,))
 
@@ -579,7 +567,7 @@ def get_new_config_number_for_user(id_user):    # TODO : modifier pour avoir l'i
 
         else:
             # If not connected to the local database, attempt to reconnect and retry
-            print("Error while executing select statement : database is not connected, retrying")
+            print("get_new_config_number_for_user Error while executing select statement : database is not connected, retrying")
             connect_to_local_db()
             return get_new_session_id(participant, id_config)
 
@@ -628,8 +616,7 @@ def get_config_labels(id_config=None):
     # Return None if there was an error or there are no configs in the database
     return None
 
-
-def create_observation(participant, id_config, id_session, session_label, active=0, id_system=get_system_id()):
+def create_observation(participant, id_config, id_session, session_label, active=0, id_system=None):
     """!
     Creates a new observation from the given parameters and inserts it in both databases
 
@@ -641,12 +628,14 @@ def create_observation(participant, id_config, id_session, session_label, active
     @param active: The status of the session 1=active, 0=inactive
     @return None
     """
+    if id_system is None:
+        id_system = get_system_id()
+
     values = (id_system, participant, id_config, id_session, session_label, active)
     send_query('insert', 'observation',
                ['id_system', 'participant', 'id_config', 'id_session', 'session_label', 'active'],
                values)
     return None
-
 
 def create_configuration(id_config, id_user, label, description):
     """!
@@ -661,7 +650,6 @@ def create_configuration(id_config, id_user, label, description):
     values = (id_config, id_user, label, description)
     return send_query('insert', 'configuration', ['id_config', 'id_user', 'label', 'description'],
                       values)
-
 
 def create_sensor_configs(id_config, sensor_list):
     """!
@@ -684,7 +672,6 @@ def create_sensor_configs(id_config, sensor_list):
 
     return no_errors_encountered
 
-
 def encrypt_password(password):
     """!
     Encrypts the given password using SHA-256
@@ -702,7 +689,7 @@ def get_active_observation():
     """
 
     query = "SELECT id_observation FROM observation WHERE active = 1;"
-
+    global local_db, local_cursor
     try:
         if local_db is not None and local_db.is_connected():
             local_cursor.execute(query)
@@ -713,14 +700,13 @@ def get_active_observation():
                 return None
         else:
             # If not connected to the local database, attempt to reconnect and retry
-            print("Error while executing select statement : database is not connected, retrying")
+            print("get_active_observation Error while executing select statement : database is not connected, retrying")
             connect_to_local_db()
             return get_active_observation()
     except Exception as e:
         # Handle any exceptions that may occur during the query execution
         print(f"Error finding active observation : {e}")
         return False
-
 
 def get_sensors_from_observation(id_observation):
     """
@@ -737,7 +723,7 @@ def get_sensors_from_observation(id_observation):
     JOIN sensor_type st ON s.id_type = st.id_type 
     WHERE s.id_observation = %s;
     """
-
+    global local_db, local_cursor
     try:
         if local_db is not None and local_db.is_connected():
             local_cursor.execute(query, id_observation)
@@ -748,7 +734,7 @@ def get_sensors_from_observation(id_observation):
                 return None
         else:
             # If not connected to the local database, attempt to reconnect and retry
-            print("Error while executing select statement : database is not connected, retrying")
+            print("get_sensors_from_observation Error while executing select statement : database is not connected, retrying")
             connect_to_local_db()
             return get_sensors_from_observation(id_observation)
     except Exception as e:
@@ -756,32 +742,3 @@ def get_sensors_from_observation(id_observation):
         print(f"Error finding sensors from observation : {e}")
         return False
 
-
-"""********* Monitoring functions **********"""
-
-
-def set_battery_low(sensor_id, datetime):
-    """!
-    Insert the monitoring message "Sensor battery low"
-
-    @param sensor_id: The ID of the sensor.
-    @param datetime : The datetime when the datas had been received.
-    """
-    # TODO : (Matteo) Ajouter la gestion pour la BDD distante dans cette fonction
-    query = """
-        INSERT INTO monitoring (id_sensor, id_system, timestamp, id_error)
-        VALUES (%s, %s, %s, (SELECT id_error FROM Error_message WHERE label = 'Sensor battery low'));
-        """
-    data = (sensor_id, get_system_id(), datetime)
-    try:
-        local_cursor.execute(query, data)
-        local_db.commit()
-        return True
-    except mysql.connector.Error as error:
-        if error.errno == 2013:
-            # CBD : Monitoring "Lost local DB connection at [datetime]"
-            connect_to_local_db()
-            # CBD : Monitoring "local DB connection at [datetime]"
-            return set_battery_low(sensor_id, datetime)
-        else:
-            return False
