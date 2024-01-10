@@ -366,7 +366,7 @@ class App(ThemedTk):
         @return Nothing
         """
 
-        page.on_validate_button_click()
+        page.save_sensor_info()
         # Clear the previous page content
         self.clear_the_page(page)
 

@@ -69,9 +69,10 @@ class SensorPairingManagement:
         # ici une boucle pour ajouter des MAC_ADDRESS bidons
         # Attention, le format sera certainement celui ecrit ici
         # avec "0x" au début, il faut compté 18 dans la bdd plutot que 16
-        sensor_entries = self.get_sensors(globals.global_id_config_selectionned)
-        for sensor in sensor_entries:
-            self.create_labeled_entry(sensor, sensor_entries.index(sensor) + 1)
+        self.sensor_entries = self.get_sensors(globals.global_id_config_selectionned)
+
+        for index, sensor in enumerate(self.sensor_entries, start=1):
+            self.create_labeled_entry(sensor, index)
 
         # Configure the scroll region to follow the content of the frame
         self.frame_canvas.update_idletasks()
@@ -456,7 +457,7 @@ class SensorPairingManagement:
         self.canvas.destroy()
         self.frame.destroy()
 
-    def save_sensor_info(self, sensor_entries):
+    def save_sensor_info(self):
         conn = None
         try:
             conn = mysql.connector.connect(
@@ -472,7 +473,7 @@ class SensorPairingManagement:
             ON DUPLICATE KEY UPDATE
             id_type=VALUES(id_type), description=VALUES(description), label=VALUES(label);
             """
-            for sensor in sensor_entries:
+            for sensor in self.sensor_entries:
                 # TODO recuperer le vrai id_type
                 id_type = '1'
                 id_observation = globals.global_new_id_observation
@@ -488,13 +489,3 @@ class SensorPairingManagement:
                 cursor.close()
             if conn:
                 conn.close()
-
-    def on_validate_button_click(self):
-        # Récupérer les entrées des capteurs sans l'adresse IEEE
-        sensor_entries = self.get_sensors(globals.global_id_config_selectionned)
-
-        for sensor in sensor_entries:
-            sensor["ieee_address"] = "0x1234567891237894"  # Adresse IEEE fictive pour les tests
-
-        # Sauvegarder les informations dans la base de données
-        self.save_sensor_info(sensor_entries)
