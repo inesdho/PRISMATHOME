@@ -197,7 +197,8 @@ class SensorPairingManagement:
                 label_sensor_value = ttk.Label(button_pairing.master, text="Vibration : Unknown")
                 label_sensor_value.pack(side=tk.LEFT, padx=10)
 
-        my_thread = threading.Thread(target=model.local_mqtt.get_sensor_value, args=(sensor_selected["name"], label_sensor_value))
+        my_thread = threading.Thread(target=model.local_mqtt.get_sensor_value,
+                                     args=(sensor_selected["name"], label_sensor_value))
         my_thread.start()
 
         showinfo("Capteur sélectionné", f"Vous avez sélectionné le capteur {sensor_selected}")
@@ -355,7 +356,8 @@ class SensorPairingManagement:
         # Fill the scrollable frame with the available sensors
         for i in range(len(sensor_list)):
             # Check if the sensor is not already chosen
-            if sensor_list[i]["ieee_address"] not in self.black_list and sensor_list[i]["label"] in sensor_type_dictionary[sensor["type"]]:
+            if (sensor_list[i]["ieee_address"] not in self.black_list and sensor_list[i]["label"]
+                    in sensor_type_dictionary[sensor["type"]]):
                 # Create a box frame to the sensor_label
                 sensor_frame = tk.Frame(scrollable_frame, cursor="hand2", bg="white", pady=0)
                 sensor_frame.pack(fill=tk.X, padx=10, pady=(5, 0), expand=True)
@@ -375,7 +377,8 @@ class SensorPairingManagement:
                 sensor_label.bind("<Enter>", self.on_enter_sensor_label)
                 sensor_label.bind("<Leave>", self.on_leave_sensor_label)
 
-    # TODO INDUS same ici, mais pour modifier l'appairage du capteur et donc le désappairé, pas besoin de retourner quoi que ce soit (enfin je crois)
+    # TODO INDUS same ici, mais pour modifier l'appairage du capteur et donc le désappairé, pas besoin de retourner
+    #  quoi que ce soit (enfin je crois)
     def edit_the_pairing(self, button_pairing, sensor_selected, sensor_elt):
         """!
         @brief edit_the_pairing : Call the pairing_a_sensor function with the param edit_sensor=sensor_selected to edit
@@ -394,6 +397,8 @@ class SensorPairingManagement:
     # TODO INES C'est fait
 
     def get_sensors(self, id_config):
+        # TODO changer en une fonction d'affichage qui prend en param une liste de sensors à afficher
+
         # This id_config should be passed to the method or obtained from the class/global scope.
 
         # Start a connection to the database
@@ -407,7 +412,10 @@ class SensorPairingManagement:
 
         # Define the SQL query
         query = (
-            "SELECT sensor_config.sensor_label, sensor_config.sensor_description, sensor_type.type FROM sensor_config, sensor_type  WHERE sensor_config.id_config = %s  AND sensor_config.id_sensor_type = sensor_type.id_type")
+            "SELECT sc.sensor_label, sc.sensor_description, sc.type "
+            "FROM sensor_config sc, sensor_type st  "
+            "WHERE sc.id_config = %s  "
+            "AND sc.id_sensor_type = st.id_type")
 
         # Execute the query with the provided id_config
         cursor.execute(query, (id_config,))

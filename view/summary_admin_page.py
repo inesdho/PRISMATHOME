@@ -42,7 +42,8 @@ class SummaryAdmin:
         # Information about the configuration
         scenario_frame = ttk.Frame(self.frame)
         scenario_frame.pack(fill=tk.BOTH)
-        scenario_label = ttk.Label(scenario_frame, text="Configuration : " + globals.global_scenario_name_configuration, padding=10)
+        scenario_label = ttk.Label(scenario_frame, text="Configuration : "
+                                   + globals.global_scenario_name_configuration, padding=10)
         scenario_label.pack(side=tk.LEFT)
 
         # Creation of the frame that will contain the buttons
@@ -58,7 +59,7 @@ class SummaryAdmin:
                 database="prisme_home_1"
             )
             cursor = conn.cursor()
-            cursor.execute("SELECT DISTINCT id_type, type FROM sensor_type")
+            cursor.execute("SELECT DISTINCT id_type, type FROM sensor_type")    # get_sensor_type_list()
             all_sensor_types = cursor.fetchall()
 
             for sensor_type_id, sensor_type in all_sensor_types:
@@ -113,6 +114,7 @@ class SummaryAdmin:
         self.frame.destroy()
 
     def validate_conf(self):
+        # TODO: virer du controller et faire un appel à model.create_configuration et model.save_sensor_configs
         """!
         @brief This functions validated all the infos relative to the current created configuration in order to save them
         @param self : the instance
@@ -128,7 +130,8 @@ class SummaryAdmin:
         cursor = conn.cursor()
 
         # Exécutez une requête
-        query = "INSERT INTO configuration (id_config, id_user, label, description)VALUES(%s, %s, %s, %s)"
+        query = ("INSERT INTO configuration (id_config, id_user, label, description)"
+                 "VALUES(%s, %s, %s, %s)")
         cursor.execute(query, (
             globals.global_id_config, globals.global_id_user, globals.global_scenario_name_configuration,
             globals.global_description_configuration))
@@ -136,7 +139,8 @@ class SummaryAdmin:
 
         # Insert each sensor's data into the database
         for sensor_type_id, label, description in globals.global_sensor_entries:
-            query = "INSERT INTO sensor_config (id_config, id_sensor_type, sensor_label, sensor_description) VALUES (%s, %s, %s, %s)"
+            query = ("INSERT INTO sensor_config (id_config, id_sensor_type, sensor_label, sensor_description) "
+                     "VALUES (%s, %s, %s, %s)")
             cursor.execute(query, (globals.global_id_config, sensor_type_id, label, description))
 
         conn.commit()

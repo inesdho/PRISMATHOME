@@ -51,7 +51,7 @@ def connect_to_remote_db():
             print(e)
             time.sleep(2)
     else:
-        print("Not allowed to join")
+        print("Disconnect request")
         time.sleep(2)
 
 
@@ -119,13 +119,12 @@ def synchronise_queries():
             queries = local.local_cursor.fetchall()
             for query_entry in queries:
                 print("Query: ", query_entry[1])
-                query = query_entry[1]  # Assuming the query is in the first column
+                query = query_entry[1]
                 success = execute_remote_query(query)
                 if success:
                     # If the query was executed successfully, delete the entry from the local table
                     local.local_cursor.execute("DELETE FROM remote_queries WHERE query = %s", (query,))
                     local.local_db.commit()
-                    print("YEEEESSSSS")
         except Exception as e:
             print(f"Error syncing failed queries: {e}")
         else:
@@ -135,3 +134,4 @@ def synchronise_queries():
                 connection_thread = threading.Thread(target=connect_to_remote_db)
                 connection_thread.start()
             return 0
+
