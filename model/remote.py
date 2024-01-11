@@ -22,14 +22,17 @@ cursor = None
 thread_active = 0  # is used to know if the program is actively trying to reconnect to the remote db
 disconnect_request = 0  # is used to stop the connect thread from looping
 
-ids_to_modify = ['id_sensor', 'id_system', 'id_data', 'id_observation']
+flag_synchro = False
+
+ids_to_modify = ['id_sensor', 'id_data', 'id_observation']
+tables_to_prepend = ['sensor', 'data', 'observation']
 
 def connect_to_remote_db():
     """!
     Tries to connect to the remote database at an interval of 2 seconds. This function is used by other functions in
     an asynchronous manner using a thread, so it doesn't block the main program
     """
-    global db, cursor, thread_active, disconnect_request
+    global db, cursor, thread_active, disconnect_request, flag_synchro
 
     thread_active = 1
     disconnect_request = 0
@@ -42,7 +45,9 @@ def connect_to_remote_db():
                 database="prisme@home_ICM"
             )
             cursor = db.cursor()
+            flag_synchro = True
             synchronise_queries()
+            flag_synchro = False
             thread_active = 0
             break  # Break out of the loop if synchronization is successful
 
@@ -75,21 +80,29 @@ def disconnect_from_remote_db():
         print("already disconnected from distant db")
 
 
-def execute_remote_query(query, values=None):
+def execute_remote_query(query, values=None, synchronise=False):
     """!
     Tries to insert into the remote database the query and values passed as arguments
     @param query the query to be inserted
     @param values the values of said query
+    @param synchronise: TODO
     @return 1 if successfully inserted, 0 otherwise
     """
-    global db, cursor
+    global db, cursor, flag_synchro
 
-    if db is not None and db.is_connected():  # checks if connected to the remote DB
+    if (db is not None and db.is_connected()):  # checks if connected to the remote DB
         try:
+            if not synchronise:
+                while flag_synchro:
+                    pass
+
             if values is not None:
+                print("Executed in remote : ", query, "values", values)
                 cursor.execute(query, values)
             else:
+                print("Executed in remote : ", query)
                 cursor.execute(query)
+
             db.commit()  # No errors, query inserted in the remote db
             return 1
         except mysql.connector.Error as error:
@@ -97,15 +110,14 @@ def execute_remote_query(query, values=None):
             # TODO : Matteo return autre chose et ne pas cache la requête ici
             # Si la requête a eu une erreur ici, elle ne se fera jamais
             # Cas normalement impossible mais soyons rigoureux
-            print("try execute_remote_query : ")
-            print("query", query, "values", values)
-            print(error)
+            print("Erreur ", error, "En executant : ", query, "values", values)
             return 0
     else:
-        print("Distant database not connected")
+        print("Distant database not connected req : ", query, "values", values)
+
         # Create thread to check on the database
+        local.caching = True
         if thread_active == 0:
-            local.caching = True
             connection_thread = threading.Thread(target=connect_to_remote_db)
             connection_thread.start()
         return 0
@@ -116,30 +128,39 @@ def synchronise_queries():
     Synchronises data between local database and remote database :
     Grabs all non sent queries from the local database's 'remote_queries' table and sends them to the remote database
     """
-
     print("Synchronising data between local and remote databases")
     if db is not None and db.is_connected():
         try:
-            # Fetch all entries from the 'remote_queries' table
-            while local.caching == True:
+            print("local.caching = ", local.caching)
+            while local.caching:
+                print("Wait for the end of caching")
                 time.sleep(0.5)
+            try:
+                if local.local_db is not None and local.local_db.is_connected():
+                    # Fetch all entries from the 'remote_queries' table
+                    with local.cursor_protection:
+                        local.local_cursor.execute("SELECT * FROM remote_queries")
+                        queries = local.local_cursor.fetchall()
+            except Exception as e:
+                print(f"Error select from remote_queries: {e}")
+                return
 
-            local.local_cursor.execute("SELECT * FROM remote_queries")
-            queries = local.local_cursor.fetchall()
             for query_entry in queries:
-                print("Query: ", query_entry[1])
+                print("Syncro req : ", query_entry[1])
                 query = query_entry[1]
-                success = execute_remote_query(query)
+                success = execute_remote_query(query,None,True)
                 if success:
-                    # If the query was executed successfully, delete the entry from the local table
-                    local.local_cursor.execute("DELETE FROM remote_queries WHERE query = %s", (query,))
-                    local.local_db.commit()
+                    if local.local_db is not None and local.local_db.is_connected():
+                        # If the query was executed successfully, delete the entry from the local table
+                        with local.cursor_protection:
+                            local.local_cursor.execute("DELETE FROM remote_queries WHERE query = %s", (query,))
+                            local.local_db.commit()
         except Exception as e:
             print(f"Error syncing failed queries: {e}")
-        else:
-            print("Distant database not connected")
-            # Create thread to check on the database
-            if thread_active == 0:
-                connection_thread = threading.Thread(target=connect_to_remote_db)
-                connection_thread.start()
-            return 0
+    else:
+        print("Distant database not connected")
+        # Create thread to check on the database
+        if thread_active == 0:
+            connection_thread = threading.Thread(target=connect_to_remote_db)
+            connection_thread.start()
+        return

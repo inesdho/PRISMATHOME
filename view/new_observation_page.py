@@ -9,6 +9,7 @@
 import tkinter as tk
 from tkinter import ttk
 import globals
+from model import local
 
 import mysql
 from controller.entry_manager import EntryManager
@@ -49,7 +50,7 @@ class NewObservation:
 
 
         # Configuration list
-        options = self.get_config()
+        options = local.get_config_labels()
         configuration_label = ttk.Label(self.frame, text="Configuration")
         configuration_label.pack()
         self.configuration_combobox = ttk.Combobox(self.frame, values=options, width=29)
@@ -89,6 +90,9 @@ class NewObservation:
         id_system = self.get_id_system()
         id_conf = self.get_config_by_id(self.configuration_combobox.get())
         id_session = self.get_id_session() + 1
+        participant = self.participant_entry.get()
+
+        #create_observation(participant, id_config, id_session, session_label, active=0, id_system=None)
 
         conn = mysql.connector.connect(
             host="localhost",

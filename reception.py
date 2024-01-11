@@ -21,6 +21,8 @@ Project realized by 5 students from IG2I.
 import paho.mqtt.client as mqtt
 import sys
 from controller import treatment
+from model import local
+from model import remote
 import os
 import getpass
 import signal
@@ -37,7 +39,10 @@ def on_message(client, userdata, msg):
 
 if __name__ == "__main__":
     # Connection to local db
-    treatment.local.connect_to_local_db()
+    local.connect_to_local_db()
+
+    # Connection to distant db
+    remote.connect_to_remote_db()
 
     ## The mqtt client to collect the data from the broker
     coordinator = mqtt.Client("Coordinator")

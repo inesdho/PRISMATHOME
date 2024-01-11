@@ -38,7 +38,7 @@ def data_treatment(client, userdata, mqtt_msg):
     datetime_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
 
     ## The id of the sensor that sent datas
-    sensor_id = local.find_sensor_by_type_label(sensor_type, sensor_label)
+    sensor_id = local.get_sensor_from_type_label(sensor_type, sensor_label)
 
     # Selection of the process to execute according to the sensor
     match sensor_type:

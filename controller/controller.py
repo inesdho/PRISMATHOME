@@ -236,6 +236,7 @@ class App(ThemedTk):
         @return Nothing
         """
         # Create a new configuration in the database
+        # TODO : COMMENTAIRE A CHANGER OU NOM DE FONCTION (PAS CLAIR DU TOUT)
         create_a_config_page.on_create_configuration_button_click()
 
         # Redirection to the "selection sensor quantity" page
@@ -282,6 +283,7 @@ class App(ThemedTk):
         if selection_sensor_quantity_page.chose_at_least_one_sensor():
             # Calls this function in order to store into global variables the datas entered by the user in the sensor
             # quantity page
+            # TODO : CHANGER LE NOM DE LA FONCTION INCOHERENT
             selection_sensor_quantity_page.on_next_button_click()
             self.redirect_to_labellisation_sensor_from_anywhere(selection_sensor_quantity_page)
         else:

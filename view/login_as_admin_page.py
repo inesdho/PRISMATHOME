@@ -10,6 +10,7 @@ from tkinter import ttk, messagebox
 
 import mysql.connector
 import globals
+from model import local
 
 from controller.entry_manager import EntryManager
 
@@ -76,35 +77,15 @@ class LoginAsAdministrator:
         print(username)
         print(password)
 
-        # Connexion to the MySQL database
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
-
-        # Execute a request
-        query = "SELECT * FROM user WHERE login=%s AND password=%s"
-        cursor.execute(query, (username, password))
-        user = cursor.fetchone()
+        user = local.get_user_from_login_and_password(username, password)
 
         # Check if the user was found in the database
         if user:
             globals.global_id_user = user[0]
-            query_update = "UPDATE prisme_home_1.user SET connected=1 WHERE login=%s AND password=%s"
-            cursor.execute(query_update, (username, password))
-            conn.commit()
-            messagebox.showinfo("Connexion allowed", "Welcome, {}".format(username))
+            local.update_user_connexion_status(username, password, 1)
             connexion_allowed = True
-
         else:
             messagebox.showerror("Connexion error", "Login or password incorrect")
-
-        # Close the connexion to the database
-        cursor.close()
-        conn.close()
 
         return connexion_allowed
 
