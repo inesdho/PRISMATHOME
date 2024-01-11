@@ -121,8 +121,29 @@ class SummaryUser:
         self.frame.destroy()
 
     def start_observation(self):
-        #TODO Mettre l'observation active + voir avec les indus comment recuperer et inserer les datas
-        return None
+        #TODO voir avec les indus comment recuperer et inserer les datas
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
+
+            # Execute a request
+            query_update = "UPDATE prisme_home_1.observation SET active=1 WHERE id_observation=%s"
+            cursor.execute(query_update, (globals.global_new_id_observation,))  # Pass label as a tuple
+            conn.commit()
+
+        except mysql.connector.Error as err:
+            print(f"Database error: {err}")
+            return None
+
+        finally:
+            # Closing the cursor and connection
+            cursor.close()
+            conn.close()
 
 
     def clear_sensor_entries(self):
