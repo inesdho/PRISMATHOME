@@ -417,6 +417,8 @@ class App(ThemedTk):
         @param summary_user_page : the summary user page
         @return Nothing
         """
+
+        summary_user_page.start_observation()
         # Clear the previous page content
         self.clear_the_page(summary_user_page)
 
