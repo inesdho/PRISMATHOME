@@ -129,7 +129,9 @@ class SummaryObservation:
         self.frame.destroy()
 
     def stop_observation(self):
-        # TODO voir avec les indus comment recuperer et inserer les datas
+        # TODO Mathilde : voir où appeller la fonction car lorsque que je la met au bonne endroit ca
+        #  pose probleme
+        #  + voir avec les indus comment stopper la reception des datas
         try:
             conn = mysql.connector.connect(
                 host="localhost",
