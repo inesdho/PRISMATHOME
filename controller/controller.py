@@ -142,7 +142,7 @@ class App(ThemedTk):
 
         # Redirection to summary to confirm the configuration
         next_button = ttk.Button(self.main_frame, text="Validate",
-                                 command=lambda: self.redirect_to_summary_user_from_anywhere(sensor_pairing_page))
+                                 command=lambda: self.redirect_to_summary_user_from_pairing(sensor_pairing_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
 
     def redirect_to_login_as_admin_from_anywhere(self, page):
@@ -373,6 +373,33 @@ class App(ThemedTk):
                                  (summary_admin_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
+
+    def redirect_to_summary_user_from_pairing(self, sensor_pairing_page):
+        """!
+        @brief This function saves the information about the pairing of the sensor and calls the 'Summary user' page
+        @param self : the instance
+        @param sensor_pairing_page : the sensor pairing page
+        @return Nothing
+        """
+        # Saving the infos about the pairing
+        sensor_pairing_page.save_sensor_info()
+
+        # Redirecting to the 'Summary user' page
+        self.redirect_to_summary_user_from_anywhere(self, sensor_pairing_page)
+
+    def redirect_to_summary_user_from_summary_observation(self, summary_observation_page):
+        """!
+        @brief This function stops the observation and calls the 'Summary user' page
+        @param self : the instance
+        @param summary_observation_page : the summary observation page
+        @return Nothing
+        """
+        # Saving the infos about the pairing
+        summary_observation_page.stop_observation()
+
+        # Redirecting to the 'Summary user' page
+        self.redirect_to_summary_user_from_anywhere(self, summary_observation_page)
+
     def redirect_to_summary_user_from_anywhere(self, page):
         """!
         @brief This function clears the previous page in order to display the content of the "summary user"
@@ -381,8 +408,6 @@ class App(ThemedTk):
         @param page : the previous page
         @return Nothing
         """
-
-        page.save_sensor_info()
         # Clear the previous page content
         self.clear_the_page(page)
 
@@ -436,7 +461,7 @@ class App(ThemedTk):
 
         # Stop observation button
         back_button = ttk.Button(self.main_frame, text="Stop observation",
-                                 command=lambda: self.redirect_to_summary_user_from_anywhere(summary_observation_page))
+                                 command=lambda: self.redirect_to_summary_user_from_summary_observation(summary_observation_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
     def clear_the_page(self, page):
