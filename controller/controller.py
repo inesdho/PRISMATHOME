@@ -432,6 +432,8 @@ class App(ThemedTk):
         # TODO PAUL : si tu veux faire des modifs c'est dans la fonction start observation de summary user
         summary_user_page.start_observation()
 
+        messagebox.showinfo("Start observation", "The observation is starting.")
+
         # Changing the label and the function associated to the button
         button.config(text="Stop observation",command=lambda: self.stop_observation(button, summary_user_page))
 
@@ -447,6 +449,8 @@ class App(ThemedTk):
         # Calling the function to stop the observation
         # TODO PAUL : si tu veux faire des modifs c'est dans la fonction stop observation de summary user
         summary_user_page.stop_observation()
+
+        messagebox.showinfo("Stop observation", "The observation is stopped.")
 
         # Changing the label and the function associated to the button
         button.config(text="Start observation",command=lambda: self.start_observation(button, summary_user_page))
