@@ -5,6 +5,7 @@ from tkinter.messagebox import *
 import mysql
 import globals
 
+from model import local
 import model.local_mqtt
 import time
 import threading
@@ -66,7 +67,7 @@ class SensorPairingManagement:
         ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid",
                   padding=5).pack(side=tk.LEFT)
 
-        self.sensor_entries = self.get_sensors(globals.global_id_config_selectionned)
+        self.sensor_entries = local.get_sensors_from_configuration(globals.global_id_config_selectionned)
 
         for index, sensor in enumerate(self.sensor_entries, start=1):
             self.create_labeled_entry(sensor, index)
@@ -404,53 +405,6 @@ class SensorPairingManagement:
 
     # TODO INES C'est fait
 
-    def get_sensors(self, id_config):
-        # TODO changer en une fonction d'affichage qui prend en param une liste de sensors à afficher
-
-        # This id_config should be passed to the method or obtained from the class/global scope.
-
-        # Start a connection to the database
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
-
-        # Define the SQL query
-        query = (
-            "SELECT sc.sensor_label, sc.sensor_description, sc.type "
-            "FROM sensor_config sc, sensor_type st  "
-            "WHERE sc.id_config = %s  "
-            "AND sc.id_sensor_type = st.id_type")
-
-        # Execute the query with the provided id_config
-        cursor.execute(query, (id_config,))
-
-        # Fetch the results
-        results = cursor.fetchall()
-
-        # The list of sensors' dictionary
-        sensors = []
-
-        # Fill the sensor list from the result
-        for row in results:
-            sensor_label = row[0]
-            sensor_description = row[1]
-            sensor_type = row[2]
-
-            sensors.append({
-                "label": sensor_label,
-                "description": sensor_description,
-                "type": sensor_type,
-            })
-
-        # Close the cursor and connection
-        cursor.close()
-        conn.close()
-
-        return sensors
 
     def clear_page(self):
         """!
@@ -465,8 +419,8 @@ class SensorPairingManagement:
         conn = None
         try:
             conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
+                host="192.168.1.36",
+                user="paul",
                 password="Q3fhllj2",
                 database="prisme_home_1"
             )

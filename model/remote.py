@@ -143,7 +143,7 @@ def synchronise_queries():
                 if local.local_db is not None and local.local_db.is_connected():
                     # Fetch all entries from the 'remote_queries' table
                     print("Waiting for local.cursor protection")
-                    with local.cursor_protection:
+                    with local.local_cursor_protection:
                         print("Executing query SELECT * FROM remote_queries")
                         local.local_cursor.execute("SELECT * FROM remote_queries")
                         queries = local.local_cursor.fetchall()
@@ -169,7 +169,7 @@ def synchronise_queries():
                 if success:
                     if local.local_db is not None and local.local_db.is_connected():
                         # If the query was executed successfully, delete the entry from the local table
-                        with local.cursor_protection:
+                        with local.local_cursor_protection:
                             local.local_cursor.execute("DELETE FROM remote_queries WHERE query = %s", (query,))
                             local.local_db.commit()
         except Exception as e:
