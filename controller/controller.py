@@ -468,6 +468,7 @@ class App(ThemedTk):
         self.main_frame.destroy()
 
     def create_new_main_frame(self):
+
         """!
         @brief This function creates a new empty frame that will contain the elements of a new page
         @param self : the instance
