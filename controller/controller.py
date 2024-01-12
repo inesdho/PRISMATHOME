@@ -424,7 +424,7 @@ class App(ThemedTk):
         @brief This function starts the observation and change the label of the button
         @param self : the instance
         @param button : the start observation button
-        @:param summary_user_page : the summary user page
+        @param summary_user_page : the summary user page
         @return Nothing
         """
 
@@ -442,7 +442,7 @@ class App(ThemedTk):
         @brief This function allows the user to stop the observation and change the label of the button
         @param self : the instance
         @param button : the stop observation button
-        @:param summary_user_page : the summary user page
+        @param summary_user_page : the summary user page
         @return Nothing
         """
 

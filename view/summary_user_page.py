@@ -70,13 +70,16 @@ class SummaryUser:
             all_sensor_types = cursor.fetchall()
 
             for sensor_type_id, sensor_type in all_sensor_types:
-                sensor_type_button = ttk.Button(
-                    button_frame,
-                    text=sensor_type,
-                    command=lambda id=sensor_type_id, type=sensor_type: self.display_sensor_info(id, type),
-                    padding=5
-                )
-                sensor_type_button.pack(side=tk.LEFT)
+                # Retrieve information from sensors of this type from the database
+                sensor_infos = self.get_sensor_infos_for_type(sensor_type_id)
+                if sensor_infos:
+                    sensor_type_button = ttk.Button(
+                        button_frame,
+                        text=sensor_type,
+                        command=lambda id=sensor_type_id, type=sensor_type: self.display_sensor_info(id, type),
+                        padding=5
+                    )
+                    sensor_type_button.pack(side=tk.LEFT)
 
             cursor.close()
             conn.close()
@@ -101,14 +104,12 @@ class SummaryUser:
         # Retrieve information from sensors of this type from the database
         sensor_infos = self.get_sensor_infos_for_type(sensor_type_id)
 
-        if not sensor_infos:
-            self.sensor_text.insert(tk.END, f"No information available for {sensor_type} sensors.\n")
-        else:
-            for sensor_info in sensor_infos:
-                sensor_label = sensor_info[0]
-                sensor_description = sensor_info[1]
-                sensor_display = f"{sensor_type} sensor:\nLabel: {sensor_label}\nDescription: {sensor_description}\n\n"
-                self.sensor_text.insert(tk.END, sensor_display)
+
+        for sensor_info in sensor_infos:
+            sensor_label = sensor_info[0]
+            sensor_description = sensor_info[1]
+            sensor_display = f"{sensor_type} sensor:\nLabel: {sensor_label}\nDescription: {sensor_description}\n\n"
+            self.sensor_text.insert(tk.END, sensor_display)
 
         self.sensor_text.configure(state='disabled')
 

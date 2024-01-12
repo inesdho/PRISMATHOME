@@ -61,13 +61,21 @@ class SummaryAdmin:
             all_sensor_types = cursor.fetchall()
 
             for sensor_type_id, sensor_type in all_sensor_types:
-                sensor_type_button = ttk.Button(
-                    button_frame,
-                    text=sensor_type,
-                    command=lambda id=sensor_type_id, type=sensor_type: self.display_sensor_info(id, type),
-                    padding=5
-                )
-                sensor_type_button.pack(side=tk.LEFT)
+                # Convert sensor_type_id to str for comparison
+                sensor_type_id_str = str(sensor_type_id)
+                # Filter entries for this sensor type
+                entries_for_type = [
+                    entry for entry in globals.global_sensor_entries
+                    if str(entry[0]).startswith(sensor_type_id_str)  # Ensure both are strings
+                ]
+                if entries_for_type.count()==0:
+                    sensor_type_button = ttk.Button(
+                        button_frame,
+                        text=sensor_type,
+                        command=lambda id=sensor_type_id, type=sensor_type: self.display_sensor_info(id, type),
+                        padding=5
+                    )
+                    sensor_type_button.pack(side=tk.LEFT, padx=5)
 
             cursor.close()
             conn.close()
@@ -99,14 +107,11 @@ class SummaryAdmin:
             if str(entry[0]).startswith(sensor_type_id_str)  # Ensure both are strings
         ]
 
-        if not entries_for_type:
-            self.sensor_text.insert(tk.END, f"No information available for {sensor_type} sensors.\n")
-        else:
-            for index, (sensor_id, label_entry, description_entry) in enumerate(entries_for_type, start=1):
-                if index > sensor_count:
-                    break
-                sensor_info = f"{sensor_type} sensor {index}:\nLabel: {label_entry}\nDescription: {description_entry}\n\n"
-                self.sensor_text.insert(tk.END, sensor_info)
+        for index, (sensor_id, label_entry, description_entry) in enumerate(entries_for_type, start=1):
+            if index > sensor_count:
+                break
+            sensor_info = f"{sensor_type} sensor {index}:\nLabel: {label_entry}\nDescription: {description_entry}\n\n"
+            self.sensor_text.insert(tk.END, sensor_info)
 
         self.sensor_text.configure(state='disabled')
 

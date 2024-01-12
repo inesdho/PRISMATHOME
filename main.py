@@ -6,9 +6,9 @@ from tkinter import messagebox
 
 if __name__ == "__main__":
     # Starting the application
-    app = App()
-    if messagebox.askyesno("Import data", "Do you want to try to import data from the remote database into the local."
-                                          "database ?"):
+    answer = messagebox.askyesno("Import data", "Do you want to try to import data from the remote database into the local."
+                                       "database ?")
+    if answer:
         try:
             # Try to update the local database with the data from the remote database
             UpdateLocalDatabase()
@@ -16,8 +16,7 @@ if __name__ == "__main__":
             # Displaying an error message
             tk.Tk().withdraw()
             messagebox.showerror("Erreur", f"An error occurred while trying to update the local database : {str(e)}")
-            app.destroy()
-
+    app = App()
     app.mainloop()
 
 
