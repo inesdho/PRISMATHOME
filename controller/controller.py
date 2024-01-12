@@ -382,10 +382,10 @@ class App(ThemedTk):
         @return Nothing
         """
         # Saving the infos about the pairing
-        sensor_pairing_page.save_sensor_info()
+        sensor_pairing_page.on_validate_button_click()
 
         # Redirecting to the 'Summary user' page
-        self.redirect_to_summary_user_from_anywhere(self, sensor_pairing_page)
+        self.redirect_to_summary_user_from_anywhere(sensor_pairing_page)
 
     def redirect_to_summary_user_from_summary_observation(self, summary_observation_page):
         """!
@@ -398,7 +398,7 @@ class App(ThemedTk):
         summary_observation_page.stop_observation()
 
         # Redirecting to the 'Summary user' page
-        self.redirect_to_summary_user_from_anywhere(self, summary_observation_page)
+        self.redirect_to_summary_user_from_anywhere(summary_observation_page)
 
     def redirect_to_summary_user_from_anywhere(self, page):
         """!
