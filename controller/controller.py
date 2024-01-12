@@ -15,7 +15,6 @@ from view.login_as_admin_page import LoginAsAdministrator
 from view.modify_or_create_configuration_page import ModifyOrCreateConfiguration
 from view.summary_admin_page import SummaryAdmin
 from view.summary_user_page import SummaryUser
-from view.summary_observation_page import SummaryObservation
 from view.selection_sensor_quantity_page import QuantitySensor
 from view.labellisation_sensor_page import LabelisationSensor
 from view.sensor_pairing_management_page import SensorPairingManagement
@@ -387,19 +386,6 @@ class App(ThemedTk):
         # Redirecting to the 'Summary user' page
         self.redirect_to_summary_user_from_anywhere(sensor_pairing_page)
 
-    def redirect_to_summary_user_from_summary_observation(self, summary_observation_page):
-        """!
-        @brief This function stops the observation and calls the 'Summary user' page
-        @param self : the instance
-        @param summary_observation_page : the summary observation page
-        @return Nothing
-        """
-        # Saving the infos about the pairing
-        summary_observation_page.stop_observation()
-
-        # Redirecting to the 'Summary user' page
-        self.redirect_to_summary_user_from_anywhere(summary_observation_page)
-
     def redirect_to_summary_user_from_anywhere(self, page):
         """!
         @brief This function clears the previous page in order to display the content of the "summary user"
@@ -429,40 +415,41 @@ class App(ThemedTk):
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Start observation button
-        back_button = ttk.Button(self.main_frame, text="Start observation",
-                                 command=lambda: self.redirect_to_summary_observation_from_summary_user(
-                                     summary_user_page))
-        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+        button = ttk.Button(self.main_frame, text="Start observation")
+        button.config(command=lambda: self.start_observation(button, summary_user_page))
+        button.pack(side=tk.LEFT, padx=10, expand=True)
 
-    def redirect_to_summary_observation_from_summary_user(self, summary_user_page):
+    def start_observation(self, button, summary_user_page):
         """!
-        @brief This function clears the previous page in order to display the content of the "summary obsevation"
-        page and adds navigations buttons.
+        @brief This function starts the observation and change the label of the button
         @param self : the instance
-        @param summary_user_page : the summary user page
+        @param button : the start observation button
+        @:param summary_user_page : the summary user page
         @return Nothing
         """
 
+        # Calling the function to start the observation
+        # TODO PAUL : si tu veux faire des modifs c'est dans la fonction start observation de summary user
         summary_user_page.start_observation()
-        # Clear the previous page content
-        self.clear_the_page(summary_user_page)
 
-        # Creation of the summary observation page
-        summary_observation_page = SummaryObservation(self)
-        summary_observation_page.show_page()
+        # Changing the label and the function associated to the button
+        button.config(text="Stop observation",command=lambda: self.stop_observation(button, summary_user_page))
 
-        # Creation of a main frame
-        self.create_new_main_frame()
+    def stop_observation(self, button, summary_user_page):
+        """!
+        @brief This function allows the user to stop the observation and change the label of the button
+        @param self : the instance
+        @param button : the stop observation button
+        @:param summary_user_page : the summary user page
+        @return Nothing
+        """
 
-        # Redirection to the PHPMyAdmin
-        cancel_button = ttk.Button(self.main_frame, text="Get data through PHPMyAdmin",
-                                   command=lambda: webbrowser.open('http://localhost/phpmyadmin/'))
-        cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
+        # Calling the function to stop the observation
+        # TODO PAUL : si tu veux faire des modifs c'est dans la fonction stop observation de summary user
+        summary_user_page.stop_observation()
 
-        # Stop observation button
-        back_button = ttk.Button(self.main_frame, text="Stop observation",
-                                 command=lambda: self.redirect_to_summary_user_from_summary_observation(summary_observation_page))
-        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+        # Changing the label and the function associated to the button
+        button.config(text="Start observation",command=lambda: self.start_observation(button, summary_user_page))
 
     def clear_the_page(self, page):
         """!
