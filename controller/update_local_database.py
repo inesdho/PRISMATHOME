@@ -172,6 +172,7 @@ class UpdateLocalDatabase:
         except mysql.connector.Error as err:
             raise err
             print(f"Erreur MySQL : {err}")
+
         finally:
             # Closing the connections
             if remote_cursor:

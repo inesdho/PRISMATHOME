@@ -68,7 +68,7 @@ class SummaryAdmin:
                     entry for entry in globals.global_sensor_entries
                     if str(entry[0]).startswith(sensor_type_id_str)  # Ensure both are strings
                 ]
-                if entries_for_type.count()==0:
+                if entries_for_type:
                     sensor_type_button = ttk.Button(
                         button_frame,
                         text=sensor_type,
@@ -114,6 +114,7 @@ class SummaryAdmin:
             self.sensor_text.insert(tk.END, sensor_info)
 
         self.sensor_text.configure(state='disabled')
+
 
     def clear_page(self):
         """!

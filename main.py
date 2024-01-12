@@ -1,23 +1,28 @@
 from controller.controller import App
 from controller.update_local_database import UpdateLocalDatabase
-import time
-import tkinter as tk
 from tkinter import messagebox
 
 if __name__ == "__main__":
-    # Starting the application
-    answer = messagebox.askyesno("Import data", "Do you want to try to import data from the remote database into the local."
-                                       "database ?")
-    if answer:
+    # Creating an instance of the application
+    app = App()
+
+    # Asking the user if they want to import data
+    answer = messagebox.askyesno("Import data", "Do you want to try to import data from the remote database into "
+                                                "the local database?")
+
+    # Checking the user's response after the main loop
+    if answer==True:
         try:
             # Try to update the local database with the data from the remote database
             UpdateLocalDatabase()
         except Exception as e:
-            # Displaying an error message
-            tk.Tk().withdraw()
-            messagebox.showerror("Erreur", f"An error occurred while trying to update the local database : {str(e)}")
-    app = App()
+            messagebox.showerror("Erreur", f"An error occurred while trying to update the local database: {str(e)}")
+            print('passé par le except')
+
+    # Starting the main event loop
     app.mainloop()
+
+
 
 
 
