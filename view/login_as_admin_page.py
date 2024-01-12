@@ -68,13 +68,10 @@ class LoginAsAdministrator:
         @param self : the instance
         @return the boolean connexion_allowed that will return true if the connexion is allowed else false
         """
-        username = self.login_entry.get()
-        password = self.password_entry.get()
+        globals.global_connected_admin_login = self.login_entry.get()
+        globals.global_connected_admin_password = self.password_entry.get()
 
         connexion_allowed = False
-
-        print(username)
-        print(password)
 
         # Connexion to the MySQL database
         conn = mysql.connector.connect(
@@ -87,16 +84,16 @@ class LoginAsAdministrator:
 
         # Execute a request
         query = "SELECT * FROM user WHERE login=%s AND password=%s"
-        cursor.execute(query, (username, password))
+        cursor.execute(query, (globals.global_connected_admin_login, globals.global_connected_admin_password))
         user = cursor.fetchone()
 
         # Check if the user was found in the database
         if user:
             globals.global_id_user = user[0]
             query_update = "UPDATE prisme_home_1.user SET connected=1 WHERE login=%s AND password=%s"
-            cursor.execute(query_update, (username, password))
+            cursor.execute(query_update, (globals.global_connected_admin_login, globals.global_connected_admin_password))
             conn.commit()
-            messagebox.showinfo("Connexion allowed", "Welcome, {}".format(username))
+            messagebox.showinfo("Connexion allowed", "Welcome, {}".format(globals.global_connected_admin_login))
             connexion_allowed = True
 
         else:
@@ -107,4 +104,5 @@ class LoginAsAdministrator:
         conn.close()
 
         return connexion_allowed
+
 

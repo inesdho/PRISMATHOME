@@ -6,3 +6,5 @@ global_scenario_name_configuration = None
 global_description_configuration = None
 global_id_config_selectionned=None
 global_new_id_observation=None
+global_connected_admin_login=None
+global_connected_admin_password=None
