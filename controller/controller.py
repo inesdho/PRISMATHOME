@@ -15,12 +15,10 @@ from view.login_as_admin_page import LoginAsAdministrator
 from view.modify_or_create_configuration_page import ModifyOrCreateConfiguration
 from view.summary_admin_page import SummaryAdmin
 from view.summary_user_page import SummaryUser
-from view.summary_observation_page import SummaryObservation
 from view.selection_sensor_quantity_page import QuantitySensor
 from view.labellisation_sensor_page import LabelisationSensor
 from view.sensor_pairing_management_page import SensorPairingManagement
 import webbrowser
-
 
 
 class App(ThemedTk):
@@ -91,6 +89,19 @@ class App(ThemedTk):
 
         self.call_new_observation_page()
 
+    def redirect_to_new_observation_from_modify_or_create_a_config(self, modify_or_create_configuration_page):
+        """!
+        @brief This function logs the admins out before redirecting to the nex observation page
+        @param self : the instance
+        @param modify_or_create_configuration_page : the "modify or create a config" page
+        @return Nothing
+        """
+        # Logging out the admin
+        modify_or_create_configuration_page.log_out_the_admin()
+
+        # Redirecting to the new observation page
+        self.redirect_to_new_observation_from_anywhere(modify_or_create_configuration_page)
+
     def is_a_config_chosen(self, new_observation_page):
         """!
         @brief This function checks that the user has chosen a configuration for the observation. If no configuration
@@ -130,10 +141,8 @@ class App(ThemedTk):
 
         # Redirection to summary to confirm the configuration
         next_button = ttk.Button(self.main_frame, text="Validate",
-                                 command=lambda: self.redirect_to_summary_user_from_anywhere(sensor_pairing_page))
+                                 command=lambda: self.redirect_to_summary_user_from_pairing(sensor_pairing_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
-
-
 
     def redirect_to_login_as_admin_from_anywhere(self, page):
         """!
@@ -160,12 +169,12 @@ class App(ThemedTk):
         # Cancel button to redirect to the new observation page
         ttk.Button(self.main_frame, text="Cancel",
                    command=lambda: self.redirect_to_new_observation_from_anywhere(login_as_admin_page)).place(
-            relx=0.9,rely=0.1)
+            relx=0.9, rely=0.1)
 
     def connexion_button_clic(self, login_as_admin_page):
         """!
-        @brief This function calls the connexion_admin function located in the "login as admin page" in order to check if
-        the login and password entered by the user are correct
+        @brief This function calls the connexion_admin function located in the "login as admin page" in order to check
+        if the login and password entered by the user are correct
         @param self : the instance
         @param login_as_admin_page : the login as admin page
         @return Nothing
@@ -174,7 +183,6 @@ class App(ThemedTk):
         if login_as_admin_page.connexion_admin():
             # If they are correct the user is redirected to the "modify or create a configuration page"
             self.redirect_to_modify_or_create_configuration_from_anywhere(login_as_admin_page)
-
 
     def redirect_to_modify_or_create_configuration_from_anywhere(self, page):
         """!
@@ -196,7 +204,7 @@ class App(ThemedTk):
 
         # Logout Button
         logout_button = ttk.Button(self.main_frame, text="Log out",
-                                   command=lambda: self.redirect_to_new_observation_from_anywhere(
+                                   command=lambda: self.redirect_to_new_observation_from_modify_or_create_a_config(
                                        modify_or_create_configuration_page))
         logout_button.place(relx=0.9, rely=0.01)
 
@@ -227,21 +235,27 @@ class App(ThemedTk):
         # Go back to the "modify or create a configuration page"
         self.redirect_to_modify_or_create_configuration_from_anywhere(summary_admin_page)
 
-    def redirect_to_selection_sensor_quantity_from_create_a_config(self, create_a_config_page):
+    def redirect_to_selection_sensor_quantity_from_create_a_config(self, modify_or_create_a_config_page):
         """!
-        @brief This function calls the function allows the config to be saved locally and then calls the redirection to
-        the "selection sensor quantity" page
+        @brief This function first checks if the label of the config chosen by the user is not already taken. In that
+        case, it will display an error message asking the user to choose another name for the configuration.
+        If the name doesn't already exist, the function allows the inputs of the user to be saved locally and then calls
+        the redirection to the "selection sensor quantity" page
         @param self: the instance
-        @param create_a_config_page : the create or modify a configuration page
+        @param modify_or_create_a_config_page : the create or modify a configuration page
         @return Nothing
         """
-        # Create a new configuration in the database
-        # TODO : COMMENTAIRE A CHANGER OU NOM DE FONCTION (PAS CLAIR DU TOUT)
-        create_a_config_page.on_create_configuration_button_click()
 
-        # Redirection to the "selection sensor quantity" page
-        self.redirect_to_selection_sensor_quantity_from_anywhere(create_a_config_page)
+        # Checks if the user has chosen a unique name for the configuration
+        if modify_or_create_a_config_page.does_label_config_already_exists():
+            # Display a message asking the user to choose another name
+            messagebox.showerror("Error", "This configuration's name already exists. Please choose another one.")
+        else:
+            # Create a new configuration in the database
+            modify_or_create_a_config_page.save_label_description_id_of_config_into_globals()
 
+            # Redirection to the "selection sensor quantity" page
+            self.redirect_to_selection_sensor_quantity_from_anywhere(modify_or_create_a_config_page)
 
     def redirect_to_selection_sensor_quantity_from_anywhere(self, page):
         """!
@@ -289,7 +303,6 @@ class App(ThemedTk):
         else:
             messagebox.showerror("Error", "Please select at least one sensor")
 
-
     def redirect_to_labellisation_sensor_from_anywhere(self, page):
         """!
         @brief This function clears the previous page in order to display the content of the "labellisation sensor"
@@ -316,9 +329,9 @@ class App(ThemedTk):
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         next_button = ttk.Button(self.main_frame, text="Next",
-                                 command=lambda: self.redirect_to_summary_admin_from_labellisation(labellisation_sensor_page))
+                                 command=lambda: self.redirect_to_summary_admin_from_labellisation(
+                                     labellisation_sensor_page))
         next_button.pack(side=tk.RIGHT, padx=10, expand=True)
-
 
     def redirect_to_summary_admin_from_labellisation(self, labellisation_sensor_page):
         """!
@@ -343,21 +356,36 @@ class App(ThemedTk):
         self.create_new_main_frame()
 
         # Cancel button
-        concenl_button = ttk.Button(self.main_frame, text="Cancel",
-                                    command=lambda: self.redirect_to_modify_or_create_configuration_from_anywhere(
-                                        summary_admin_page))
-        concenl_button.pack(side=tk.LEFT, padx=10, expand=True)
+        cancel_button = ttk.Button(self.main_frame, text="Cancel",
+                                   command=lambda: self.redirect_to_modify_or_create_configuration_from_anywhere(
+                                       summary_admin_page))
+        cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Back button
         back_button = ttk.Button(self.main_frame, text="Back",
-                                 command=lambda: self.redirect_to_labellisation_sensor_from_anywhere(summary_admin_page))
+                                 command=lambda: self.redirect_to_labellisation_sensor_from_anywhere(
+                                     summary_admin_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Validate configuration button
         back_button = ttk.Button(self.main_frame, text="Validate configuration",
                                  command=lambda: self.redirect_to_modify_or_create_configuration_after_config_validation
-                                     (summary_admin_page))
+                                 (summary_admin_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+
+    def redirect_to_summary_user_from_pairing(self, sensor_pairing_page):
+        """!
+        @brief This function saves the information about the pairing of the sensor and calls the 'Summary user' page
+        @param self : the instance
+        @param sensor_pairing_page : the sensor pairing page
+        @return Nothing
+        """
+        # Saving the infos about the pairing
+        sensor_pairing_page.on_validate_button_click()
+
+        # Redirecting to the 'Summary user' page
+        self.redirect_to_summary_user_from_anywhere(sensor_pairing_page)
 
     def redirect_to_summary_user_from_anywhere(self, page):
         """!
@@ -367,8 +395,6 @@ class App(ThemedTk):
         @param page : the previous page
         @return Nothing
         """
-
-        page.save_sensor_info()
         # Clear the previous page content
         self.clear_the_page(page)
 
@@ -381,7 +407,7 @@ class App(ThemedTk):
 
         # Cancel button
         cancel_button = ttk.Button(self.main_frame, text="Exit",
-                                    command=lambda: self.redirect_to_new_observation_from_anywhere(summary_user_page))
+                                   command=lambda: self.redirect_to_new_observation_from_anywhere(summary_user_page))
         cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Back button
@@ -390,38 +416,45 @@ class App(ThemedTk):
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Start observation button
-        back_button = ttk.Button(self.main_frame, text="Start observation",
-                                 command=lambda: self.redirect_to_summary_observation_from_summary_user(summary_user_page))
-        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+        button = ttk.Button(self.main_frame, text="Start observation")
+        button.config(command=lambda: self.start_observation(button, summary_user_page))
+        button.pack(side=tk.LEFT, padx=10, expand=True)
 
-
-    def redirect_to_summary_observation_from_summary_user(self, summary_user_page):
+    def start_observation(self, button, summary_user_page):
         """!
-        @brief This function clears the previous page in order to display the content of the "summary obsevation"
-        page and adds navigations buttons.
+        @brief This function starts the observation and change the label of the button
         @param self : the instance
-        @param summary_user_page : the summary user page
+        @param button : the start observation button
+        @:param summary_user_page : the summary user page
         @return Nothing
         """
-        # Clear the previous page content
-        self.clear_the_page(summary_user_page)
 
-        # Creation of the summary observation page
-        summary_observation_page = SummaryObservation(self)
-        summary_observation_page.show_page()
+        # Calling the function to start the observation
+        # TODO PAUL : si tu veux faire des modifs c'est dans la fonction start observation de summary user
+        summary_user_page.start_observation()
 
-        # Creation of a main frame
-        self.create_new_main_frame()
+        messagebox.showinfo("Start observation", "The observation is starting.")
 
-        # Redirection to the PHPMyAdmin
-        cancel_button = ttk.Button(self.main_frame, text="Get data through PHPMyAdmin",
-                                   command=lambda: webbrowser.open('http://localhost/phpmyadmin/'))
-        cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
+        # Changing the label and the function associated to the button
+        button.config(text="Stop observation",command=lambda: self.stop_observation(button, summary_user_page))
 
-        # Stop observation button
-        back_button = ttk.Button(self.main_frame, text="Stop observation",
-                                 command=lambda: self.redirect_to_summary_user_from_anywhere(summary_observation_page))
-        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+    def stop_observation(self, button, summary_user_page):
+        """!
+        @brief This function allows the user to stop the observation and change the label of the button
+        @param self : the instance
+        @param button : the stop observation button
+        @:param summary_user_page : the summary user page
+        @return Nothing
+        """
+
+        # Calling the function to stop the observation
+        # TODO PAUL : si tu veux faire des modifs c'est dans la fonction stop observation de summary user
+        summary_user_page.stop_observation()
+
+        messagebox.showinfo("Stop observation", "The observation is stopped.")
+
+        # Changing the label and the function associated to the button
+        button.config(text="Start observation",command=lambda: self.start_observation(button, summary_user_page))
 
     def clear_the_page(self, page):
         """!
@@ -436,6 +469,7 @@ class App(ThemedTk):
         self.main_frame.destroy()
 
     def create_new_main_frame(self):
+
         """!
         @brief This function creates a new empty frame that will contain the elements of a new page
         @param self : the instance

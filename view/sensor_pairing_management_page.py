@@ -386,8 +386,6 @@ class SensorPairingManagement:
                 sensor_label.bind("<Enter>", self.on_enter_sensor_label)
                 sensor_label.bind("<Leave>", self.on_leave_sensor_label)
 
-    # TODO INDUS same ici, mais pour modifier l'appairage du capteur et donc le désappairé, pas besoin de retourner
-    #  quoi que ce soit (enfin je crois)
     def edit_the_pairing(self, button_pairing, sensor_selected, sensor_elt):
         """!
         @brief edit_the_pairing : Call the pairing_a_sensor function with the param edit_sensor=sensor_selected to edit
@@ -415,7 +413,7 @@ class SensorPairingManagement:
         self.canvas.destroy()
         self.frame.destroy()
 
-    def save_sensor_info(self):
+    def save_sensor_info(self, sensor_entries):
         conn = None
         try:
             conn = mysql.connector.connect(
@@ -431,9 +429,8 @@ class SensorPairingManagement:
             ON DUPLICATE KEY UPDATE
             id_type=VALUES(id_type), description=VALUES(description), label=VALUES(label);
             """
-            for sensor in self.sensor_entries:
-                # TODO recuperer le vrai id_type
-                id_type = '1'
+            for sensor in sensor_entries:
+                id_type = self.id_type_by_label(sensor['type'])
                 id_observation = globals.global_new_id_observation
                 data = (sensor["ieee_address"], id_type, id_observation, sensor["label"], sensor["description"])
                 cursor.execute(query, data)
@@ -447,3 +444,45 @@ class SensorPairingManagement:
                 cursor.close()
             if conn:
                 conn.close()
+
+    def on_validate_button_click(self):
+        # Récupérer les entrées des capteurs sans l'adresse IEEE
+        sensor_entries = self.get_sensors(globals.global_id_config_selectionned)
+
+        for sensor in sensor_entries:
+            sensor["ieee_address"] = "0x1234567891237894"  # Adresse IEEE fictive pour les tests
+
+        # Sauvegarder les informations dans la base de données
+        self.save_sensor_info(sensor_entries)
+
+    def id_type_by_label(self,label):
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
+
+            # Execute a request
+            query = "SELECT id_type FROM sensor_type WHERE type=%s"
+            cursor.execute(query, (label,))  # Pass label as a tuple
+
+            # Fetch the first result
+            result = cursor.fetchone()
+
+            # Make sure to fetch all results to clear the cursor before closing it, even if you don't use them.
+            while cursor.fetchone() is not None:
+                pass
+
+            return result[0] if result else None
+
+        except mysql.connector.Error as err:
+            print(f"Database error: {err}")
+            return None
+
+        finally:
+            # Closing the cursor and connection
+            cursor.close()
+            conn.close()

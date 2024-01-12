@@ -71,6 +71,8 @@ class LoginAsAdministrator:
         """
         username = self.login_entry.get()
         password = self.password_entry.get()
+        globals.global_connected_admin_login = username
+        globals.global_connected_admin_password = password
 
         connexion_allowed = False
 
@@ -88,4 +90,5 @@ class LoginAsAdministrator:
             messagebox.showerror("Connexion error", "Login or password incorrect")
 
         return connexion_allowed
+
 

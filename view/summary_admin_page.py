@@ -29,7 +29,6 @@ class SummaryAdmin:
         """!
         @brief The show_page function creates and displays all the elements of the "summary" page
         @param self : the instance
-        @param is_observation : True if the page is to be displayed in the context of an observation
         @return Nothing
         """
         # Frame that will contain the title of the page and the data about the observation
@@ -69,6 +68,13 @@ class SummaryAdmin:
         self.sensor_text.pack(fill=tk.BOTH, expand=tk.TRUE)
 
     def display_sensor_info(self, sensor_type_id, sensor_type):
+        """!
+        @brief This function display the infos related to the chosen sensor type inside the text widget.
+        @param self : the instance
+        @param sensor_type_id : id related to the type of sensor
+        @param sensor_type :  label of the type of sensor
+        @return Nothing
+        """
         self.sensor_text.configure(state='normal')
         self.sensor_text.delete("1.0", tk.END)
 

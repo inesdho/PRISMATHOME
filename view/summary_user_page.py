@@ -89,38 +89,27 @@ class SummaryUser:
 
     def display_sensor_info(self, sensor_type_id, sensor_type):
         """!
-        @brief This function displays into the text widget all the sensors of a type selected by the user and the infos
-        related to the sensors
-        @param self : the instance
-        @param sensor_type_id : the id of the type of sensor that needs it's info dipalyed
-        @param sensor_type : the type of sensor
-        @return Nothing
+        @brief Displays information about all sensors of a selected type in the text widget.
+        @param self: Instance reference.
+        @param sensor_type_id: ID of the sensor type whose information is to be displayed.
+        @param sensor_type: Type of sensor.
+        @return None
         """
-
-        # Anabeling the edition of the text widget and clearing it's previous content
         self.sensor_text.configure(state='normal')
         self.sensor_text.delete("1.0", tk.END)
 
-        # Convert sensor_type_id to str for comparison
-        sensor_type_id_str = str(sensor_type_id)
-        sensor_count = globals.sensor_counts.get(sensor_type_id, 0)
+        # Retrieve information from sensors of this type from the database
+        sensor_infos = self.get_sensor_infos_for_type(sensor_type_id)
 
-    # Filter entries for this sensor type
-        entries_for_type = [
-            entry for entry in globals.global_sensor_entries
-            if str(entry[0]).startswith(sensor_type_id_str)  # Ensure both are strings
-        ]
-
-        if not entries_for_type:
+        if not sensor_infos:
             self.sensor_text.insert(tk.END, f"No information available for {sensor_type} sensors.\n")
         else:
-            for index, (sensor_id, label_entry, description_entry) in enumerate(entries_for_type, start=1):
-                if index > sensor_count:
-                    break
-                sensor_info = f"{sensor_type} sensor {index}:\nLabel: {label_entry}\nDescription: {description_entry}\n\n"
-                self.sensor_text.insert(tk.END, sensor_info)
+            for sensor_info in sensor_infos:
+                sensor_label = sensor_info[0]
+                sensor_description = sensor_info[1]
+                sensor_display = f"{sensor_type} sensor:\nLabel: {sensor_label}\nDescription: {sensor_description}\n\n"
+                self.sensor_text.insert(tk.END, sensor_display)
 
-        # Disabeling the edition once the modifications are done
         self.sensor_text.configure(state='disabled')
 
     def clear_page(self):
@@ -131,38 +120,58 @@ class SummaryUser:
         """
         self.frame.destroy()
 
-    def validate_conf(self):
-        # TODO: virer du controller et faire un appel à model.create_configuration et model.save_sensor_configs
-        """!
-        @brief This functions validated all the infos relative to the current created configuration in order to save them
-        @param self : the instance
-        @return Nothing
-        """
-        # Connect to the database
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
+    def start_observation(self):
+        #TODO voir avec les indus comment recuperer et inserer les datas
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
 
-        # Exécutez une requête
-        query = "INSERT INTO configuration (id_config, id_user, label, description)VALUES(%s, %s, %s, %s)"
-        cursor.execute(query, (
-        globals.global_id_config, globals.global_id_user, globals.global_scenario_name_configuration,
-        globals.global_description_configuration))
-        conn.commit()
+            # Execute a request
+            query_update = "UPDATE prisme_home_1.observation SET active=1 WHERE id_observation=%s"
+            cursor.execute(query_update, (globals.global_new_id_observation,))  # Pass label as a tuple
+            conn.commit()
 
-        # Insert each sensor's data into the database
-        for sensor_type_id, label, description in globals.global_sensor_entries:
-            query = "INSERT INTO sensor_config (id_config, id_sensor_type, sensor_label, sensor_description) VALUES (%s, %s, %s, %s)"
-            cursor.execute(query, (globals.global_id_config, sensor_type_id, label, description))
+        except mysql.connector.Error as err:
+            print(f"Database error: {err}")
+            return None
 
-        conn.commit()
-        cursor.close()
-        conn.close()
-        self.clear_sensor_entries()
+        finally:
+            # Closing the cursor and connection
+            cursor.close()
+            conn.close()
+
+
+    def stop_observation(self):
+        # TODO Mathilde : voir où appeller la fonction car lorsque que je la met au bonne endroit ca
+        #  pose probleme
+        #  + voir avec les indus comment stopper la reception des datas
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
+
+            # Execute a request
+            query_update = "UPDATE prisme_home_1.observation SET active=0 WHERE id_observation=%s"
+            cursor.execute(query_update, (globals.global_new_id_observation,))  # Pass label as a tuple
+            conn.commit()
+
+        except mysql.connector.Error as err:
+            print(f"Database error: {err}")
+            return None
+
+        finally:
+            # Closing the cursor and connection
+            cursor.close()
+            conn.close()
 
 
     def clear_sensor_entries(self):
@@ -270,22 +279,27 @@ class SummaryUser:
             # Closing the cursor and connection
             cursor.close()
             conn.close()
-    def exist_in_this_config(self, sensor_type):
-        # TODO Modifier la fonction pour qu'elle retourne true si ce type de capteur est présent dans la configuration en cours sinon false
-        return True
 
-    def get_sensors_id_from_type(self, sensor_type):
-        # TODO Modifier la fonction pour qu'elle retourne la liste des capteurs de type 'sensor_type' présent dans la configuration
-        return ["id_sensor1", "id_sensor2", "id_sensor3", "id_sensor4", "id_sensor5", "id_sensor6"]
+    def get_sensor_infos_for_type(self, sensor_type_id):
+        """ Retrieves sensor information for a specific type from the database. """
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
 
-    def get_sensor_label(self, id_sensor):
-        # TODO Modifier la fonction pour qu'elle retourne le label d'un capteur en fonction de son id
-        return id_sensor + "sensor "
+            query = "SELECT label, description FROM sensor WHERE id_type=%s AND id_observation=%s"
+            cursor.execute(query, (sensor_type_id, globals.global_new_id_observation))
 
-    def get_sensor_description(self, id_sensor):
-        # TODO Modifier la fonction pour qu'elle retourne la description d'un capteur en fonction de son id
-        return "Description du capteur " + id_sensor
+            sensor_infos = cursor.fetchall()
 
-    def get_sensor_status(self, id_sensor):
-        # TODO Modifier la fonction pour qu'elle retourne le status d'un capteur en fonction de son id
-        return "Status du capteur " + id_sensor
+            cursor.close()
+            conn.close()
+            return sensor_infos
+
+        except mysql.connector.Error as err:
+            print(f"Database error: {err}")
+        return []
