@@ -34,13 +34,14 @@ def connect_to_local_db():
     global local_db, local_cursor
     try:
         # Connexion to the database
-        local_db = mysql.connector.connect(
-            host="127.0.0.1",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        local_cursor = local_db.cursor()
+        with cursor_protection:
+            local_db = mysql.connector.connect(
+                host="192.168.1.36",
+                user="paul",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            local_cursor = local_db.cursor()
     except Exception as e:
         time.sleep(1)
         # Loop until the connection works
@@ -133,7 +134,7 @@ def send_query(query_type, table, fields=None, values=None, condition=None):
         query = f"{query_type} FROM `{table}`"
         query += f" WHERE {condition}"
 
-    print(f"Try execute (local) : {query, values}")
+    print(f"\033[92mTry execute (local) : {query, values}\033[0m")
 
     try:
         # Storing data in local DB
@@ -141,7 +142,7 @@ def send_query(query_type, table, fields=None, values=None, condition=None):
             local_cursor.execute(query, values)
             local_db.commit()
             last_id = local_cursor.lastrowid
-        print(f"Executed (local) : {query, values}")
+        print(f"\033[92mExecuted (local) : {query, values}\033[0m")
 
         # Building remote query
         # Appending system id to specific ids before sending to remote DB storing function
@@ -184,7 +185,7 @@ def send_query(query_type, table, fields=None, values=None, condition=None):
         #     remote_values = [add_system_id(local_cursor.lastrowid)] + remote_values
         #     query = f"{query_type} INTO `{table}`"
         #     query += f" ({', '.join(fields)}) VALUES ({', '.join(['%s'] * len(remote_values))})"
-        print(f"Try execute (distant) : {remote_query, remote_values}")
+        print(f"\033[94mTry execute (distant) : {remote_query, remote_values}\033[0m")
 
         # Attempting to send to remote DB
         if remote.execute_remote_query(remote_query, remote_values) == 1:  # Success
@@ -199,8 +200,8 @@ def send_query(query_type, table, fields=None, values=None, condition=None):
             # CBD: Monitoring "local DB connection at [datetime]"
             return send_query(query_type, table, fields, values, condition)
         else:
-            print("PB send_query : ", query, values)
-            print("Error (local):", error, "Code : ", error.errno)
+            print("\033[91mPB send_query : ", query, values, "\033[0m")
+            print("\033[91mError (local):", error, "Code : ", error.errno, "\033[0m")
             return 0
 
 
