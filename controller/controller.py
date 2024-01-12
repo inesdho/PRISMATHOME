@@ -25,12 +25,13 @@ class App(ThemedTk):
 
     def __init__(self):
         """!
-        @brief The __init__ function creates and set the theme and parameter of the window that will contain the pages of the
-        user interface
+        @brief The __init__ function creates and set the theme and parameter of the window that will contain the pages
+        of the user interface
         @param self : the instance
         @return Nothing
         """
         ThemedTk.__init__(self)
+        ThemedTk.lift(self)
         self.title("PRISM@Home")
         self.attributes('-fullscreen', True)
         self.bind('<Escape>', lambda e: self.attributes('-fullscreen', False))

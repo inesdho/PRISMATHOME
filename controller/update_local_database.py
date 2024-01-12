@@ -54,6 +54,8 @@ class FunctionSelectionDialog(tk.Toplevel):
         """
         selected_functions = [self.listbox.get(idx) for idx in self.listbox.curselection()]
         self.callback(selected_functions)
+        # Popup close
+        grab_release()
         self.destroy()
 
 

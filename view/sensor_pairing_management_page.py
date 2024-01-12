@@ -32,7 +32,7 @@ class SensorPairingManagement:
         self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
 
         # Displays the title of the page
-        label_page = ttk.Label(self.frame, text="Sensor pairing", font=16, padding=10)
+        label_page = ttk.Label(self.frame, text="Sensor pairing", font=globals.global_font_title, padding=10)
         label_page.pack(pady=10)
 
         # Creation of a canvas in order to add a scrollbar in case to many lines of sensors are displayed
@@ -59,11 +59,11 @@ class SensorPairingManagement:
 
         # Create the title of the different field
         ttk.Label(frame_title, background="lightgrey", width=20, text="Sensor", borderwidth=1, relief="solid",
-                  padding=5).pack(side=tk.LEFT)
+                  padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
         ttk.Label(frame_title, background="lightgrey", width=20, text="Label", borderwidth=1, relief="solid",
-                  padding=5).pack(side=tk.LEFT)
+                  padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
         ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid",
-                  padding=5).pack(side=tk.LEFT)
+                  padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
         # TODO mettre au propre
         # ici une boucle pour ajouter des MAC_ADDRESS bidons
@@ -91,15 +91,15 @@ class SensorPairingManagement:
 
         # Showing the type of the sensor
         ttk.Label(data_frame, text=sensor["type"] + " sensor " + str(index), width=20, anchor='w', wraplength=140,
-                  background="white", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
+                  background="white", borderwidth=1, relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
         # Creating a text widget tht will contain the label associated with the sensor
         ttk.Label(data_frame, text=sensor["label"], borderwidth=1, background="white", width=20,
-                  relief="solid", padding=5).pack(side=tk.LEFT)
+                  relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
         # Showing the description of the sensor
         ttk.Label(data_frame, background="white", width=80, text=sensor["description"], borderwidth=1,
-                  relief="solid", padding=5).pack(side=tk.LEFT)
+                  relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
         button_pairing = ttk.Button(data_frame, text=" ")
         button_pairing.pack(side=tk.LEFT, padx=5)

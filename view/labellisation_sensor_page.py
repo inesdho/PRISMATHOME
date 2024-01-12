@@ -27,7 +27,7 @@ class LabelisationSensor:
         self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
 
         # Displays the title of the page
-        label = ttk.Label(self.frame, text="Sensor labellisation", font=16, padding=10)
+        label = ttk.Label(self.frame, text="Sensor labellisation", font=globals.global_font_title, padding=10)
         label.pack(pady=20)
 
         # Creation of a canvas in order to add a scrollbar in case to many lines of sensors are displayed
@@ -108,12 +108,12 @@ class LabelisationSensor:
         label = ttk.Label(entry_frame, text=label_text, width=20)
         label.pack(side=tk.LEFT)
 
-        label_label = ttk.Label(entry_frame, text="Label :", width=10)
+        label_label = ttk.Label(entry_frame, text="Label :", width=10, font=globals.global_font_text)
         label_label.pack(side=tk.LEFT)
         entry_label = EntryManager(entry_frame, min=1, max=80, has_width=20, auto_pack=False, default_text=initial_label)
         entry_label.get_entry().pack(side=tk.LEFT)
 
-        description_label = ttk.Label(entry_frame, text="Description :", width=15)
+        description_label = ttk.Label(entry_frame, text="Description :", width=15, font=globals.global_font_text)
         description_label.pack(side=tk.LEFT)
         entry_description = EntryManager(entry_frame, min=1, max=600, has_width=80, has_special_char=True, auto_pack=False,
                                          default_text=initial_description)
@@ -134,8 +134,6 @@ class LabelisationSensor:
             label = label_entry.get()
             description = description_entry.get()
             globals.global_sensor_entries.append((sensor_type_id, label, description))
-            print("ici : ", globals.global_sensor_entries)
-            print(f"Sensor Type ID: {sensor_type_id}, Label - {label}, Description - {description}")
 
     def clear_page(self):
         """!

@@ -24,6 +24,13 @@ class QuantitySensor:
         self.master = master
         self.frame = ttk.Frame(self.master)
 
+        # Create a main frame which will be centered in the window
+        self.frame.pack(expand=True)
+
+        # Displays the title of the page
+        label = ttk.Label(self.frame, text="Sensor quantity selection", font=globals.global_font_title)
+        label.pack(pady=20)
+
     def fetch_sensor_types(self):
         """!
         @brief This functions connects to the database and fetch all the existing sensor type
@@ -50,14 +57,6 @@ class QuantitySensor:
         @param self : the instance
         @return Nothing
         """
-
-        # Create a main frame which will be centered in the window
-        self.frame = ttk.Frame(self.master)
-        self.frame.pack(expand=True)
-
-        # Displays the title of the page
-        label = ttk.Label(self.frame, text="Sensor quantity selection", font=16)
-        label.pack(pady=20)
 
         # Create a frame for the sensor selectors inside the main frame
         self.frame_sensors = tk.Frame(self.frame, padx=10, pady=10)

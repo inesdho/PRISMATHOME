@@ -6,12 +6,9 @@ if __name__ == "__main__":
     # Creating an instance of the application
     app = App()
 
-    # Asking the user if they want to import data
-    answer = messagebox.askyesno("Import data", "Do you want to try to import data from the remote database into "
-                                                "the local database?")
-
     # Checking the user's response after the main loop
-    if answer==True:
+    if messagebox.askyesno("Import data", "Do you want to try to import data from the remote database into "
+                                             "the local database?"):
         try:
             # Try to update the local database with the data from the remote database
             UpdateLocalDatabase()

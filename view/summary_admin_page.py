@@ -23,6 +23,50 @@ class SummaryAdmin:
         """
         self.master = master
         self.frame = ttk.Frame(self.master)
+        self.sensor_entries = []  # List to hold the label, description entries for each sensor, and sensor type ID
+
+        self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
+
+        # Creation of the frame that will contain the buttons
+        self.button_frame = ttk.Frame(self.master)
+        self.button_frame.pack(padx=5, pady=10)
+
+        # Displays the title of the page
+        label = ttk.Label(self.frame, text="Summary", font=globals.global_font_title, padding=10)
+        label.pack(pady=20)
+
+        # Information about the configuration
+        scenario_label = ttk.Label(self.frame, text="Configuration : " + globals.global_scenario_name_configuration,
+                                   padding=10, anchor="w", font=globals.global_font_title1)
+        scenario_label.pack(pady=20, fill=tk.BOTH)
+
+        self.button_frame = ttk.Frame(self.frame)
+        self.button_frame.pack(padx=5, pady=10)
+
+        # Creation of a canvas in order to add a scrollbar in case to many lines of sensors are displayed
+        self.canvas = tk.Canvas(self.frame, bd=2, relief="ridge", highlightthickness=2)
+        self.scrollbar = ttk.Scrollbar(self.frame, orient="vertical", command=self.canvas.yview)
+        self.scrollbar.pack(side=tk.RIGHT, fill="y")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        self.frame_canvas = ttk.Frame(self.canvas)
+        self.canvas.create_window((0, 0), anchor='nw', window=self.frame_canvas)
+
+        # Creation of the frame tate will contain the title of the field
+        frame_title = ttk.Frame(self.frame_canvas)
+        frame_title.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
+
+        # Create the title of the different field
+        ttk.Label(frame_title, background="lightgrey", width=20, text="Sensor", borderwidth=1, relief="solid",
+                  padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+        ttk.Label(frame_title, background="lightgrey", width=20, text="Label", borderwidth=1, relief="solid",
+                  padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+        ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid",
+                  padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+
+        self.data_frame = ttk.Frame(self.frame_canvas)
+        self.data_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
     def show_page(self):
         """!
@@ -30,24 +74,6 @@ class SummaryAdmin:
         @param self : the instance
         @return Nothing
         """
-        # Frame that will contain the title of the page and the data about the observation
-        self.frame = ttk.Frame(self.master)
-        self.frame.pack(fill=tk.BOTH)
-
-        # Title of the page
-        title_label = ttk.Label(self.frame, text='Summary', font=16)
-        title_label.pack(pady=10)
-
-        # Information about the configuration
-        scenario_frame = ttk.Frame(self.frame)
-        scenario_frame.pack(fill=tk.BOTH)
-        scenario_label = ttk.Label(scenario_frame, text="Configuration : " + globals.global_scenario_name_configuration, padding=10)
-        scenario_label.pack(side=tk.LEFT)
-
-        # Creation of the frame that will contain the buttons
-        button_frame = ttk.Frame(self.frame)
-        button_frame.pack(padx=5, pady=10)
-
         # Connect to the database and retrieve sensor types
         try:
             conn = mysql.connector.connect(
@@ -68,11 +94,12 @@ class SummaryAdmin:
                     entry for entry in globals.global_sensor_entries
                     if str(entry[0]).startswith(sensor_type_id_str)  # Ensure both are strings
                 ]
+                print(entries_for_type)
                 if entries_for_type:
                     sensor_type_button = ttk.Button(
-                        button_frame,
+                        self.button_frame,
                         text=sensor_type,
-                        command=lambda id=sensor_type_id, type=sensor_type: self.display_sensor_info(id, type),
+                        command=lambda type=sensor_type, entries_for_type=entries_for_type: self.display_sensor_info_V2(type, entries_for_type),
                         padding=5
                     )
                     sensor_type_button.pack(side=tk.LEFT, padx=5)
@@ -82,11 +109,8 @@ class SummaryAdmin:
         except mysql.connector.Error as err:
             print(f"Error: {err}")
 
-        # Creation of the frame that will contain the datas relative to the sensors
-        self.sensor_text = tk.Text(self.frame)
-        self.sensor_text.pack(fill=tk.BOTH, expand=tk.TRUE)
 
-    def display_sensor_info(self, sensor_type_id, sensor_type):
+    def display_sensor_info(self, ensor_type_id_str, sensor_type, entries_for_types):
         """!
         @brief This function display the infos related to the chosen sensor type inside the text widget.
         @param self : the instance
@@ -97,16 +121,6 @@ class SummaryAdmin:
         self.sensor_text.configure(state='normal')
         self.sensor_text.delete("1.0", tk.END)
 
-        # Convert sensor_type_id to str for comparison
-        sensor_type_id_str = str(sensor_type_id)
-        sensor_count = globals.sensor_counts.get(sensor_type_id, 0)
-
-        # Filter entries for this sensor type
-        entries_for_type = [
-            entry for entry in globals.global_sensor_entries
-            if str(entry[0]).startswith(sensor_type_id_str)  # Ensure both are strings
-        ]
-
         for index, (sensor_id, label_entry, description_entry) in enumerate(entries_for_type, start=1):
             if index > sensor_count:
                 break
@@ -114,6 +128,38 @@ class SummaryAdmin:
             self.sensor_text.insert(tk.END, sensor_info)
 
         self.sensor_text.configure(state='disabled')
+
+
+    def display_sensor_info_V2(self, sensor_type, entries_for_type):
+
+        self.data_frame.destroy()
+
+        self.data_frame = ttk.Frame(self.frame_canvas)
+        self.data_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
+
+        for index, (sensor_id, label_entry, description_entry) in enumerate(entries_for_type, start=1):
+            sensor_frame = ttk.Frame(self.data_frame)
+            sensor_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
+
+            # Showing the type of the sensor
+            ttk.Label(sensor_frame, text=f"{sensor_type} sensor {index}", width=20, anchor='w', wraplength=140,
+                      background="white", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
+
+            # Creating a text widget tht will contain the label associated with the sensor
+            ttk.Label(sensor_frame, text=f"{label_entry}", borderwidth=1, background="white", width=20,
+                      relief="solid", padding=5).pack(side=tk.LEFT)
+
+            # Showing the description of the sensor
+            ttk.Label(sensor_frame, text=f"{description_entry}", borderwidth=1, background="white", width=80,
+                      relief="solid", padding=5).pack(side=tk.LEFT)
+
+        # Configure the scroll region to follow the content of the frame
+        self.frame_canvas.update_idletasks()
+        self.canvas.config(scrollregion=self.canvas.bbox("all"))
+
+
+
+
 
 
     def clear_page(self):
