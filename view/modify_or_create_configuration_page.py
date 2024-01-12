@@ -89,8 +89,8 @@ class ModifyOrCreateConfiguration:
         """
         # Connexion to the MySQL database
         conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
+            host="192.168.1.36",
+            user="paul",
             password="Q3fhllj2",
             database="prisme_home_1"
         )
@@ -121,8 +121,8 @@ class ModifyOrCreateConfiguration:
         """
         # Connexion to the MySQL database
         conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
+            host="192.168.1.36",
+            user="paul",
             password="Q3fhllj2",
             database="prisme_home_1"
         )

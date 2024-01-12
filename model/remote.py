@@ -113,7 +113,7 @@ def execute_remote_query(query, values=None, synchronise=False):
             # Si la requête a eu une erreur ici, elle ne se fera jamais
             # Cas normalement impossible mais soyons rigoureux
             print("\033[91mErreur ", error, "En executant : ", query, "values", values, "\033[0m")
-            return 0
+            raise
     else:
         print("\033[91mDistant database not connected req : ", query, "values", values, "\033[0m")
 

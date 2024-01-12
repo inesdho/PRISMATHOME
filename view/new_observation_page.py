@@ -29,7 +29,6 @@ class NewObservation:
         self.configuration_combobox = ttk.Combobox(self.frame)
         self.configuration_values = []
 
-
     def show_page(self):
         """!
         @brief The show_page function creates and displays all the elements of the "new_observation" page
@@ -53,20 +52,24 @@ class NewObservation:
         """list_configuration_labels = [config['label'] for config in configurations]
         list_configuration_ids = [config['id_config'] for config in configurations]"""
 
-
         configuration_label = ttk.Label(self.frame, text="Configuration")
         configuration_label.pack()
 
         # Get the configuration labels and ids
         configurations = local.get_config_labels_ids()
 
-        # Creation of a tuple list
-        self.configuration_values = [(config['label'], config['id_config']) for config in configurations]
+        if configurations is not None:
+            # Creation of a tuple list
+            self.configuration_values = [(config['label'], config['id_config']) for config in configurations]
 
-        # Creation of a combobox with the list of configuration labels
-        self.configuration_combobox = ttk.Combobox(self.frame, width=29)
-        self.configuration_combobox['values'] = [label for label, id_config in self.configuration_values]
-        self.configuration_combobox.pack(pady=10)
+            # Creation of a combobox with the list of configuration labels
+            self.configuration_combobox = ttk.Combobox(self.frame, width=29)
+            self.configuration_combobox['values'] = [label for label, id_config in self.configuration_values]
+            self.configuration_combobox.pack(pady=10)
+        else:
+            configurations = []
+            self.configuration_combobox = ttk.Combobox(self.frame, values=configurations, width=29)
+            self.configuration_combobox.pack(pady=10)
 
         # Session input
         session_label = ttk.Label(self.frame, text="Session")
@@ -119,5 +122,3 @@ class NewObservation:
             if label == selected_label:
                 return id_config
         return None
-
-
