@@ -23,6 +23,8 @@ from model import remote
 local_db = None
 local_cursor = None
 
+disconnect_request = 0  # is used to stop the connect thread from looping
+
 local_cursor_protection = threading.Lock()
 
 caching = False
@@ -35,8 +37,10 @@ def connect_to_local_db():
 
     @return None
     """
-    global local_db, local_cursor
+    global local_db, local_cursor, disconnect_request
     try:
+        if disconnect_request == 1:
+            return
         # Connexion to the database
         with local_cursor_protection:
             local_db = mysql.connector.connect(
@@ -51,6 +55,23 @@ def connect_to_local_db():
         time.sleep(1)
         # Loop until the connection works
         connect_to_local_db()
+
+
+def disconnect_from_local_db():
+    """!
+    Tries to connect to the local database and loops until successfully connected
+
+    @return None
+    """
+    global local_db, local_cursor, disconnect_request
+
+    # Disconnect from the database
+    with local_cursor_protection:
+        disconnect_request = 1
+        local_cursor.close()
+        local_db.close()
+        local_db = None
+        local_cursor = None
 
 
 # DONE
@@ -258,7 +279,7 @@ def save_sensor_data(sensor_id, data, timestamp):
 
 
 # DONE
-def set_battery_low(sensor_id, datetime):
+def monitor_battery_low(sensor_id, datetime):
     """!
     Insert the monitoring message "Sensor battery low"
 
@@ -268,8 +289,64 @@ def set_battery_low(sensor_id, datetime):
     @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
     0 if no data was stored
     """
-    values = (sensor_id, get_system_id(), timestamp, get_error_id_from_label('Sensor battery low'))
+    values = (sensor_id, get_system_id(), datetime, get_error_id_from_label('Sensor battery low'))
     return send_query('insert', 'monitoring', ['id_sensor', 'id_system', 'timestamp', 'id_error'], values)
+
+
+def monitor_system_shut_down_by_participant(datetime):
+    """!
+    Insert the monitoring message "System shut down by participant"
+
+    @param datetime : The datetime when the datas had been received.
+
+    @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
+    0 if no data was stored
+    """
+
+    values = (get_system_id(), datetime, get_error_id_from_label('System shut down by participant'))
+    return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
+
+
+def monitor_system_started_up_by_participant(datetime):
+    """!
+    Insert the monitoring message "System started up by participant"
+
+    @param datetime : The datetime when the datas had been received.
+
+    @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
+    0 if no data was stored
+    """
+
+    values = (get_system_id(), datetime, get_error_id_from_label('System started up by participant'))
+    return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
+
+
+def monitor_observation_started(datetime):
+    """!
+    Insert the monitoring message "Observation started"
+
+    @param datetime : The datetime when the datas had been received.
+
+    @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
+    0 if no data was stored
+    """
+
+    values = (get_system_id(), datetime, get_error_id_from_label('Observation started'))
+    return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
+
+
+def monitor_observation_stopped(datetime):
+    """!
+    Insert the monitoring message "Observation stopped"
+
+    @param datetime : The datetime when the datas had been received.
+
+    @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
+    0 if no data was stored
+    """
+
+    values = (get_system_id(), datetime, get_error_id_from_label('Observation stopped'))
+    return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
 
 
 # DONE
@@ -289,7 +366,7 @@ def save_sensor_battery(sensor_id, battery, datetime):
 
     if battery < 10:
         # update monitoring table
-        if set_battery_low(sensor_id, datetime) == 0:
+        if monitor_battery_low(sensor_id, datetime) == 0:
             return False
 
     return True
@@ -406,6 +483,7 @@ def get_sensor_from_type_label(sensor_type, label):
         print(f"Error getting id sensor : {e}")
         return False
 
+
 # DONE
 def get_sensors_from_configuration(id_config):
     """!
@@ -454,12 +532,13 @@ def get_sensors_from_configuration(id_config):
     except Exception as e:
         # Handle any exceptions that may occur during the query execution
         print(f"Error finding sensors related to the configuration: {e}")
-        if(e.errno == 2013):
+        if (e.errno == 2013):
             connect_to_local_db()
             return get_sensors_from_configuration(id_config)
 
     # Return None if no sensors found or if an error occurred
     return None
+
 
 # DONE
 def get_error_id_from_label(label):
@@ -574,6 +653,7 @@ def update_user_connexion_status(login, password, connexion_status):
     # Return None if the user is not found or there are errors
     return None
 
+
 # DONE
 def get_new_config_id():
     """!
@@ -619,7 +699,8 @@ def get_new_config_id():
             connect_to_local_db()
             return get_new_config_id()
 
-#DONE
+
+# DONE
 def get_new_id_session(participant, id_config):
     """!
     @brief This functions returns the id of the last session created in the database + 1
@@ -636,7 +717,7 @@ def get_new_id_session(participant, id_config):
                 local_cursor.execute(query, values)
                 result = local_cursor.fetchone()
 
-            return result[0]+1 if result[0] else 1
+            return result[0] + 1 if result[0] else 1
         else:
             # If not connected to the local database, attempt to reconnect and retry
             print(
@@ -699,6 +780,7 @@ def get_config_labels_ids(id_config=None):
             connect_to_local_db()
             return get_config_labels_ids(id_config)
 
+
 # DONE
 def create_observation(participant, id_config, id_session, session_label, active=0, id_system=None):
     """!
@@ -720,6 +802,7 @@ def create_observation(participant, id_config, id_session, session_label, active
                ['id_system', 'participant', 'id_config', 'id_session', 'session_label', 'active'],
                values)
     return None
+
 
 # DONE
 def create_configuration(id_config, id_user, label, description):
@@ -804,6 +887,7 @@ def encrypt_password(password):
     """
     return hashlib.sha256(password.encode()).hexdigest()
 
+
 # DONE
 def get_active_observation():
     """!
@@ -834,6 +918,7 @@ def get_active_observation():
         if (e.errno == 2013):
             connect_to_local_db()
             return get_active_observation()
+
 
 # DONE
 def get_sensors_from_observation(id_observation):

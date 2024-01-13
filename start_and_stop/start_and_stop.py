@@ -173,14 +173,18 @@ if __name__ == "__main__":
     blink_background = threading.Thread(target=yellow_led_blink_background)
     blink_background.start()
 
-    signal.signal(signal.SIGTERM, handler_prgm_stopped)
+    id_observation = model.local.get_active_observation()
 
-    # Send a SIGTERM signal to the prism@home program
-    subprocess.call(['kill', '-SIGTERM', str(main_program.pid)], shell=False)
+    if id_observation is not None:
 
-    # Wait for the signal comming from prism@home program
-    while not program_down:
-        pass
+        signal.signal(signal.SIGTERM, handler_prgm_stopped)
+
+        # Send a SIGTERM signal to the prism@home program
+        subprocess.call(['kill', '-SIGTERM', str(main_program.pid)], shell=False)
+
+        # Wait for the signal comming from prism@home program
+        while not program_down:
+            pass
 
     # Shutdown the system when everything is ready
     subprocess.run(["sudo", "shutdown", "-h", "now"], check=True)

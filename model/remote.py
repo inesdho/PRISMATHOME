@@ -70,9 +70,11 @@ def disconnect_from_remote_db():
     global db, cursor, disconnect_request
     if db is not None and db.is_connected():
         try:
+            disconnect_request = 1
+            cursor.close()
+            db.close()
             db = None
             cursor = None
-            disconnect_request = 1
             return 1
 
         except Exception as e:

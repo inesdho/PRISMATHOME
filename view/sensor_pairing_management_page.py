@@ -428,8 +428,6 @@ class SensorPairingManagement:
             query = """
             INSERT INTO sensor (MAC_address_sensor, id_type, id_observation, label, description)
             VALUES (%s, %s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE
-            id_type=VALUES(id_type), description=VALUES(description), label=VALUES(label);
             """
             for sensor in self.sensor_entries:
                 id_type = self.get_id_type_by_label(sensor['type'])
