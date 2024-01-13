@@ -33,7 +33,7 @@ class QuantitySensor:
         label = ttk.Label(self.frame, text="Sensor quantity selection", font=globals.global_font_title)
         label.pack(pady=20)
 
-        def show_page(self):
+    def show_page(self):
         """!
         @brief The show_page function creates and displays all the elements of the "selection sensor quantity" page
         @param self : the instance

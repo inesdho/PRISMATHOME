@@ -12,7 +12,7 @@ global_id_session_selectionned = None
 global_new_id_observation = None
 global_connected_admin_login = None
 global_connected_admin_password = None
-global_font_title=("Calibi", 16, "bold")
-global_font_title1=("Calibi", 12, "bold")
-global_font_text=("Calibi", 10, "bold")
+global_font_title = ("Calibi", 16, "bold")
+global_font_title1 = ("Calibi", 12, "bold")
+global_font_text = ("Calibi", 10, "bold")
 

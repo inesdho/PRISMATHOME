@@ -54,7 +54,6 @@ class NewObservation:
         list_configuration_ids = [config['id_config'] for config in configurations]"""
 
         # Configuration list
-        options = self.get_config()
         configuration_label = ttk.Label(self.frame, text="Configuration", font=globals.global_font_title1)
         configuration_label.pack()
 

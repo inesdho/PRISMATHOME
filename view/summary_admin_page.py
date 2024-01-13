@@ -75,24 +75,6 @@ class SummaryAdmin:
         @param self : the instance
         @return Nothing
         """
-        # Frame that will contain the title of the page and the data about the observation
-        self.frame = ttk.Frame(self.master)
-        self.frame.pack(fill=tk.BOTH)
-
-        # Title of the page
-        title_label = ttk.Label(self.frame, text='Summary', font=16)
-        title_label.pack(pady=10)
-
-        # Information about the configuration
-        scenario_frame = ttk.Frame(self.frame)
-        scenario_frame.pack(fill=tk.BOTH)
-        scenario_label = ttk.Label(scenario_frame, text="Configuration : " + globals.global_scenario_name_configuration, padding=10)
-        scenario_label.pack(side=tk.LEFT)
-
-        # Creation of the frame that will contain the buttons
-        button_frame = ttk.Frame(self.frame)
-        button_frame.pack(padx=5, pady=10)
-
         # Get the sensor types from DB
         all_sensor_types = local.get_sensor_type_list()
 
@@ -109,32 +91,12 @@ class SummaryAdmin:
                     sensor_type_button = ttk.Button(
                         self.button_frame,
                         text=sensor_type,
-                        command=lambda type=sensor_type, entries_for_type=entries_for_type: self.display_sensor_info_V2(type, entries_for_type),
+                        command=lambda type=sensor_type, entries_for_type=entries_for_type: self.display_sensor_info(type, entries_for_type),
                         padding=5
                     )
                     sensor_type_button.pack(side=tk.LEFT, padx=5)
 
-        def display_sensor_info(self, ensor_type_id_str, sensor_type, entries_for_types):
-        """!
-        @brief This function display the infos related to the chosen sensor type inside the text widget.
-        @param self : the instance
-        @param sensor_type_id : id related to the type of sensor
-        @param sensor_type :  label of the type of sensor
-        @return Nothing
-        """
-        self.sensor_text.configure(state='normal')
-        self.sensor_text.delete("1.0", tk.END)
-
-        for index, (sensor_id, label_entry, description_entry) in enumerate(entries_for_type, start=1):
-            if index > sensor_count:
-                break
-            sensor_info = f"{sensor_type} sensor {index}:\nLabel: {label_entry}\nDescription: {description_entry}\n\n"
-            self.sensor_text.insert(tk.END, sensor_info)
-
-        self.sensor_text.configure(state='disabled')
-
-
-    def display_sensor_info_V2(self, sensor_type, entries_for_type):
+    def display_sensor_info(self, sensor_type, entries_for_type):
 
         self.data_frame.destroy()
 
@@ -160,11 +122,6 @@ class SummaryAdmin:
         # Configure the scroll region to follow the content of the frame
         self.frame_canvas.update_idletasks()
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
-
-
-
-
-
 
     def clear_page(self):
         """!
