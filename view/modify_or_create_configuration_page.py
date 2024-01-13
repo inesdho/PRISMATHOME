@@ -80,16 +80,6 @@ class ModifyOrCreateConfiguration:
         globals.global_scenario_name_configuration = self.name_entry.get()
         globals.global_description_configuration = self.description_text_entry.get()
 
-        print(globals.global_scenario_name_configuration)
-        print(globals.global_description_configuration)
-
-        num_config = self.get_number_config_create_by_admin(globals.global_id_user) + 1
-
-        id_config = str(globals.global_id_user) + "-" + str(num_config)
-        globals.global_id_config = id_config
-        print("valeur de l'id user")
-        print(globals.global_id_user)
-
     def does_label_config_already_exists(self):
         """!
         @brief This function checks that the label of the configuration is not already used in the database. For this
@@ -122,37 +112,6 @@ class ModifyOrCreateConfiguration:
             return False
         else:
             return True
-
-    def get_number_config_create_by_admin(self, id_user):
-        """!
-        @brief This function is called when the user clicks on a button to modify a configuration and fetch said
-        configuration in the database
-        @param self : the instance
-        @param id_user : the id of the user wanting to modify the configuration
-        @return Nothing
-        """
-
-        # Connexion to the MySQL database
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
-
-        # Execute a request
-        query = "SELECT COUNT(*) FROM configuration WHERE id_user = %s"
-        cursor.execute(query, (id_user,))
-
-        # Get the result
-        count = cursor.fetchone()[0]
-
-        # Close the connexion to the database
-        cursor.close()
-        conn.close()
-
-        return count
 
     def log_out_the_admin(self):
         """!

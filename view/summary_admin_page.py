@@ -8,6 +8,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import *
+from model import local
 import globals
 import mysql.connector
 
@@ -41,38 +42,26 @@ class SummaryAdmin:
         # Information about the configuration
         scenario_frame = ttk.Frame(self.frame)
         scenario_frame.pack(fill=tk.BOTH)
-        scenario_label = ttk.Label(scenario_frame, text="Configuration : " + globals.global_scenario_name_configuration, padding=10)
+        scenario_label = ttk.Label(scenario_frame, text="Configuration : "
+                                   + globals.global_scenario_name_configuration, padding=10)
         scenario_label.pack(side=tk.LEFT)
 
         # Creation of the frame that will contain the buttons
         button_frame = ttk.Frame(self.frame)
         button_frame.pack(padx=5, pady=10)
 
-        # Connect to the database and retrieve sensor types
-        try:
-            conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="Q3fhllj2",
-                database="prisme_home_1"
+        # Get the sensor types from DB
+        all_sensor_types = local.get_sensor_type_list()
+
+        # Create a button for each sensor type to display sensors by type
+        for sensor_type_id, sensor_type in all_sensor_types:
+            sensor_type_button = ttk.Button(
+                button_frame,
+                text=sensor_type,
+                command=lambda id=sensor_type_id, type=sensor_type: self.display_sensor_info(id, type),
+                padding=5
             )
-            cursor = conn.cursor()
-            cursor.execute("SELECT DISTINCT id_type, type FROM sensor_type")
-            all_sensor_types = cursor.fetchall()
-
-            for sensor_type_id, sensor_type in all_sensor_types:
-                sensor_type_button = ttk.Button(
-                    button_frame,
-                    text=sensor_type,
-                    command=lambda id=sensor_type_id, type=sensor_type: self.display_sensor_info(id, type),
-                    padding=5
-                )
-                sensor_type_button.pack(side=tk.LEFT)
-
-            cursor.close()
-            conn.close()
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
+            sensor_type_button.pack(side=tk.LEFT)
 
         # Creation of the frame that will contain the datas relative to the sensors
         self.sensor_text = tk.Text(self.frame)
@@ -124,32 +113,20 @@ class SummaryAdmin:
         @param self : the instance
         @return Nothing
         """
-        # Connect to the database
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
 
-        # Exécutez une requête
-        query = "INSERT INTO configuration (id_config, id_user, label, description)VALUES(%s, %s, %s, %s)"
-        cursor.execute(query, (
-            globals.global_id_config, globals.global_id_user, globals.global_scenario_name_configuration,
-            globals.global_description_configuration))
-        conn.commit()
+        # Get the new id config to create it
+        globals.global_id_config = local.get_new_config_id()
+
+        # Insert the configuration in DB
+        local.create_configuration(globals.global_id_config,
+                                   globals.global_id_user,
+                                   globals.global_scenario_name_configuration,
+                                   globals.global_description_configuration)
 
         # Insert each sensor's data into the database
-        for sensor_type_id, label, description in globals.global_sensor_entries:
-            query = "INSERT INTO sensor_config (id_config, id_sensor_type, sensor_label, sensor_description) VALUES (%s, %s, %s, %s)"
-            cursor.execute(query, (globals.global_id_config, sensor_type_id, label, description))
+        local.create_sensor_configs(globals.global_id_config, globals.global_sensor_entries)
 
-        conn.commit()
-        cursor.close()
-        conn.close()
         self.clear_sensor_entries()
-
 
     def clear_sensor_entries(self):
         """!

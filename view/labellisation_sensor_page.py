@@ -8,6 +8,7 @@
 import tkinter as tk
 from tkinter import ttk
 import mysql.connector
+from model import local
 import globals
 from controller.entry_manager import EntryManager
 
@@ -60,41 +61,22 @@ class LabelisationSensor:
                 initial_label = existing_entry[1] if existing_entry else "Label"
                 initial_description = existing_entry[2] if existing_entry else "Description"
 
-                try:
-                    conn = mysql.connector.connect(
-                        host="localhost",
-                        user="root",
-                        password="Q3fhllj2",
-                        database="prisme_home_1"
-                    )
-                    cursor = conn.cursor()
-                    query = "SELECT type FROM sensor_type WHERE id_type = %s"
-                    cursor.execute(query, (sensor_type_id,))
-                    type_result = cursor.fetchone()
-                    cursor.close()
-                    conn.close()
+                sensor_type = local.get_sensor_type_from_id_type(sensor_type_id)
 
-                    if type_result:
-                        sensor_type = type_result[0]
-                        label_text = f'{sensor_type} sensor {i+1}'
-                    else:
-                        label_text = 'Unknown sensor'
-                        sensor_type_id = None
-
-                    # Give sensor_type_id to the method create_labeled_entry
-                    self.create_labeled_entry(unique_id, label_text, initial_label, initial_description)
-                except mysql.connector.Error as err:
-                    print(f"Error: {err}")
-                    label_text = 'Error sensor'
+                if sensor_type:
+                    label_text = f'{sensor_type} sensor {i+1}'
+                else:
+                    label_text = 'Unknown sensor'
                     sensor_type_id = None
-                    self.create_labeled_entry(unique_id, label_text, "Label", "Description")
 
+                # Give sensor_type_id to the method create_labeled_entry
+                self.create_labeled_entry(sensor_type_id, label_text, initial_label, initial_description)
 
         # Configure the scroll region to follow the content of the frame
         self.frame_canvas.update_idletasks()
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
-    def create_labeled_entry(self, unique_id, label_text, initial_label, initial_description):
+    def create_labeled_entry(self, sensor_type_id, label_text, initial_label, initial_description):
         """!
         @brief This function creates label entries according to the sensor quantity of each type selected by the user in the
         selection sensor quantity page. The user can then enter the label and descrition to attribute to each sensor
@@ -119,8 +101,8 @@ class LabelisationSensor:
                                          default_text=initial_description)
         entry_description.get_entry().pack(side=tk.LEFT)
 
-        # Add the unique_id instead of sensor_type_id to the list of sensor_entries with the label and description
-        self.sensor_entries.append((unique_id, entry_label, entry_description))
+        # Add the sensor_type_id to the list of sensor_entries with the label and description
+        self.sensor_entries.append((sensor_type_id, entry_label, entry_description))
 
     def get_sensor_data(self):
         """!

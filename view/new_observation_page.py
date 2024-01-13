@@ -9,6 +9,7 @@
 import tkinter as tk
 from tkinter import ttk
 import globals
+from model import local
 
 import mysql
 from controller.entry_manager import EntryManager
@@ -26,6 +27,7 @@ class NewObservation:
         self.master = master
         self.frame = ttk.Frame(self.master)
         self.configuration_combobox = ttk.Combobox(self.frame)
+        self.configuration_values = []
 
     def show_page(self):
         """!
@@ -47,13 +49,27 @@ class NewObservation:
         # TODO paul I guess ? remplacer le default texte par la valeur que tu as crée de l'utilisateur de la session
         self.user_entry = EntryManager(self.frame, min=1, max=30, has_width=30, default_text="User")
 
+        """list_configuration_labels = [config['label'] for config in configurations]
+        list_configuration_ids = [config['id_config'] for config in configurations]"""
 
-        # Configuration list
-        options = self.get_config()
         configuration_label = ttk.Label(self.frame, text="Configuration")
         configuration_label.pack()
-        self.configuration_combobox = ttk.Combobox(self.frame, values=options, width=29)
-        self.configuration_combobox.pack(pady=10)
+
+        # Get the configuration labels and ids
+        configurations = local.get_config_labels_ids()
+
+        if configurations is not None:
+            # Creation of a tuple list
+            self.configuration_values = [(config['label'], config['id_config']) for config in configurations]
+
+            # Creation of a combobox with the list of configuration labels
+            self.configuration_combobox = ttk.Combobox(self.frame, width=29)
+            self.configuration_combobox['values'] = [label for label, id_config in self.configuration_values]
+            self.configuration_combobox.pack(pady=10)
+        else:
+            configurations = []
+            self.configuration_combobox = ttk.Combobox(self.frame, values=configurations, width=29)
+            self.configuration_combobox.pack(pady=10)
 
         # Session input
         session_label = ttk.Label(self.frame, text="Session")
@@ -79,113 +95,36 @@ class NewObservation:
         @param self : the instance
         @return Nothing
         """
+        # Get the new id_config from function
+        id_config = self.get_selected_id_config()
+        # Get participant from entry
+        participant = self.participant_entry.get()
+        # Get new id session from function
+        id_session = local.get_new_id_session(participant, id_config)
+        # Get session label from entry
+        session_label = self.session_entry.get()
 
-        # Print the chosen data
-        print("User :", self.user_entry.get())
-        print("Configuration :", self.configuration_combobox.get())
-        print("Session :", self.session_entry.get())
-        print("Participant :", self.participant_entry.get())
-
-        globals.global_participant_selectionned = self.participant_entry.get()
+        globals.global_participant_selectionned = participant
         globals.global_id_system_selectionned = self.get_id_system()
-        globals.global_id_config_selectionned = self.get_config_by_id(self.configuration_combobox.get())
-        globals.global_id_session_selectionned = self.get_id_session() + 1
-        globals.global_session_label_selctionned = self.session_entry.get()
+        globals.global_id_config_selectionned = id_config
+        globals.global_id_session_selectionned = id_session
+        globals.global_session_label_selctionned = session_label
 
-    def get_config(self):
-        """!
-        @brief This functions returns the label of the configurations stored in the database
-        @param self : the instance
-        @return the label of the configurations stored in the database
+        # Caching
+        globals.global_id_config_selectionned = id_config
+
+        # Create the observation
+        local.create_observation(participant, id_config, id_session, session_label)
+
+    def get_selected_id_config(self):
         """
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
+           @brief Retrieves the 'id_config' associated with the selected label in the combobox.
 
-        # Execute a request
-        query = "SELECT label FROM configuration"
-        cursor.execute(query)
-        # Extract the first element of each tuple to get the labels as a list of strings
-        config_labels = [row[0] for row in cursor.fetchall()]
-        cursor.close()
-        conn.close()
-        return config_labels
-
-    def get_config_by_id(self, label):
-        """!
-        @brief This functions returns the id of the configuration that was selected by the user depending on its label.
-        @param self : the instance
-        @param label : the label of the configuration
-        @return the id of the configuration selected by the user
-        """
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
-
-        # Execute a request
-        query = "SELECT id_config FROM configuration WHERE label=%s"
-        cursor.execute(query, (label,))  # Pass label as a tuple
-        result = cursor.fetchone()  # Fetch the first result
-        cursor.close()
-        conn.close()
-        id_conf = result[0]
-        return id_conf if result else None
-
-    def get_id_system(self):
-        """!
-        @brief This functions returns the id of the system
-        @param self : the instance
-        @return the id of the system
-        """
-        try:
-            conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="Q3fhllj2",
-                database="prisme_home_1"
-            )
-            cursor = conn.cursor()
-
-            # Check if 'system' is a table in your database and escape it with backticks if necessary
-            query = "SELECT id_system FROM `system`"
-            cursor.execute(query)
-            result = cursor.fetchone()  # Fetch the result
-            return result[0] if result else None
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
-        finally:
-            cursor.close()
-            conn.close()
-
-    def get_id_session(self):
-        """!
-        @brief This functions returns the id of the last session created in the database
-        @param self : the instance
-        @return the id of the last session created in the database
-        """
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
-        label = self.configuration_combobox.get()
-        id_conf = self.get_config_by_id(label)  # Ensure id_conf is set correctly
-
-        # Make sure the query includes both placeholders
-        query = "SELECT COUNT(id_session) FROM observation WHERE participant=%s AND id_config=%s"
-        cursor.execute(query, (self.participant_entry.get(), id_conf))  # Pass participant and id_conf as a tuple
-        result = cursor.fetchone()  # Fetch the first result
-        cursor.close()
-        conn.close()
-        return result[0] if result else None
-
+           @return The 'id_config' associated with the selected label in the combobox.
+                   Returns None if no item is selected or if the selected item is not found.
+           """
+        selected_label = self.configuration_combobox.get()
+        for label, id_config in self.configuration_values:
+            if label == selected_label:
+                return id_config
+        return None

@@ -5,6 +5,7 @@ from tkinter.messagebox import *
 import mysql
 import globals
 
+from model import local
 import model.local_mqtt
 import time
 import threading
@@ -65,13 +66,10 @@ class SensorPairingManagement:
         ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid",
                   padding=5).pack(side=tk.LEFT)
 
-        # TODO mettre au propre
-        # ici une boucle pour ajouter des MAC_ADDRESS bidons
-        # Attention, le format sera certainement celui ecrit ici
-        # avec "0x" au début, il faut compté 18 dans la bdd plutot que 16
-        sensor_entries = self.get_sensors(globals.global_id_config_selectionned)
-        for sensor in sensor_entries:
-            self.create_labeled_entry(sensor, sensor_entries.index(sensor) + 1)
+        self.sensor_entries = local.get_sensors_from_configuration(globals.global_id_config_selectionned)
+
+        for index, sensor in enumerate(self.sensor_entries, start=1):
+            self.create_labeled_entry(sensor, index)
 
         # Configure the scroll region to follow the content of the frame
         self.frame_canvas.update_idletasks()
@@ -81,7 +79,7 @@ class SensorPairingManagement:
         """!
         @brief This function shows the label and the description of each sensor associated to the configuration chosen
         by the user
-        @param the instance
+        @param self : the instance
         @param sensor : The sensor that need its information to be displayed
         @param index : The index of the sensor within its sensor type
         @return Nothing
@@ -312,7 +310,7 @@ class SensorPairingManagement:
 
         @return : None
         """
-        print('Paring a sensor')
+        print("pairing the sensor : ", sensor)
         # Dictionary of sensor label related to their description in zigbee2mqtt
         # You must add the sensor description in this dictionary for every new sensor reference you add
         sensor_type_dictionary = {
@@ -366,8 +364,8 @@ class SensorPairingManagement:
         # Fill the scrollable frame with the available sensors
         for i in range(len(sensor_list)):
             # Check if the sensor is not already chosen
-            if sensor_list[i]["ieee_address"] not in self.black_list and sensor_list[i]["label"] in \
-                    sensor_type_dictionary[sensor["type"]]:
+            if (sensor_list[i]["ieee_address"] not in self.black_list and sensor_list[i]["label"]
+                    in sensor_type_dictionary[sensor["type"]]):
                 # Create a box frame to the sensor_label
                 sensor_frame = tk.Frame(scrollable_frame, cursor="hand2", bg="white", pady=0)
                 sensor_frame.pack(fill=tk.X, padx=10, pady=(5, 0), expand=True)
@@ -402,51 +400,6 @@ class SensorPairingManagement:
 
         # self.button_init(button_pairing, sensor_elt)
 
-    # TODO INES C'est fait
-
-    def get_sensors(self, id_config):
-        # This id_config should be passed to the method or obtained from the class/global scope.
-
-        # Start a connection to the database
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
-
-        # Define the SQL query
-        query = (
-            "SELECT sensor_config.sensor_label, sensor_config.sensor_description, sensor_type.type FROM sensor_config, sensor_type  WHERE sensor_config.id_config = %s  AND sensor_config.id_sensor_type = sensor_type.id_type")
-
-        # Execute the query with the provided id_config
-        cursor.execute(query, (id_config,))
-
-        # Fetch the results
-        results = cursor.fetchall()
-
-        # The list of sensors' dictionary
-        sensors = []
-
-        # Fill the sensor list from the result
-        for row in results:
-            sensor_label = row[0]
-            sensor_description = row[1]
-            sensor_type = row[2]
-
-            sensors.append({
-                "label": sensor_label,
-                "description": sensor_description,
-                "type": sensor_type,
-            })
-
-        # Close the cursor and connection
-        cursor.close()
-        conn.close()
-
-        return sensors
-
     def clear_page(self):
         """!
         @brief this function clears the content of the page
@@ -456,91 +409,11 @@ class SensorPairingManagement:
         self.canvas.destroy()
         self.frame.destroy()
 
-    def save_sensor_info(self, sensor_entries):
-        conn = None
-        try:
-            conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="Q3fhllj2",
-                database="prisme_home_1"
-            )
-            cursor = conn.cursor()
-            # Exécutez une requête d'insertion
-            query = """
-            INSERT INTO observation (id_system, participant, id_config, id_session, session_label, active)
-            VALUES (%s, %s, %s, %s, %s, %s)
-            """
-            cursor.execute(query, (globals.global_id_system_selectionned, globals.global_participant_selectionned, globals.global_id_config_selectionned, globals.global_id_session_selectionned, globals.global_session_label_selctionned, 0))
-
-            # Récupérez l'ID de la nouvelle observation
-            globals.global_new_id_observation = cursor.lastrowid
-
-            # Confirmez les modifications dans la base de données
-            conn.commit()
-
-            # Affichez l'ID de la nouvelle observation
-            print("L'ID de la nouvelle observation est :", globals.global_new_id_observation)
-            query = """
-            INSERT INTO sensor (MAC_address_sensor, id_type, id_observation, label, description)
-            VALUES (%s, %s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE
-            id_type=VALUES(id_type), description=VALUES(description), label=VALUES(label);
-            """
-            for sensor in sensor_entries:
-                id_type = self.id_type_by_label(sensor['type'])
-                id_observation = globals.global_new_id_observation
-                data = (sensor["ieee_address"], id_type, id_observation, sensor["label"], sensor["description"])
-                cursor.execute(query, data)
-            conn.commit()
-        except mysql.connector.Error as e:
-            print("Error: ", e)
-            if conn:
-                conn.rollback()
-        finally:
-            if cursor:
-                cursor.close()
-            if conn:
-                conn.close()
-
     def on_validate_button_click(self):
-        # Récupérer les entrées des capteurs sans l'adresse IEEE
-        sensor_entries = self.get_sensors(globals.global_id_config_selectionned)
 
-        for sensor in sensor_entries:
+        """
+        for sensor in self.sensor_entries:
             sensor["ieee_address"] = "0x1234567891237894"  # Adresse IEEE fictive pour les tests
-
-        # Sauvegarder les informations dans la base de données
-        self.save_sensor_info(sensor_entries)
-
-    def id_type_by_label(self,label):
-        try:
-            conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="Q3fhllj2",
-                database="prisme_home_1"
-            )
-            cursor = conn.cursor()
-
-            # Execute a request
-            query = "SELECT id_type FROM sensor_type WHERE type=%s"
-            cursor.execute(query, (label,))  # Pass label as a tuple
-
-            # Fetch the first result
-            result = cursor.fetchone()
-
-            # Make sure to fetch all results to clear the cursor before closing it, even if you don't use them.
-            while cursor.fetchone() is not None:
-                pass
-
-            return result[0] if result else None
-
-        except mysql.connector.Error as err:
-            print(f"Database error: {err}")
-            return None
-
-        finally:
-            # Closing the cursor and connection
-            cursor.close()
-            conn.close()
+        """
+        # Create sensors in the database
+        local.create_sensors(globals.global_new_id_observation, self.sensor_entries)

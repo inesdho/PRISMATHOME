@@ -297,6 +297,7 @@ class App(ThemedTk):
         if selection_sensor_quantity_page.chose_at_least_one_sensor():
             # Calls this function in order to store into global variables the datas entered by the user in the sensor
             # quantity page
+            # TODO : CHANGER LE NOM DE LA FONCTION INCOHERENT
             selection_sensor_quantity_page.on_next_button_click()
             self.redirect_to_labellisation_sensor_from_anywhere(selection_sensor_quantity_page)
         else:
