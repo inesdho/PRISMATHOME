@@ -10,6 +10,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 from ttkthemes import ThemedTk, ThemedStyle
+
+from model import local
 from view.new_observation_page import NewObservation
 from view.login_as_admin_page import LoginAsAdministrator
 from view.modify_or_create_configuration_page import ModifyOrCreateConfiguration
@@ -247,9 +249,9 @@ class App(ThemedTk):
         """
 
         # Checks if the user has chosen a unique name for the configuration
-        if modify_or_create_a_config_page.does_label_config_already_exists():
+        if local.config_label_exists(modify_or_create_a_config_page.name_entry.get()):
             # Display a message asking the user to choose another name
-            messagebox.showerror("Error", "This configuration's name already exists. Please choose another one.")
+            messagebox.showerror("Error", "This configuration name already exists. Please choose another one.")
         else:
             # Create a new configuration in the database
             modify_or_create_a_config_page.save_label_description_id_of_config_into_globals()

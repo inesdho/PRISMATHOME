@@ -961,3 +961,42 @@ def get_observation_info(id_observation, field=None):
         if e.errno == 2013:
             connect_to_local_db()
             return get_observation_info(id_observation)
+
+
+def config_label_exists(label):
+    """!
+     Checks if a config with this label already exists in the local database
+
+     @param label: The label to look for
+     @return: The number of labels in the database that are identical to the on provided
+     """
+    global local_db, local_cursor
+    try:
+        # Check if the local database connection is established
+        if local_db is not None and local_db.is_connected():
+            query = "SELECT COUNT(*) FROM configuration WHERE label = %s"
+
+            with local_cursor_protection:
+                local_cursor.execute(query, (label,))
+
+                # Fetch the result
+                result = local_cursor.fetchone()
+            if result == 0:
+                return result
+            else:
+                return 1
+        else:
+            # If not connected to the local database, attempt to reconnect and retry
+            print(
+                "config_label_exists Error while executing select statement : database is not connected, retrying")
+            connect_to_local_db()
+            return config_label_exists(label)
+
+    except Exception as e:
+        # Handle any exceptions that may occur during the query execution
+        print(f"Error checking conflicting labels: {e}")
+        if (e.errno == 2013):
+            connect_to_local_db()
+            return config_label_exists(label)
+    # Return None if the sensor type is not found or there are errors
+    return None

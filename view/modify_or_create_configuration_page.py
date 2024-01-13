@@ -80,39 +80,6 @@ class ModifyOrCreateConfiguration:
         globals.global_scenario_name_configuration = self.name_entry.get()
         globals.global_description_configuration = self.description_text_entry.get()
 
-    def does_label_config_already_exists(self):
-        """!
-        @brief This function checks that the label of the configuration is not already used in the database. For this
-        purpose it will count the number of occurrence of the label in the table configuration.
-        @param self : the instance
-        @return If the label is already used, this functions returns True, otherwise False.
-        """
-        # Connexion to the MySQL database
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
-
-        # Execute a request
-        query = "SELECT COUNT(*) FROM configuration WHERE label = %s"
-        cursor.execute(query, (self.name_entry.get(),))
-
-        # Get the result
-        count = cursor.fetchone()[0]
-
-        # Close the connexion to the database
-        cursor.close()
-        conn.close()
-
-        # Return False if no other configuration has the same name, return True otherwise
-        if count == 0:
-            return False
-        else:
-            return True
-
     def log_out_the_admin(self):
         """!
         @brief This function is called when the admin logs out and will change the connection status to False
@@ -129,6 +96,7 @@ class ModifyOrCreateConfiguration:
         cursor = conn.cursor()
 
         # Update the connexion status in the database
+        # TODO logout_admin(id_user)
         query_update = "UPDATE prisme_home_1.user SET connected=0 WHERE login=%s AND password=%s"
         cursor.execute(query_update, (globals.global_connected_admin_login, globals.global_connected_admin_password))
         conn.commit()
