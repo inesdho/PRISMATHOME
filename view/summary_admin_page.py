@@ -60,11 +60,11 @@ class SummaryAdmin:
 
         # Create the title of the different field
         ttk.Label(frame_title, background="lightgrey", width=20, text="Sensor", borderwidth=1, relief="solid",
-                  padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+                  padding=5, font=globals.global_font_text, anchor="center").pack(side=tk.LEFT)
         ttk.Label(frame_title, background="lightgrey", width=20, text="Label", borderwidth=1, relief="solid",
-                  padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+                  padding=5, font=globals.global_font_text, anchor="center").pack(side=tk.LEFT)
         ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid",
-                  padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+                  padding=5, font=globals.global_font_text, anchor="center").pack(side=tk.LEFT)
 
         self.data_frame = ttk.Frame(self.frame_canvas)
         self.data_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
@@ -86,7 +86,6 @@ class SummaryAdmin:
                     entry for entry in globals.global_sensor_entries
                     if str(entry[0]).startswith(sensor_type_id_str)  # Ensure both are strings
                 ]
-                print(entries_for_type)
                 if entries_for_type:
                     sensor_type_button = ttk.Button(
                         self.button_frame,
@@ -97,6 +96,13 @@ class SummaryAdmin:
                     sensor_type_button.pack(side=tk.LEFT, padx=5)
 
     def display_sensor_info(self, sensor_type, entries_for_type):
+        """!
+        @brief Displays information about all sensors of a selected type.
+        @param self: Instance reference.
+        @param entries_for_type: all the sensors associated with a type of sensor
+        @param sensor_type: Type of sensor.
+        @return None
+        """
 
         self.data_frame.destroy()
 
