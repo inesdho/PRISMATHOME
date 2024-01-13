@@ -86,37 +86,11 @@ class NewObservation:
         print("Session :", self.session_entry.get())
         print("Participant :", self.participant_entry.get())
 
-        id_system = self.get_id_system()
-        id_conf = self.get_config_by_id(self.configuration_combobox.get())
-        id_session = self.get_id_session() + 1
-
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
-
-        # Exécutez une requête d'insertion
-        query = """
-        INSERT INTO observation (id_system, participant, id_config, id_session, session_label, active)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        """
-        cursor.execute(query, (id_system, self.participant_entry.get(), id_conf, id_session, self.session_entry.get(), 0))
-
-        # Récupérez l'ID de la nouvelle observation
-        globals.global_new_id_observation = cursor.lastrowid
-
-        # Confirmez les modifications dans la base de données
-        conn.commit()
-
-        # Affichez l'ID de la nouvelle observation
-        print("L'ID de la nouvelle observation est :", globals.global_new_id_observation)
-
-        # Assurez-vous de fermer le curseur et la connexion
-        cursor.close()
-        conn.close()
+        globals.global_participant_selectionned = self.participant_entry.get()
+        globals.global_id_system_selectionned = self.get_id_system()
+        globals.global_id_config_selectionned = self.get_config_by_id(self.configuration_combobox.get())
+        globals.global_id_session_selectionned = self.get_id_session() + 1
+        globals.global_session_label_selctionned = self.session_entry.get()
 
     def get_config(self):
         """!
@@ -162,8 +136,8 @@ class NewObservation:
         result = cursor.fetchone()  # Fetch the first result
         cursor.close()
         conn.close()
-        globals.global_id_config_selectionned=result[0]
-        return globals.global_id_config_selectionned if result else None
+        id_conf = result[0]
+        return id_conf if result else None
 
     def get_id_system(self):
         """!

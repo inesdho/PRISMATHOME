@@ -466,6 +466,21 @@ class SensorPairingManagement:
                 database="prisme_home_1"
             )
             cursor = conn.cursor()
+            # Exécutez une requête d'insertion
+            query = """
+            INSERT INTO observation (id_system, participant, id_config, id_session, session_label, active)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(query, (globals.global_id_system_selectionned, globals.global_participant_selectionned, globals.global_id_config_selectionned, globals.global_id_session_selectionned, globals.global_session_label_selctionned, 0))
+
+            # Récupérez l'ID de la nouvelle observation
+            globals.global_new_id_observation = cursor.lastrowid
+
+            # Confirmez les modifications dans la base de données
+            conn.commit()
+
+            # Affichez l'ID de la nouvelle observation
+            print("L'ID de la nouvelle observation est :", globals.global_new_id_observation)
             query = """
             INSERT INTO sensor (MAC_address_sensor, id_type, id_observation, label, description)
             VALUES (%s, %s, %s, %s, %s)
