@@ -47,7 +47,6 @@ class SensorPairingManagement:
         self.frame_canvas = ttk.Frame(self.canvas)
         self.canvas.create_window((0, 0), anchor='nw', window=self.frame_canvas)
 
-
     def show_page(self):
         """!
         @brief The show_page function creates and displays all the elements of the "Sensor pairing" page
@@ -80,7 +79,7 @@ class SensorPairingManagement:
         """!
         @brief This function shows the label and the description of each sensor associated to the configuration chosen
         by the user
-        @param the instance
+        @param self : the instance
         @param sensor : The sensor that need its information to be displayed
         @param index : The index of the sensor within its sensor type
         @return Nothing
@@ -403,7 +402,6 @@ class SensorPairingManagement:
 
     # TODO INES C'est fait
 
-
     def clear_page(self):
         """!
         @brief this function clears the content of the page
@@ -413,76 +411,11 @@ class SensorPairingManagement:
         self.canvas.destroy()
         self.frame.destroy()
 
-    def save_sensor_info(self):
-        conn = None
-        cursor = None
-        id_observation = globals.global_new_id_observation
-        try:
-            conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="Q3fhllj2",
-                database="prisme_home_1"
-            )
-            cursor = conn.cursor()
-            query = """
-            INSERT INTO sensor (MAC_address_sensor, id_type, id_observation, label, description)
-            VALUES (%s, %s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE
-            id_type=VALUES(id_type), description=VALUES(description), label=VALUES(label);
-            """
-            for sensor in self.sensor_entries:
-                id_type = self.get_id_type_by_label(sensor['type'])
-                values = (sensor["ieee_address"], id_type, id_observation, sensor["label"], sensor["description"])
-                cursor.execute(query, values)
-            conn.commit()
-        except mysql.connector.Error as e:
-            print("Error: ", e)
-            if conn:
-                conn.rollback()
-        finally:
-            if cursor is not None:
-                cursor.close()
-            if conn is not None:
-                conn.close()
-
     def on_validate_button_click(self):
 
         """
         for sensor in self.sensor_entries:
             sensor["ieee_address"] = "0x1234567891237894"  # Adresse IEEE fictive pour les tests
         """
-        # Sauvegarder les informations dans la base de données
-        self.save_sensor_info()
-
-    def get_id_type_by_label(self, label):
-        try:
-            conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="Q3fhllj2",
-                database="prisme_home_1"
-            )
-            cursor = conn.cursor()
-
-            # Execute a request
-            query = "SELECT id_type FROM sensor_type WHERE type=%s"
-            cursor.execute(query, (label,))  # Pass label as a tuple
-
-            # Fetch the first result
-            result = cursor.fetchone()
-
-            # Make sure to fetch all results to clear the cursor before closing it, even if you don't use them.
-            while cursor.fetchone() is not None:
-                pass
-
-            return result[0] if result else None
-
-        except mysql.connector.Error as err:
-            print(f"Database error: {err}")
-            return None
-
-        finally:
-            # Closing the cursor and connection
-            cursor.close()
-            conn.close()
+        # Create sensors in the database
+        local.create_sensors(globals.global_new_id_observation, self.sensor_entries)

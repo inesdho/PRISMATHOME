@@ -268,7 +268,7 @@ def set_battery_low(sensor_id, datetime):
     @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
     0 if no data was stored
     """
-    values = (sensor_id, get_system_id(), timestamp, get_error_id_from_label('Sensor battery low'))
+    values = (sensor_id, get_system_id(), datetime, get_error_id_from_label('Sensor battery low'))
     return send_query('insert', 'monitoring', ['id_sensor', 'id_system', 'timestamp', 'id_error'], values)
 
 
@@ -792,6 +792,73 @@ def create_sensor_configs(id_config, sensor_list):
         print(f"Error creating sensor config : {e}")
         return False
     """
+
+
+def get_id_type_from_label(label):  # TODO : modify this function to return a list and check in the python code to
+    # associate the correct ids to the sensor list
+    """!
+    Finds the sensor type id corresponding to the label
+
+    @param label: The label of the error
+    @return: The corresponding id_type if found, None if nothing was found or an error occurred
+    """
+    global local_db, local_cursor
+    try:
+        # Check if the local database connection is established
+        if local_db is not None and local_db.is_connected():
+            query = "SELECT id_type FROM sensor_type WHERE type = %s"
+
+            with local_cursor_protection:
+                local_cursor.execute(query, (label,))
+
+                # Fetch the result
+                result = local_cursor.fetchone()
+            if result:
+                return result[0]
+        else:
+            # If not connected to the local database, attempt to reconnect and retry
+            print(
+                "get_id_type_from_label Error while executing select statement : database is not connected, retrying")
+            connect_to_local_db()
+            return get_id_type_from_label(label)
+
+    except Exception as e:
+        # Handle any exceptions that may occur during the query execution
+        print(f"Error finding sensor type from id_type: {e}")
+        if (e.errno == 2013):
+            connect_to_local_db()
+            return get_id_type_from_label(label)
+
+    # Return None if the sensor type is not found or there are errors
+    return None
+
+
+def create_sensors(id_observation, sensor_list):
+    """!
+    Saves the information of one or more sensors in both databases
+
+    @param id_observation: The observation id
+    @param sensor_list: The list of sensors
+    @return True if successful, False if one or more errors occurred
+    """
+
+    no_errors_encountered = True  # Used to know if any errors occurred in the loop
+
+    if id_observation is None:
+        return False
+
+    for sensor in sensor_list:  # Go through the sensor list
+        id_type = get_id_type_from_label(sensor['type'])    # Get the corresponding id_type
+        values = (sensor["ieee_address"], id_type, id_observation, sensor["label"], sensor["description"])
+
+        # Check for any errors while sending data
+        result = send_query('insert', 'sensor',
+                            ['MAC_address_sensor', 'id_type', 'id_observation', 'label', 'description'],
+                            values)
+        if result == 0:  # No data stored in local nor remote
+            no_errors_encountered = False
+
+    return no_errors_encountered
 
 
 # DONE
