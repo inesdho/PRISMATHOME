@@ -11,6 +11,8 @@
 """
 import errno
 
+import globals
+
 import mysql.connector
 import time
 import hashlib
@@ -38,12 +40,13 @@ def connect_to_local_db():
         # Connexion to the database
         with local_cursor_protection:
             local_db = mysql.connector.connect(
-                host="192.168.1.36",
-                user="paul",
+                host="localhost",
+                user="root",
                 password="Q3fhllj2",
                 database="prisme_home_1"
             )
             local_cursor = local_db.cursor()
+            print("Connected to local database")
     except Exception as e:
         time.sleep(1)
         # Loop until the connection works
@@ -144,7 +147,11 @@ def send_query(query_type, table, fields=None, values=None, condition=None):
             local_cursor.execute(query, values)
             local_db.commit()
             last_id = local_cursor.lastrowid
+
         print(f"\033[92mExecuted (local) : {query, values}\033[0m")
+
+        if query_type.upper() == "INSERT" and table == 'observation':
+            globals.global_new_id_observation = last_id
 
         # Building remote query
         # Appending system id to specific ids before sending to remote DB storing function

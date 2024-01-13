@@ -413,12 +413,14 @@ class SensorPairingManagement:
         self.canvas.destroy()
         self.frame.destroy()
 
-    def save_sensor_info(self, sensor_entries):
+    def save_sensor_info(self):
         conn = None
+        cursor = None
+        id_observation = globals.global_new_id_observation
         try:
             conn = mysql.connector.connect(
-                host="192.168.1.36",
-                user="paul",
+                host="localhost",
+                user="root",
                 password="Q3fhllj2",
                 database="prisme_home_1"
             )
@@ -429,33 +431,31 @@ class SensorPairingManagement:
             ON DUPLICATE KEY UPDATE
             id_type=VALUES(id_type), description=VALUES(description), label=VALUES(label);
             """
-            for sensor in sensor_entries:
-                id_type = self.id_type_by_label(sensor['type'])
-                id_observation = globals.global_new_id_observation
-                data = (sensor["ieee_address"], id_type, id_observation, sensor["label"], sensor["description"])
-                cursor.execute(query, data)
+            for sensor in self.sensor_entries:
+                id_type = self.get_id_type_by_label(sensor['type'])
+                values = (sensor["ieee_address"], id_type, id_observation, sensor["label"], sensor["description"])
+                cursor.execute(query, values)
             conn.commit()
         except mysql.connector.Error as e:
             print("Error: ", e)
             if conn:
                 conn.rollback()
         finally:
-            if cursor:
+            if cursor is not None:
                 cursor.close()
-            if conn:
+            if conn is not None:
                 conn.close()
 
     def on_validate_button_click(self):
-        # Récupérer les entrées des capteurs sans l'adresse IEEE
-        sensor_entries = self.get_sensors(globals.global_id_config_selectionned)
 
-        for sensor in sensor_entries:
+        """
+        for sensor in self.sensor_entries:
             sensor["ieee_address"] = "0x1234567891237894"  # Adresse IEEE fictive pour les tests
-
+        """
         # Sauvegarder les informations dans la base de données
-        self.save_sensor_info(sensor_entries)
+        self.save_sensor_info()
 
-    def id_type_by_label(self,label):
+    def get_id_type_by_label(self, label):
         try:
             conn = mysql.connector.connect(
                 host="localhost",

@@ -40,8 +40,8 @@ def connect_to_remote_db():
     while not disconnect_request:
         try:
             db = mysql.connector.connect(
-                host="192.168.1.36",
-                user="paul",
+                host="localhost",
+                user="root",
                 password="Q3fhllj2",
                 database="prisme@home_ICM"
             )
@@ -146,7 +146,9 @@ def synchronise_queries():
                     with local.local_cursor_protection:
                         print("Executing query SELECT * FROM remote_queries")
                         local.local_cursor.execute("SELECT * FROM remote_queries")
+                        print("Selected")
                         queries = local.local_cursor.fetchall()
+                        print("Fetched")
                         if queries is None:
                             print("\033[93msynchronise_queries : No queries\033[0m")
                             return
@@ -157,9 +159,12 @@ def synchronise_queries():
                     return
 
             except Exception as e:
-                print(f"Error select from remote_queries: {e}")
+                print(f"\033[91mError select from remote_queries: {e}\033[0m")
                 if e.errno == 2013:
                     connect_to_remote_db()
+                    return
+                print("Try to synchronise again")
+                synchronise_queries()
                 return
 
             for query_entry in queries:
