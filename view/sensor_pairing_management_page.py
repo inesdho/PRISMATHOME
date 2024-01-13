@@ -411,9 +411,13 @@ class SensorPairingManagement:
 
     def on_validate_button_click(self):
 
-        """
+
         for sensor in self.sensor_entries:
             sensor["ieee_address"] = "0x1234567891237894"  # Adresse IEEE fictive pour les tests
-        """
+
+
+        # Create the observation
+        local.create_observation(globals.global_participant_selectionned, globals.global_id_config_selectionned, globals.global_id_session_selectionned, globals.global_session_label_selctionned)
+
         # Create sensors in the database
         local.create_sensors(globals.global_new_id_observation, self.sensor_entries)

@@ -105,7 +105,7 @@ class NewObservation:
         session_label = self.session_entry.get()
 
         globals.global_participant_selectionned = participant
-        globals.global_id_system_selectionned = self.get_id_system()
+        globals.global_id_system_selectionned = local.get_system_id()
         globals.global_id_config_selectionned = id_config
         globals.global_id_session_selectionned = id_session
         globals.global_session_label_selctionned = session_label
@@ -113,8 +113,6 @@ class NewObservation:
         # Caching
         globals.global_id_config_selectionned = id_config
 
-        # Create the observation
-        local.create_observation(participant, id_config, id_session, session_label)
 
     def get_selected_id_config(self):
         """
