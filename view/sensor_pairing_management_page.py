@@ -310,7 +310,7 @@ class SensorPairingManagement:
 
         @return : None
         """
-
+        print("pairing the sensor : ", sensor)
         # Dictionary of sensor label related to their description in zigbee2mqtt
         # You must add the sensor description in this dictionary for every new sensor reference you add
         sensor_type_dictionary = {
@@ -399,8 +399,6 @@ class SensorPairingManagement:
         self.pairing_a_sensor(button_pairing, sensor_elt, sensor_selected)
 
         # self.button_init(button_pairing, sensor_elt)
-
-    # TODO INES C'est fait
 
     def clear_page(self):
         """!

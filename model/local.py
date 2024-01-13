@@ -511,17 +511,19 @@ def get_sensors_from_configuration(id_config):
                 # Fetch the result
                 result = local_cursor.fetchall()
                 print("RESULT: ", result)
-
-            if result is not None:
-                sensors = []
-                for row in result:  # Format and fill the resulting sensor list
-                    sensors.append({
-                        "label": row[0],
-                        "description": row[1],
-                        "type": row[2]
-                    })
+            try:
+                if result is not None:
+                    sensors = []
+                    for row in result:  # Format and fill the resulting sensor list
+                        sensors.append({
+                            "label": row[0],
+                            "description": row[1],
+                            "type": row[2]
+                        })
 
                 return sensors
+            except Exception as e:
+                print("Erreur dans la convertion du résultat : ",e)
         else:
             # If not connected to the local database, attempt to reconnect and retry
             print(
@@ -969,17 +971,20 @@ def get_sensors_from_observation(id_observation):
     @return A list of dictionaries with keys "type" and "label" for each sensor. None list if no sensors are found.
     """
 
+    print('\033[95mid observation = ', id_observation, "\033[0m")
+
     query = """
     SELECT s.label, st.type 
     FROM sensor s 
     JOIN sensor_type st ON s.id_type = st.id_type 
     WHERE s.id_observation = %s;
     """
+
     global local_db, local_cursor
     try:
         if local_db is not None and local_db.is_connected():
             with local_cursor_protection:
-                local_cursor.execute(query, id_observation)
+                local_cursor.execute(query, (id_observation,))
                 rows = local_cursor.fetchall()
             if rows:
                 return [{"label": row[0], "type": row[1]} for row in rows]
