@@ -877,6 +877,45 @@ def create_sensor_configs(id_config, sensor_list):
     """
 
 
+def create_sensors(id_observation, sensor_list):
+    """!
+    Saves the information of one or more sensors in both databases
+
+    @param id_observation: The observation id
+    @param sensor_list: The list of sensors
+    @return True if successful, False if one or more errors occurred
+    """
+
+    no_errors_encountered = True  # Used to know if any errors occurred in the loop
+
+    if id_observation is None:
+        return False
+
+    types_list = get_sensor_type_list()
+
+    for sensor in sensor_list:  # Go through the sensor list
+        id_type = None
+        for id, type in types_list:   # Get the corresponding id_type
+            if sensor["type"] == type:
+                id_type = id
+                break
+
+        if id_type is None:
+            print("Sensor type not found in types list")
+            return False
+
+        values = (sensor["ieee_address"], id_type, id_observation, sensor["label"], sensor["description"])
+
+        # Check for any errors while sending data
+        result = send_query('insert', 'sensor',
+                            ['MAC_address_sensor', 'id_type', 'id_observation', 'label', 'description'],
+                            values)
+        if result == 0:  # No data stored in local nor remote
+            no_errors_encountered = False
+
+    return no_errors_encountered
+
+
 # DONE
 def encrypt_password(password):
     """!

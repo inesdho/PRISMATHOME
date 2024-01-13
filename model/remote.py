@@ -111,9 +111,6 @@ def execute_remote_query(query, values=None, synchronise=False):
             return 1
         except mysql.connector.Error as error:
             # Error inserting the data in distant base
-            # TODO : Matteo return autre chose et ne pas cache la requête ici
-            # Si la requête a eu une erreur ici, elle ne se fera jamais
-            # Cas normalement impossible mais soyons rigoureux
             print("\033[91mErreur ", error, "En executant : ", query, "values", values, "\033[0m")
             raise
     else:
