@@ -10,6 +10,7 @@ from tkinter import ttk, messagebox
 
 import mysql.connector
 import globals
+from model import local
 
 from controller.entry_manager import EntryManager
 
@@ -67,40 +68,25 @@ class LoginAsAdministrator:
         @param self : the instance
         @return the boolean connexion_allowed that will return true if the connexion is allowed else false
         """
-        globals.global_connected_admin_login = self.login_entry.get()
-        globals.global_connected_admin_password = self.password_entry.get()
+        username = self.login_entry.get()
+        password = self.password_entry.get()
+        globals.global_connected_admin_login = username
+        globals.global_connected_admin_password = password
 
         connexion_allowed = False
 
-        # Connexion to the MySQL database
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
+        print(username)
+        print(password)
 
-        # Execute a request
-        query = "SELECT * FROM user WHERE login=%s AND password=%s"
-        cursor.execute(query, (globals.global_connected_admin_login, globals.global_connected_admin_password))
-        user = cursor.fetchone()
+        user = local.get_user_from_login_and_password(username, password)
 
         # Check if the user was found in the database
         if user:
             globals.global_id_user = user[0]
-            query_update = "UPDATE prisme_home_1.user SET connected=1 WHERE login=%s AND password=%s"
-            cursor.execute(query_update, (globals.global_connected_admin_login, globals.global_connected_admin_password))
-            conn.commit()
-            messagebox.showinfo("Connexion allowed", "Welcome, {}".format(globals.global_connected_admin_login))
+            local.update_user_connexion_status(username, password, 1)
             connexion_allowed = True
-
         else:
             messagebox.showerror("Connexion error", "Login or password incorrect")
-
-        # Close the connexion to the database
-        cursor.close()
-        conn.close()
 
         return connexion_allowed
 

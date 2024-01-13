@@ -9,8 +9,10 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import *
+from model import local
 import globals
 import mysql.connector
+
 
 class QuantitySensor:
     def __init__(self, master):
@@ -31,27 +33,7 @@ class QuantitySensor:
         label = ttk.Label(self.frame, text="Sensor quantity selection", font=globals.global_font_title)
         label.pack(pady=20)
 
-    def fetch_sensor_types(self):
-        """!
-        @brief This functions connects to the database and fetch all the existing sensor type
-        @param self : the instance
-        @return all the sensors type in the database
-        """
-
-        # Connexion to the database
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
-
-        # Execute a request
-        cursor.execute("SELECT id_type, type FROM sensor_type")  # Adaptez cette requête à votre BDD
-        return cursor.fetchall()
-
-    def show_page(self):
+        def show_page(self):
         """!
         @brief The show_page function creates and displays all the elements of the "selection sensor quantity" page
         @param self : the instance
@@ -63,7 +45,7 @@ class QuantitySensor:
         self.frame_sensors.pack()
 
         # Calls a function to fetch all the existing sensor types in the database
-        sensor_types = self.fetch_sensor_types()
+        sensor_types = local.get_sensor_type_list()
 
         # Creating comboboxes according to the types of sensors existing
         self.sensor_vars = {}  # Stocking the labels of the sensor type
@@ -103,7 +85,6 @@ class QuantitySensor:
         for sensor_type, count in globals.sensor_counts.items():
             print(f"Number of id_type {sensor_type} Sensors selected:", count)
 
-
     def chose_at_least_one_sensor(self):
         """!
         @brief This function checks if the users has selected at least one sensor
@@ -111,6 +92,6 @@ class QuantitySensor:
         @return true : if the user selected at least one sensor, false : if no sensor was selected
         """
         for sensor_type, sensor_var in self.sensor_vars.items():
-           if int(sensor_var.get()) > 0:
-               return True
+            if int(sensor_var.get()) > 0:
+                return True
         return False

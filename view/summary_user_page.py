@@ -9,7 +9,9 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import *
 import globals
+from model import local
 import mysql.connector
+import subprocess
 
 
 class SummaryUser:
@@ -66,7 +68,7 @@ class SummaryUser:
                 database="prisme_home_1"
             )
             cursor = conn.cursor()
-            cursor.execute("SELECT DISTINCT id_type, type FROM sensor_type")
+            cursor.execute("SELECT DISTINCT id_type, type FROM sensor_type")    # get_sensor_type_list()
             all_sensor_types = cursor.fetchall()
 
             for sensor_type_id, sensor_type in all_sensor_types:
@@ -123,6 +125,20 @@ class SummaryUser:
 
     def start_observation(self):
         #TODO voir avec les indus comment recuperer et inserer les datas
+
+        arguments = []
+
+        sensor_list = local.get_sensors_from_observation(globals.global_new_id_observation)
+        print("\033[95msensor list: ", sensor_list, "\033[0m")
+        for sensor in sensor_list:
+            arguments.append(sensor["type"] + "/" + sensor["label"])
+
+        print("arguments : ", arguments)
+        command = ["python", "/home/prisme/Prisme@home/PRISMATHOME/reception.py"] + arguments
+
+        # Start the main program
+        main_program = subprocess.Popen(command)
+
         try:
             conn = mysql.connector.connect(
                 host="localhost",
