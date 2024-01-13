@@ -105,7 +105,7 @@ def get_system_id():
     try:
         # Check if the local database connection is established
         if local_db is not None and local_db.is_connected():
-            query = """SELECT s.id_system FROM system s"""
+            query = """SELECT s.id_system FROM `system` s"""
 
             take_cursor_protection()
             local_cursor.execute(query)
