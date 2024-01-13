@@ -12,6 +12,8 @@ import globals
 from model import local
 import mysql.connector
 import subprocess
+import os
+import signal
 
 
 class SummaryUser:
@@ -26,6 +28,8 @@ class SummaryUser:
         self.master = master
         self.frame = ttk.Frame(self.master)
         self.frame.pack(fill=tk.BOTH)
+
+        self.program_pid = None
 
     def show_page(self):
         """!
@@ -138,6 +142,8 @@ class SummaryUser:
         # Start the main program
         main_program = subprocess.Popen(command)
 
+        self.program_pid = main_program.pid
+
         try:
             conn = mysql.connector.connect(
                 host="localhost",
@@ -166,6 +172,7 @@ class SummaryUser:
         # TODO Mathilde : voir où appeller la fonction car lorsque que je la met au bonne endroit ca
         #  pose probleme
         #  + voir avec les indus comment stopper la reception des datas
+        os.kill(self.program_pid, signal.SIGTERM)
         try:
             conn = mysql.connector.connect(
                 host="localhost",
