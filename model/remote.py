@@ -62,6 +62,7 @@ def connect_to_remote_db():
         print("Disconnect request")
         time.sleep(2)
 
+
 def disconnect_from_remote_db():
     """!
         Disconnects from the remote database
@@ -92,7 +93,7 @@ def execute_remote_query(query, values=None, synchronise=False):
     """
     global db, cursor, flag_synchro, thread_active
 
-    if (db is not None and db.is_connected()):  # checks if connected to the remote DB
+    if db is not None and db.is_connected():  # checks if connected to the remote DB
         try:
             if not synchronise:
                 while flag_synchro:
@@ -166,7 +167,7 @@ def synchronise_queries():
             for query_entry in queries:
                 print("Syncro req : ", query_entry[1])
                 query = query_entry[1]
-                success = execute_remote_query(query,None,True)
+                success = execute_remote_query(query, None, True)
                 if success:
                     if local.local_db is not None and local.local_db.is_connected():
                         # If the query was executed successfully, delete the entry from the local table

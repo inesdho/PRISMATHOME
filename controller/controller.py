@@ -435,13 +435,12 @@ class App(ThemedTk):
         """
 
         # Calling the function to start the observation
-        # TODO PAUL : si tu veux faire des modifs c'est dans la fonction start observation de summary user
-        summary_user_page.start_observation()
+        local.update_observation_status()
 
-        messagebox.showinfo("Start observation", "The observation is starting.")
+        messagebox.showinfo("Start observation", "The observation is started.")
 
         # Changing the label and the function associated to the button
-        button.config(text="Stop observation",command=lambda: self.stop_observation(button, summary_user_page))
+        button.config(text="Stop observation", command=lambda: self.stop_observation(button, summary_user_page))
 
     def stop_observation(self, button, summary_user_page):
         """!
@@ -453,13 +452,14 @@ class App(ThemedTk):
         """
 
         # Calling the function to stop the observation
-        # TODO PAUL : si tu veux faire des modifs c'est dans la fonction stop observation de summary user
-        summary_user_page.stop_observation()
+        # TODO Mathilde : voir où appeller la fonction car lorsque que je la met au bonne endroit ca pose probleme
+        #  + voir avec les indus comment stopper la reception des datas
+        local.update_observation_status(0)
 
         messagebox.showinfo("Stop observation", "The observation is stopped.")
 
         # Changing the label and the function associated to the button
-        button.config(text="Start observation",command=lambda: self.start_observation(button, summary_user_page))
+        button.config(text="Start observation", command=lambda: self.start_observation(button, summary_user_page))
 
     def clear_the_page(self, page):
         """!

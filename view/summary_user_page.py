@@ -41,17 +41,28 @@ class SummaryUser:
         scenario_frame = ttk.Frame(self.frame)
         scenario_frame.pack(fill=tk.BOTH)
         # TODO ajouter la valeur de scenario
-        scenario_label = ttk.Label(scenario_frame, text="Configuration : " + self.get_scenario(globals.global_new_id_observation), padding=10)
+        scenario_label = ttk.Label(scenario_frame,
+                                   text="Configuration : "
+                                        + local.get_config_label_from_observation_id(globals.global_new_id_observation),
+                                   padding=10)
         scenario_label.pack(side=tk.LEFT)
 
         session_frame = ttk.Frame(self.frame)
         session_frame.pack(fill=tk.BOTH)
-        session_label = ttk.Label(session_frame, text="Session : " + local.get_observation_info(globals.global_new_id_observation, 'session_label'), padding=10)
+        session_label = ttk.Label(session_frame,
+                                  text="Session : "
+                                       + local.get_observation_info(globals.global_new_id_observation,
+                                                                    'session_label'),
+                                  padding=10)
         session_label.pack(side=tk.LEFT)
 
         participant_frame = ttk.Frame(self.frame)
         participant_frame.pack(fill=tk.BOTH)
-        participant_label = ttk.Label(participant_frame, text="Participant : " + local.get_observation_info(globals.global_new_id_observation, 'participant'), padding=10)
+        participant_label = ttk.Label(participant_frame,
+                                      text="Participant : "
+                                           + local.get_observation_info(globals.global_new_id_observation,
+                                                                        'participant'),
+                                      padding=10)
         participant_label.pack(side=tk.LEFT)
 
         # Creation of the frame that will contain the buttons
@@ -90,14 +101,14 @@ class SummaryUser:
         self.sensor_text.delete("1.0", tk.END)
 
         # Retrieve information from sensors of this type from the database
-        sensor_infos = self.get_sensor_infos_for_type(sensor_type_id)
+        sensor_infos = local.get_sensor_info_from_observation(globals.global_new_id_observation, sensor_type_id)
 
         if not sensor_infos:
             self.sensor_text.insert(tk.END, f"No information available for {sensor_type} sensors.\n")
         else:
             for sensor_info in sensor_infos:
-                sensor_label = sensor_info[0]
-                sensor_description = sensor_info[1]
+                sensor_label = sensor_info['label']
+                sensor_description = sensor_info['description']
                 sensor_display = f"{sensor_type} sensor:\nLabel: {sensor_label}\nDescription: {sensor_description}\n\n"
                 self.sensor_text.insert(tk.END, sensor_display)
 
@@ -111,61 +122,6 @@ class SummaryUser:
         """
         self.frame.destroy()
 
-    def start_observation(self):
-        #TODO voir avec les indus comment recuperer et inserer les datas
-        try:
-            conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="Q3fhllj2",
-                database="prisme_home_1"
-            )
-            cursor = conn.cursor()
-
-            # Execute a request
-            # TODO local.start_observation(id_observation)
-            query_update = "UPDATE prisme_home_1.observation SET active=1 WHERE id_observation=%s"
-            cursor.execute(query_update, (globals.global_new_id_observation,))  # Pass label as a tuple
-            conn.commit()
-
-        except mysql.connector.Error as err:
-            print(f"Database error: {err}")
-            return None
-
-        finally:
-            # Closing the cursor and connection
-            cursor.close()
-            conn.close()
-
-
-    def stop_observation(self):
-        # TODO Mathilde : voir où appeller la fonction car lorsque que je la met au bonne endroit ca
-        #  pose probleme
-        #  + voir avec les indus comment stopper la reception des datas
-        try:
-            conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="Q3fhllj2",
-                database="prisme_home_1"
-            )
-            cursor = conn.cursor()
-
-            # Execute a request
-            # TODO local.stop_observation(id_observation)
-            query_update = "UPDATE prisme_home_1.observation SET active=0 WHERE id_observation=%s"
-            cursor.execute(query_update, (globals.global_new_id_observation,))  # Pass label as a tuple
-            conn.commit()
-
-        except mysql.connector.Error as err:
-            print(f"Database error: {err}")
-            return None
-
-        finally:
-            # Closing the cursor and connection
-            cursor.close()
-            conn.close()
-
 
     def clear_sensor_entries(self):
         """!
@@ -175,61 +131,3 @@ class SummaryUser:
         for _, label_entry, description_entry in globals.global_sensor_entries:
             label_entry.set('')
             description_entry.set('')
-
-    def get_scenario(self, id_observation):
-        try:
-            conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="Q3fhllj2",
-                database="prisme_home_1"
-            )
-            cursor = conn.cursor()
-
-            # Execute a request
-            # TODO local.get_config_label_from_config_observation_id(id_config, id_observation)
-            query = ("SELECT configuration.label FROM configuration, observation "
-                     "WHERE observation.id_config=configuration.id_config AND observation.id_observation=%s")
-            cursor.execute(query, (id_observation,))  # Pass label as a tuple
-
-            # Fetch the first result
-            result = cursor.fetchone()
-
-            # Make sure to fetch all results to clear the cursor before closing it, even if you don't use them.
-            while cursor.fetchone() is not None:
-                pass
-
-            return result[0] if result else None
-
-        except mysql.connector.Error as err:
-            print(f"Database error: {err}")
-            return None
-
-        finally:
-            # Closing the cursor and connection
-            cursor.close()
-            conn.close()
-
-    def get_sensor_infos_for_type(self, sensor_type_id):
-        """ Retrieves sensor information for a specific type from the database. """
-        try:
-            conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="Q3fhllj2",
-                database="prisme_home_1"
-            )
-            cursor = conn.cursor()
-            # TODO local.get_sensor_from_observation(id_observation, id_type)
-            query = "SELECT label, description FROM sensor WHERE id_type=%s AND id_observation=%s"
-            cursor.execute(query, (sensor_type_id, globals.global_new_id_observation))
-
-            sensor_infos = cursor.fetchall()
-
-            cursor.close()
-            conn.close()
-            return sensor_infos
-
-        except mysql.connector.Error as err:
-            print(f"Database error: {err}")
-        return []
