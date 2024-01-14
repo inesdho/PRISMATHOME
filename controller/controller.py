@@ -11,6 +11,7 @@ from tkinter import ttk, messagebox
 
 from ttkthemes import ThemedTk, ThemedStyle
 
+import globals
 from model import local
 from view.new_observation_page import NewObservation
 from view.login_as_admin_page import LoginAsAdministrator
@@ -99,7 +100,7 @@ class App(ThemedTk):
         @return Nothing
         """
         # Logging out the admin
-        modify_or_create_configuration_page.log_out_the_admin()
+        local.update_user_connexion_status(globals.global_id_user, 0)
 
         # Redirecting to the new observation page
         self.redirect_to_new_observation_from_anywhere(modify_or_create_configuration_page)
@@ -249,7 +250,9 @@ class App(ThemedTk):
         """
 
         # Checks if the user has chosen a unique name for the configuration
-        if local.config_label_exists(modify_or_create_a_config_page.name_entry.get()):
+        label = modify_or_create_a_config_page.name_entry.get()
+        print("config label = ", label)
+        if local.config_label_exists(label):
             # Display a message asking the user to choose another name
             messagebox.showerror("Error", "This configuration name already exists. Please choose another one.")
         else:

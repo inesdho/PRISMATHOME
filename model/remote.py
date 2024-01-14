@@ -90,7 +90,7 @@ def execute_remote_query(query, values=None, synchronise=False):
     @param synchronise: TODO
     @return 1 if successfully inserted, 0 otherwise
     """
-    global db, cursor, flag_synchro
+    global db, cursor, flag_synchro, thread_active
 
     if (db is not None and db.is_connected()):  # checks if connected to the remote DB
         try:
@@ -127,7 +127,6 @@ def synchronise_queries():
     Synchronises data between local database and remote database :
     Grabs all non sent queries from the local database's 'remote_queries' table and sends them to the remote database
     """
-
     print("Synchronising data between local and remote databases")
     if db is not None and db.is_connected():
         try:
@@ -176,10 +175,3 @@ def synchronise_queries():
                             local.local_db.commit()
         except Exception as e:
             print(f"\033[91mError syncing failed queries: {e}\033[0m")
-    else:
-        print("\033[91mDistant database not connected\033[0m")
-        # Create thread to check on the database
-        if thread_active == 0:
-            connection_thread = threading.Thread(target=connect_to_remote_db)
-            connection_thread.start()
-        return

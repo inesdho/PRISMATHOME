@@ -80,34 +80,6 @@ class ModifyOrCreateConfiguration:
         globals.global_scenario_name_configuration = self.name_entry.get()
         globals.global_description_configuration = self.description_text_entry.get()
 
-    def log_out_the_admin(self):
-        """!
-        @brief This function is called when the admin logs out and will change the connection status to False
-        @param self : the instance
-        @return Nothing
-        """
-        # Connexion to the MySQL database
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
-
-        # Update the connexion status in the database
-        # TODO logout_admin(id_user)
-        query_update = "UPDATE prisme_home_1.user SET connected=0 WHERE login=%s AND password=%s"
-        cursor.execute(query_update, (globals.global_connected_admin_login, globals.global_connected_admin_password))
-        conn.commit()
-
-        # Deleteing the login and the password of the connected admin
-        globals.global_connected_admin_login = None
-        globals.global_connected_admin_password = None
-
-        # Close the connexion to the database
-        cursor.close()
-        conn.close()
 
     def clear_page(self):
         """!

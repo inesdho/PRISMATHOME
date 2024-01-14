@@ -530,12 +530,11 @@ def get_user_from_login_and_password(login, password):
 
 
 # DONE
-def update_user_connexion_status(login, password, connexion_status):
+def update_user_connexion_status(id_user, connexion_status):
     """!
     Sets the connexion status to either 1 (connected) or 0 (disconnected) in the local db
 
-    @param login: The user's login.
-    @param password: The user's password in non encrypted form
+    @param id_user: The user's id
     @param connexion_status: The connexion status wanted
     @return: 1 if successful, otherwise None
     """
@@ -543,24 +542,23 @@ def update_user_connexion_status(login, password, connexion_status):
     try:
         # Check if the local database connection is established
         if local_db is not None and local_db.is_connected():
-            encrypted_password = encrypt_password(password)
-            query = "UPDATE user SET connected = %s WHERE login = %s AND password = %s"
+            query = "UPDATE user SET connected = %s WHERE id_user = %s"
 
             with local_cursor_protection:
-                local_cursor.execute(query, (connexion_status, login, encrypted_password))
+                local_cursor.execute(query, (connexion_status, id_user))
 
             return 1
         else:
             print("Error while executing update statement : database is not connected, retrying")
             connect_to_local_db()
-            return update_user_connexion_status(login, password, connexion_status)
+            return update_user_connexion_status(id_user, connexion_status)
 
     except Exception as e:
         # Handle any exceptions that may occur during the query execution
         print(f"Error updating user connexion status: {e}")
         if (e.errno == 2013):
             connect_to_local_db()
-            return update_user_connexion_status(login, password, connexion_status)
+            return update_user_connexion_status(id_user, connexion_status)
 
     # Return None if the user is not found or there are errors
     return None
@@ -755,38 +753,6 @@ def create_sensor_configs(id_config, sensor_list):
             no_errors_encountered = False
 
     return no_errors_encountered
-
-    """
-    global local_db, local_cursor
-
-    query = ("INSERT INTO sensor_config (id_config, id_sensor_type, sensor_label, sensor_description) "
-             "VALUES (%s, %s, %s, %s)")
-
-    no_errors_encountered = True  # Used to know if any errors occurred in the loop
-
-    try:
-        if local_db is not None and local_db.is_connected():
-            for sensor_type_id, label, description in sensor_list:  # Go through the sensor list
-                values = (id_config, sensor_type_id, label, description)
-                # Send each query and check for errors
-                local_cursor.execute(query, values)
-                local_db.commit()
-
-                if remote.execute_remote_query(query, values) == 0:
-                    no_errors_encountered = False
-
-            return no_errors_encountered
-
-        else:
-            # If not connected to the local database, attempt to reconnect and retry
-            print("get_active_observation Error while executing select statement : database is not connected, retrying")
-            connect_to_local_db()
-            return get_active_observation()
-    except Exception as e:
-        # Handle any exceptions that may occur during the query execution
-        print(f"Error creating sensor config : {e}")
-        return False
-    """
 
 
 def create_sensors(id_observation, sensor_list):
@@ -987,8 +953,7 @@ def config_label_exists(label):
                 return 1
         else:
             # If not connected to the local database, attempt to reconnect and retry
-            print(
-                "config_label_exists Error while executing select statement : database is not connected, retrying")
+            print("config_label_exists Error while executing select statement : database is not connected, retrying")
             connect_to_local_db()
             return config_label_exists(label)
 
