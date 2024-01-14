@@ -329,6 +329,8 @@ class SensorPairingManagement:
         popup_pairing.geometry('400x300')
         popup_pairing.resizable(False, False)
 
+        print("Affichage de la popup ")
+
         # Center the popup
         self.center_window(popup_pairing)
 
@@ -361,8 +363,11 @@ class SensorPairingManagement:
         scrollable_frame = ttk.Frame(my_canvas)
         my_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=400)
 
+        print("Getting the sensors")
+        print("sensor list ", sensor_list)
         # Fill the scrollable frame with the available sensors
         for i in range(len(sensor_list)):
+            print("Getting sensor boucle")
             # Check if the sensor is not already chosen
             if (sensor_list[i]["ieee_address"] not in self.black_list and sensor_list[i]["label"]
                     in sensor_type_dictionary[sensor["type"]]):
@@ -384,6 +389,7 @@ class SensorPairingManagement:
                 # Add event enter and leave for style
                 sensor_label.bind("<Enter>", self.on_enter_sensor_label)
                 sensor_label.bind("<Leave>", self.on_leave_sensor_label)
+        print("Fin boucle")
 
     def edit_the_pairing(self, button_pairing, sensor_selected, sensor_elt):
         """!
@@ -421,3 +427,4 @@ class SensorPairingManagement:
 
         # Create sensors in the database
         local.create_sensors(globals.global_new_id_observation, self.sensor_entries)
+        globals.thread_done = True

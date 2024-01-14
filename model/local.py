@@ -27,7 +27,23 @@ disconnect_request = 0  # is used to stop the connect thread from looping
 
 local_cursor_protection = threading.Lock()
 
+local_cursor_protect = False
+
 caching = False
+
+
+def take_cursor_protection():
+    global local_cursor_protect
+    while local_cursor_protect:
+        pass
+    local_cursor_protect = True
+    print("\033[96mPrise protection\033[0m")
+
+
+def release_cursor_protection():
+    global local_cursor_protect
+    local_cursor_protect = False
+    print("\033[95mrelease protection\033[0m")
 
 
 # DONE
@@ -37,20 +53,23 @@ def connect_to_local_db():
 
     @return None
     """
+    print("try to connect to local database")
     global local_db, local_cursor, disconnect_request
     try:
         if disconnect_request == 1:
             return
+
+        take_cursor_protection()
         # Connexion to the database
-        with local_cursor_protection:
-            local_db = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="Q3fhllj2",
-                database="prisme_home_1"
-            )
-            local_cursor = local_db.cursor()
-            print("Connected to local database")
+        local_db = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="Q3fhllj2",
+            database="prisme_home_1"
+        )
+        local_cursor = local_db.cursor()
+        release_cursor_protection()
+        print("Connected to local database")
     except Exception as e:
         time.sleep(1)
         # Loop until the connection works
@@ -66,12 +85,13 @@ def disconnect_from_local_db():
     global local_db, local_cursor, disconnect_request
 
     # Disconnect from the database
-    with local_cursor_protection:
-        disconnect_request = 1
-        local_cursor.close()
-        local_db.close()
-        local_db = None
-        local_cursor = None
+    take_cursor_protection()
+    disconnect_request = 1
+    local_cursor.close()
+    local_db.close()
+    local_db = None
+    local_cursor = None
+    release_cursor_protection()
 
 
 # DONE
@@ -87,10 +107,11 @@ def get_system_id():
         if local_db is not None and local_db.is_connected():
             query = """SELECT s.id_system FROM `system` s"""
 
-            with local_cursor_protection:
-                local_cursor.execute(query)
-                # Fetch the result
-                result = local_cursor.fetchone()
+            take_cursor_protection()
+            local_cursor.execute(query)
+            # Fetch the result
+            result = local_cursor.fetchone()
+            release_cursor_protection()
 
             if result:
                 return result[0]
@@ -164,10 +185,11 @@ def send_query(query_type, table, fields=None, values=None, condition=None):
 
     try:
         # Storing data in local DB
-        with local_cursor_protection:
-            local_cursor.execute(query, values)
-            local_db.commit()
-            last_id = local_cursor.lastrowid
+        take_cursor_protection()
+        local_cursor.execute(query, values)
+        local_db.commit()
+        last_id = local_cursor.lastrowid
+        release_cursor_protection()
 
         print(f"\033[92mExecuted (local) : {query, values}\033[0m")
 
@@ -254,9 +276,11 @@ def cache_query(remote_query, remote_values):
         remote_query_as_text = remote_query.format(*remote_values) % remote_values
     else:
         remote_query_as_text = remote_query
-    with local_cursor_protection:
-        local_cursor.execute(caching_query, (remote_query_as_text,))
-        local_db.commit()
+
+    take_cursor_protection()
+    local_cursor.execute(caching_query, (remote_query_as_text,))
+    local_db.commit()
+    release_cursor_protection()
 
     caching = False
     print("Fin caching : ", remote_query, remote_values)
@@ -386,11 +410,13 @@ def get_sensor_type_from_id_type(id_type):
         if local_db is not None and local_db.is_connected():
             query = "SELECT type FROM sensor_type WHERE id_type = %s"
 
-            with local_cursor_protection:
-                local_cursor.execute(query, (id_type,))
+            take_cursor_protection()
+            local_cursor.execute(query, (id_type,))
 
-                # Fetch the result
-                result = local_cursor.fetchone()
+            # Fetch the result
+            result = local_cursor.fetchone()
+            release_cursor_protection()
+
             if result:
                 return result[0]
         else:
@@ -421,11 +447,13 @@ def get_sensor_type_list():
         if local_db is not None and local_db.is_connected():
             query = "SELECT id_type, type FROM sensor_type"
 
-            with local_cursor_protection:
-                local_cursor.execute(query)
+            take_cursor_protection()
+            local_cursor.execute(query)
 
-                # Fetch the result
-                result = local_cursor.fetchall()
+            # Fetch the result
+            result = local_cursor.fetchall()
+            release_cursor_protection()
+
             if result:
                 return result
         else:
@@ -466,9 +494,10 @@ def get_sensor_from_type_label(sensor_type, label):
 
             values = (label, sensor_type)
 
-            with local_cursor_protection:
-                local_cursor.execute(query, values)
-                rows = local_cursor.fetchone()
+            take_cursor_protection()
+            local_cursor.execute(query, values)
+            rows = local_cursor.fetchone()
+            release_cursor_protection()
             if rows[0] is not None:
                 return rows[0]
             else:
@@ -504,13 +533,14 @@ def get_sensors_from_configuration(id_config):
                 "WHERE sc.id_config = %s  "
                 "AND sc.id_sensor_type = st.id_type")
 
-            with local_cursor_protection:
-                print("get_sensors_from_configuration : id_config = " + str(id_config))
-                local_cursor.execute(query, (id_config,))
+            take_cursor_protection()
+            print("get_sensors_from_configuration : id_config = " + str(id_config))
+            local_cursor.execute(query, (id_config,))
 
-                # Fetch the result
-                result = local_cursor.fetchall()
-                print("RESULT: ", result)
+            # Fetch the result
+            result = local_cursor.fetchall()
+            print("RESULT: ", result)
+            release_cursor_protection()
             try:
                 if result is not None:
                     sensors = []
@@ -523,7 +553,7 @@ def get_sensors_from_configuration(id_config):
 
                 return sensors
             except Exception as e:
-                print("Erreur dans la convertion du résultat : ",e)
+                print("Erreur dans la convertion du résultat : ", e)
         else:
             # If not connected to the local database, attempt to reconnect and retry
             print(
@@ -556,11 +586,12 @@ def get_error_id_from_label(label):
         if local_db is not None and local_db.is_connected():
             query = "SELECT id_error FROM error_message WHERE label = %s"
 
-            with local_cursor_protection:
-                local_cursor.execute(query, (label,))
+            take_cursor_protection()
+            local_cursor.execute(query, (label,))
 
-                # Fetch the result
-                result = local_cursor.fetchone()
+            # Fetch the result
+            result = local_cursor.fetchone()
+            release_cursor_protection()
             if result:
                 return result[0]
         else:
@@ -597,13 +628,14 @@ def get_user_from_login_and_password(login, password):
             encrypted_password = encrypt_password(password)
             query = "SELECT * FROM user WHERE login = %s AND password = %s"
 
-            with local_cursor_protection:
-                local_cursor.execute(query, (login, encrypted_password))
+            take_cursor_protection()
+            local_cursor.execute(query, (login, encrypted_password))
 
-                # Fetch the result
-                result = local_cursor.fetchone()
+            # Fetch the result
+            result = local_cursor.fetchone()
+            release_cursor_protection()
 
-                return result if result is not None else None
+            return result if result is not None else None
 
         else:
             print(
@@ -636,9 +668,9 @@ def update_user_connexion_status(login, password, connexion_status):
             encrypted_password = encrypt_password(password)
             query = "UPDATE user SET connected = %s WHERE login = %s AND password = %s"
 
-            with local_cursor_protection:
-                local_cursor.execute(query, (connexion_status, login, encrypted_password))
-
+            take_cursor_protection()
+            local_cursor.execute(query, (connexion_status, login, encrypted_password))
+            release_cursor_protection()
             return 1
         else:
             print("Error while executing update statement : database is not connected, retrying")
@@ -675,11 +707,12 @@ def get_new_config_id():
 
             system_id = get_system_id()
 
-            with local_cursor_protection:
-                local_cursor.execute(query, (system_id,))
+            take_cursor_protection()
+            local_cursor.execute(query, (system_id,))
 
-                # Fetch the result
-                result = local_cursor.fetchone()
+            # Fetch the result
+            result = local_cursor.fetchone()
+            release_cursor_protection()
 
             if result[0]:
                 return add_system_id(
@@ -715,9 +748,10 @@ def get_new_id_session(participant, id_config):
 
             query = "SELECT MAX(id_session) FROM observation WHERE participant=%s AND id_config=%s"
             values = (participant, id_config)
-            with local_cursor_protection:
-                local_cursor.execute(query, values)
-                result = local_cursor.fetchone()
+            take_cursor_protection()
+            local_cursor.execute(query, values)
+            result = local_cursor.fetchone()
+            release_cursor_protection()
 
             return result[0] + 1 if result[0] else 1
         else:
@@ -750,10 +784,11 @@ def get_config_labels_ids(id_config=None):
             if id_config is None:  # Grab all labels
                 query = "SELECT id_config, label FROM configuration"
 
-                with local_cursor_protection:
-                    local_cursor.execute(query)
-                    # Fetch the result
-                    result = local_cursor.fetchall()
+                take_cursor_protection()
+                local_cursor.execute(query)
+                # Fetch the result
+                result = local_cursor.fetchall()
+                release_cursor_protection()
 
                 if result:
                     return [{"id_config": row[0], "label": row[1]} for row in result]
@@ -763,9 +798,10 @@ def get_config_labels_ids(id_config=None):
             else:  # Grab label associated with specific id
                 query = "SELECT label FROM configuration WHERE id_config = %s"
 
-                with local_cursor_protection:
-                    local_cursor.execute(query, (id_config,))
-                    result = local_cursor.fetchone()
+                take_cursor_protection()
+                local_cursor.execute(query, (id_config,))
+                result = local_cursor.fetchone()
+                local.release_cursor_protection()
 
                 return result
 
@@ -846,38 +882,6 @@ def create_sensor_configs(id_config, sensor_list):
 
     return no_errors_encountered
 
-    """
-    global local_db, local_cursor
-
-    query = ("INSERT INTO sensor_config (id_config, id_sensor_type, sensor_label, sensor_description) "
-             "VALUES (%s, %s, %s, %s)")
-
-    no_errors_encountered = True  # Used to know if any errors occurred in the loop
-
-    try:
-        if local_db is not None and local_db.is_connected():
-            for sensor_type_id, label, description in sensor_list:  # Go through the sensor list
-                values = (id_config, sensor_type_id, label, description)
-                # Send each query and check for errors
-                local_cursor.execute(query, values)
-                local_db.commit()
-
-                if remote.execute_remote_query(query, values) == 0:
-                    no_errors_encountered = False
-
-            return no_errors_encountered
-
-        else:
-            # If not connected to the local database, attempt to reconnect and retry
-            print("get_active_observation Error while executing select statement : database is not connected, retrying")
-            connect_to_local_db()
-            return get_active_observation()
-    except Exception as e:
-        # Handle any exceptions that may occur during the query execution
-        print(f"Error creating sensor config : {e}")
-        return False
-    """
-
 
 def create_sensors(id_observation, sensor_list):
     """!
@@ -897,7 +901,7 @@ def create_sensors(id_observation, sensor_list):
 
     for sensor in sensor_list:  # Go through the sensor list
         id_type = None
-        for id, type in types_list:   # Get the corresponding id_type
+        for id, type in types_list:  # Get the corresponding id_type
             if sensor["type"] == type:
                 id_type = id
                 break
@@ -941,9 +945,10 @@ def get_active_observation():
     global local_db, local_cursor
     try:
         if local_db is not None and local_db.is_connected():
-            with local_cursor_protection:
-                local_cursor.execute(query)
-                rows = local_cursor.fetchall()
+            take_cursor_protection()
+            local_cursor.execute(query)
+            rows = local_cursor.fetchall()
+            release_cursor_protection()
             if rows:
                 return rows[0]
             else:
@@ -983,9 +988,10 @@ def get_sensors_from_observation(id_observation):
     global local_db, local_cursor
     try:
         if local_db is not None and local_db.is_connected():
-            with local_cursor_protection:
-                local_cursor.execute(query, (id_observation,))
-                rows = local_cursor.fetchall()
+            take_cursor_protection()
+            local_cursor.execute(query, (id_observation,))
+            rows = local_cursor.fetchall()
+            release_cursor_protection()
             if rows:
                 return [{"label": row[0], "type": row[1]} for row in rows]
             else:
