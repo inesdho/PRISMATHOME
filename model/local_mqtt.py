@@ -468,6 +468,9 @@ def check_availability():
 
                 # Divides the friendly name to send data to the database
                 data_to_database = fname.split("/")
+                if len(data_to_database) < 2:
+                    return
+
                 datetime_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
 
                 # Tries to find the topic received in the availabilities list
@@ -483,20 +486,23 @@ def check_availability():
                         elif 'offline' in availability_message['state']:
                             availabilities[1][i] = "offline"
                             sensor_id = local.get_sensor_from_type_label(data_to_database[0], data_to_database[1])
-                            local.monitor_availability_offline(sensor_id, datetime_now)
+                            if sensor_id:
+                                local.monitor_availability_offline(sensor_id, datetime_now)
 
                     # Case where the sensor is already in the system
                     elif 'online' in availabilities[1][i]:
                         if 'offline' in availability_message['state']:
                             availabilities[1][i] = "offline"
                             sensor_id = local.get_sensor_from_type_label(data_to_database[0], data_to_database[1])
-                            local.monitor_availability_offline(sensor_id, datetime_now)
+                            if sensor_id:
+                                local.monitor_availability_offline(sensor_id, datetime_now)
 
                     elif 'offline' in availabilities[1][i]:
                         if 'online' in availability_message['state']:
                             availabilities[1][i] = "online"
                             sensor_id = local.get_sensor_from_type_label(data_to_database[0], data_to_database[1])
-                            local.monitor_availability_online(sensor_id, datetime_now)
+                            if sensor_id:
+                                local.monitor_availability_online(sensor_id, datetime_now)
 
     def on_message_rename(client, userdata, msg):
         """!

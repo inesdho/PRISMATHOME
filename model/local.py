@@ -23,6 +23,9 @@ from model import remote
 local_db = None
 local_cursor = None
 
+local_db_thread_distant = None
+local_cursor_thread_distant = None
+
 disconnect_request = 0  # is used to stop the connect thread from looping
 
 local_cursor_protection = threading.Lock()
@@ -45,6 +48,29 @@ def release_cursor_protection():
     local_cursor_protect = False
     print("\033[95mrelease protection\033[0m")
 
+def connect_to_local_db_from_thread():
+    """!
+    Tries to connect to the local database and loops until successfully connected
+
+    @return None
+    """
+    print("try to connect to local database")
+    global local_db_thread_distant, local_cursor_thread_distant
+    try:
+
+        # Connexion to the database
+        local_db_thread_distant = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="Q3fhllj2",
+            database="prisme_home_1"
+        )
+        local_cursor_thread_distant = local_db_thread_distant.cursor()
+        print("Connected to local database from thread")
+    except Exception as e:
+        time.sleep(1)
+        # Loop until the connection works
+        connect_to_local_db_from_thread()
 
 # DONE
 def connect_to_local_db():
@@ -55,6 +81,7 @@ def connect_to_local_db():
     """
     print("try to connect to local database")
     global local_db, local_cursor, disconnect_request
+    global local_db_thread_distant, local_cursor_thread_distant
     try:
         if disconnect_request == 1:
             return
@@ -372,6 +399,33 @@ def monitor_observation_stopped(datetime):
     values = (get_system_id(), datetime, get_error_id_from_label('Observation stopped'))
     return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
 
+def monitor_availability_offline(sensor_id, datetime):
+    """!
+    Insert the monitoring message "Sensor availability offline"
+
+    @param sensor_id: The ID of the sensor.
+    @param datetime : The datetime when the datas had been received.
+
+    @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
+    0 if no data was stored
+    """
+    values = (sensor_id, get_system_id(), datetime, get_error_id_from_label('Sensor availability offline'))
+    return send_query('insert', 'monitoring', ['id_sensor', 'id_system', 'timestamp', 'id_error'], values)
+
+
+def monitor_availability_online(sensor_id, datetime):
+    """!
+    Insert the monitoring message "Sensor availability online"
+
+    @param sensor_id: The ID of the sensor.
+    @param datetime : The datetime when the datas had been received.
+
+    @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
+    0 if no data was stored
+    """
+    values = (sensor_id, get_system_id(), datetime, get_error_id_from_label('Sensor availability online'))
+    return send_query('insert', 'monitoring', ['id_sensor', 'id_system', 'timestamp', 'id_error'], values)
+
 
 # DONE
 def save_sensor_battery(sensor_id, battery, datetime):
@@ -509,7 +563,8 @@ def get_sensor_from_type_label(sensor_type, label):
             return get_sensor_from_type_label(sensor_type, label)
     except Exception as e:
         # Handle any exceptions that may occur during the query execution
-        print(f"Error getting id sensor : {e}")
+        print(f"Error getting id sensor from label:{label}, type:{sensor_type} : {e}")
+
         return False
 
 
