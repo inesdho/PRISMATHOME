@@ -106,14 +106,14 @@ class NewObservation:
         # Get session label from entry
         session_label = self.session_entry.get()
 
-        globals.global_participant_selectionned = participant
-        globals.global_id_system_selectionned = local.get_system_id()
-        globals.global_id_config_selectionned = id_config
-        globals.global_id_session_selectionned = id_session
-        globals.global_session_label_selctionned = session_label
+        globals.global_participant_selected = participant
+        globals.global_id_system_selected = local.get_system_id()
+        globals.global_id_config_selected = id_config
+        globals.global_id_session_selected = id_session
+        globals.global_session_label_selected = session_label
 
         # Caching
-        globals.global_id_config_selectionned = id_config
+        globals.global_id_config_selected = id_config
 
 
     def get_selected_id_config(self):

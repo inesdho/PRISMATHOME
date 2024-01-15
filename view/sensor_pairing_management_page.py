@@ -66,7 +66,7 @@ class SensorPairingManagement:
         ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid",
                   padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
-        self.sensor_entries = local.get_sensors_from_configuration(globals.global_id_config_selectionned)
+        self.sensor_entries = local.get_sensors_from_configuration(globals.global_id_config_selected)
 
         for index, sensor in enumerate(self.sensor_entries, start=1):
             self.create_labeled_entry(sensor, index)
@@ -423,7 +423,7 @@ class SensorPairingManagement:
             sensor["ieee_address"] = "0x1234567891237894"  # Adresse IEEE fictive pour les tests
         """
         # Create the observation
-        local.create_observation_with_sensors(globals.global_participant_selectionned, globals.global_id_config_selectionned, globals.global_id_session_selectionned, globals.global_session_label_selctionned, self.sensor_entries)
+        local.create_observation_with_sensors(globals.global_participant_selected, globals.global_id_config_selected, globals.global_id_session_selected, globals.global_session_label_selected, self.sensor_entries)
 
         # Create sensors in the database
         #local.create_sensors(globals.global_new_id_observation, self.sensor_entries)

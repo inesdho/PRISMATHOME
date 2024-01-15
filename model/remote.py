@@ -153,7 +153,7 @@ def synchronise_queries():
 
     print("Executing query SELECT * FROM remote_queries")
     query = "SELECT * FROM remote_queries"
-    queries = execute_query_with_reconnect(query)
+    queries = local.execute_query_with_reconnect(query)
 
     if not queries:
         print("\033[93msynchronise_queries : No queries\033[0m")
@@ -162,7 +162,7 @@ def synchronise_queries():
     for query_entry in queries:
         print("Syncro req : ", query_entry[1])
         query = query_entry[1]
-        success = execute_remote_query(query, None, True)
+        success = local.execute_remote_query(query, None, True)
         if success:
             # If the query was executed successfully, delete the entry from the local table
             #TODO faire le delete avec l'id (à rajouter dans la bdd)

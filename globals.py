@@ -1,3 +1,5 @@
+# TODO faire de la doc et des commentaires pour ce fichier
+
 global_id_user = None
 sensor_counts = {}
 global_id_config = None
@@ -5,16 +7,16 @@ global_sensor_entries = []
 global_scenario_name_configuration = None
 global_description_configuration = None
 
-global_id_config_selectionned=None
-global_new_id_observation=None
+global_id_config_selected = None
+global_new_id_observation = None
 
-global_connected_admin_login=None
-global_connected_admin_password=None
+global_connected_admin_login = None
+global_connected_admin_password = None
 
-global_participant_selectionned = None
-global_session_label_selctionned = None
-global_id_system_selectionned = None
-global_id_session_selectionned = None
+global_participant_selected = None
+global_session_label_selected = None
+global_id_system_selected = None
+global_id_session_selected = None
 
 thread_done = False
 
