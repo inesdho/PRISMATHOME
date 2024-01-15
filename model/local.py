@@ -115,16 +115,12 @@ def disconnect_from_local_db():
 
     @return None
     """
-    global local_db, local_cursor, disconnect_request
+    global disconnect_request
+
+    disconnect_request = 1
 
     # Disconnect from the database
-    take_cursor_protection()
-    disconnect_request = 1
-    local_cursor.close()
-    local_db.close()
-    local_db = None
-    local_cursor = None
-    release_cursor_protection()
+    pool.closeall()
 
 
 # DONE
@@ -169,11 +165,9 @@ def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3
         try:
             # Utiliser la connexion existante ou obtenir une nouvelle du pool
             if not cursor:
-                print("NOT CURSOR")
                 conn = pool.get_connection()
                 cursor = conn.cursor()
             else:
-                print("CURSOR")
                 retry = False
 
             cursor.execute(query, values)
@@ -184,7 +178,6 @@ def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3
                 return cursor.fetchall()
             elif query_type == "INSERT":
                 # Pour INSERT, retourner l'ID de la dernière ligne insérée
-                print("INSERT ok, id = ", cursor.lastrowid)
                 return cursor.lastrowid
             elif query_type in ["DELETE", "UPDATE"]:
                 # Pour DELETE et UPDATE, retourner le nombre de lignes affectées
@@ -200,12 +193,11 @@ def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3
 
         finally:
             if retry:
-                print("RETRY YES")
                 if cursor:
                     cursor.close()
                 if retry:
                     conn.close()
-    print("PROBLEM EXECUTING")
+
     # Si toutes les tentatives échouent
     return None
 
