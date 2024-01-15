@@ -541,5 +541,5 @@ class App(ThemedTk):
             globals.thread_done = True
             if globals.global_id_user is not None:
                 print("Deconnexion normalement")
-                local.update_user_connexion_status(global_id_user, 0)
+                local.update_user_connexion_status(globals.global_id_user, 0)
             self.destroy()

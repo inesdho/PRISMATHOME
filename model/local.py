@@ -44,6 +44,7 @@ config = {
     "database": "prisme_home_1"
 }
 
+
 # DONE
 def connect_to_local_db():
     """!
@@ -116,7 +117,6 @@ def add_system_id(local_id):
 
 
 def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3):
-
     # A flag to retry or not on connection lost
     # if a transaction is started to rollback changes
     retry = True
@@ -154,7 +154,7 @@ def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3
         finally:
             if retry:
                 if conn:
-                    if query_type !="SELECT":
+                    if query_type != "SELECT":
                         conn.commit()
                     cursor.close()
                     conn.close()
@@ -795,7 +795,8 @@ def create_observation_with_sensors(user, participant, id_config, id_session, se
 
         values = (id_system, user, participant, id_config, id_session, session_label, active)
         id_observation = send_query_local('insert', 'observation',
-                                          ['id_system', 'creator', 'participant', 'id_config', 'id_session', 'session_label',
+                                          ['id_system', 'creator', 'participant', 'id_config', 'id_session',
+                                           'session_label',
                                            'active'],
                                           values, None, cursor)
 
