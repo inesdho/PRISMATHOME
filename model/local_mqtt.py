@@ -141,7 +141,7 @@ def change_permit_join(state_wanted):
         client.disconnect()
         client.loop_stop()
 
-    client = mqtt.Client("Coordinator")
+    client = mqtt.Client("change_permit_join")
     client.on_message = on_message
     connect_to_mqtt_broker(client)
 
@@ -196,7 +196,6 @@ def rename_sensor(previous_name, new_name):
         if cpt == 0:
             cpt = 1
         else:
-            print("coucou")
             return
 
         # Convert the feedback in json
@@ -231,7 +230,7 @@ def rename_sensor(previous_name, new_name):
         client.loop_stop()
 
     # Connection to the MQTT Client
-    client = mqtt.Client("Coordinator")
+    client = mqtt.Client("rename_sensor"+previous_name)
     client.on_message = on_message
     connect_to_mqtt_broker(client)
 
@@ -325,9 +324,12 @@ def get_sensor_value(sensor_friendly_name, label_widget):
 
     mqtt_client.loop_start()
 
+    print("thread done = ", globals.thread_done)
+
     while not globals.thread_done:
         time.sleep(1)
 
+    print("Sortie du thread get_sensor_value pour capteur : ", sensor_friendly_name)
     mqtt_client.loop_stop()
     mqtt_client.disconnect()
 
