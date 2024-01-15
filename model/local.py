@@ -38,8 +38,8 @@ local_cursor_protect = False
 caching = False
 
 config = {
-    "host": "192.168.1.122",
-    "user": "prisme",
+    "host": "localhost",
+    "user": "root",
     "password": "Q3fhllj2",
     "database": "prisme_home_1"
 }
@@ -56,7 +56,7 @@ def connect_to_local_db_from_thread():
     try:
 
         # Connexion to the database
-        local_db_thread_distant = mysql.connector.connect(config)
+        local_db_thread_distant = mysql.connector.connect(**config)
         local_cursor_thread_distant = local_db_thread_distant.cursor()
         print("Connected to local database from thread")
     except Exception as e:
@@ -174,9 +174,10 @@ def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3
 
         finally:
             if retry:
-                if cursor:
+                if conn:
+                    if query_type !="SELECT":
+                        conn.commit()
                     cursor.close()
-                if retry:
                     conn.close()
 
     # Si toutes les tentatives échouent
@@ -648,7 +649,6 @@ def get_user_from_login_and_password(login, password):
     query = "SELECT * FROM user WHERE login = %s AND password = %s"
 
     result = execute_query_with_reconnect(query, (login, encrypted_password))
-    print("result = " + str(result))
     if result is not None and len(result) > 0:
         return result[0]
     else:

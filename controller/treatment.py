@@ -79,20 +79,29 @@ def data_treatment(client, userdata, mqtt_msg):
                         return
 
                 # Save the data in the db
+                print("Enregistrement de la donnée")
                 local.save_sensor_data(sensor_id, temp, datetime_now)
+                print("Donnée enregistreée")
 
                 if sensor_datas["battery"]:
                     # Update the sensor battery in db
+                    print("Mise à jour battery")
                     local.save_sensor_battery(sensor_id, sensor_datas["battery"], datetime_now)
-
+                    print("Fin mise à jour battery")
+                print("FIN TRAITEMENT DONNEe")
         case "Door":
             print("Un capteur a envoyé des données")
             if 'contact' in sensor_datas:
                 # Save the data in the db
+                print("Enregistrement de la donnée")
                 local.save_sensor_data(sensor_id, sensor_datas["contact"], datetime_now)
+                print("Donnée enregistreée")
                 if sensor_datas["battery"]:
                     # Update the sensor battery in db
+                    print("Mise à jour battery")
                     local.save_sensor_battery(sensor_id, sensor_datas["battery"], datetime_now)
+                    print("Fin mise à jour battery")
+                print("FIN TRAITEMENT DONNEe")
 
         case "Motion":
             print("Un capteur a envoyé des données")

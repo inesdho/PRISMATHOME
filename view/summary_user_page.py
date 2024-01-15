@@ -98,11 +98,18 @@ class SummaryUser:
 
         # Connect to the database and retrieve sensor types
         try:
-            all_sensor_types = local.get_sensor_type_list()
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
+            cursor.execute("SELECT DISTINCT id_type, type FROM sensor_type")    # get_sensor_type_list()
+            all_sensor_types = cursor.fetchall()
 
             for sensor_type_id, sensor_type in all_sensor_types:
                 # Retrieve information from sensors of this type from the database
-                # TODO : use local function
                 sensor_infos = self.get_sensor_infos_for_type(sensor_type_id)
                 if sensor_infos:
                     sensor_type_button = ttk.Button(
@@ -223,12 +230,233 @@ class SummaryUser:
         """
         self.frame.destroy()
 
+    def start_observation(self):
+        #TODO voir avec les indus comment recuperer et inserer les datas
+
+        arguments = []
+
+        sensor_list = local.get_sensors_from_observation(globals.global_new_id_observation)
+        print("\033[95msensor list: ", sensor_list, "\033[0m")
+        for sensor in sensor_list:
+            arguments.append(sensor["type"] + "/" + sensor["label"])
+
+        print("arguments : ", arguments)
+        command = ["python", "/home/prisme/Prisme@home/PRISMATHOME/reception.py"] + arguments
+
+        # Start the main program
+        main_program = subprocess.Popen(command)
+
+        self.program_pid = main_program.pid
+
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
+
+            # Execute a request
+            query_update = "UPDATE prisme_home_1.observation SET active=1 WHERE id_observation=%s"
+            cursor.execute(query_update, (globals.global_new_id_observation,))  # Pass label as a tuple
+            conn.commit()
+
+        except mysql.connector.Error as err:
+            print(f"Database error: {err}")
+            return None
+
+        finally:
+            # Closing the cursor and connection
+            cursor.close()
+            conn.close()
+
+    # TODO : Déplacer les 2 fonctions ci dessous dans une lib de fonction systèmes
+    def send_sigterm(self, pid):
+        script_path = "/home/prisme/Prisme@home/PRISMATHOME/kill_program.sh"
+        subprocess.run(["sh", script_path, str(pid)], check=True)
+
+    def get_pid_of_script(self, script_name):
+        """!
+        @brief Get the pid of the script "script_name"
+        @param script_name The name of the script that we want to get the pid
+        @return The pid of the script "script_name"
+        """
+        try:
+            # Exécution de la commande 'ps' pour obtenir les processus en cours
+            process = subprocess.run(['ps', 'aux'], stdout=subprocess.PIPE, text=True)
+            # Filtrage des lignes qui contiennent le nom du script
+            lines = process.stdout.split('\n')
+            for line in lines:
+                if script_name in line:
+                    parts = line.split()
+                    # Le PID est généralement le deuxième élément dans la sortie de 'ps aux'
+                    return int(parts[1])
+        except Exception as e:
+            print(f"Erreur lors de la recherche du PID: {e}")
+        return None
+
+    def stop_observation(self):
+        # TODO Mathilde : voir où appeller la fonction car lorsque que je la met au bonne endroit ca
+        #  pose probleme
+        #  + voir avec les indus comment stopper la reception des datas
+
+        if self.program_pid is None:
+            self.program_pid = self.get_pid_of_script("reception.py")
+            self.send_sigterm(self.program_pid)
+        else:
+            os.kill(self.program_pid, signal.SIGTERM)
+
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
+
+            # Execute a request
+            query_update = "UPDATE prisme_home_1.observation SET active=0 WHERE id_observation=%s"
+            cursor.execute(query_update, (globals.global_new_id_observation,))  # Pass label as a tuple
+            conn.commit()
+
+        except mysql.connector.Error as err:
+            print(f"Database error: {err}")
+            return None
+
+        finally:
+            # Closing the cursor and connection
+            cursor.close()
+            conn.close()
+
 
     def clear_sensor_entries(self):
         """!
         @brief This function clears the sensor entries after validation.
         """
         globals.global_sensor_entries.clear()
+        # Vous pouvez également effacer les entrées visuelles ici, si nécessaire
         for _, label_entry, description_entry in globals.global_sensor_entries:
             label_entry.set('')
             description_entry.set('')
+
+    def get_session(self, id_observation):
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
+
+            # Execute a request
+            query = "SELECT session_label FROM observation WHERE id_observation=%s"
+            cursor.execute(query, (id_observation,))  # Pass label as a tuple
+
+            # Fetch the first result
+            result = cursor.fetchone()
+
+            # Make sure to fetch all results to clear the cursor before closing it, even if you don't use them.
+            while cursor.fetchone() is not None:
+                pass
+
+            return result[0] if result else None
+
+        except mysql.connector.Error as err:
+            print(f"Database error: {err}")
+            return None
+
+        finally:
+            # Closing the cursor and connection
+            cursor.close()
+            conn.close()
+
+    def get_participant(self, id_observation):
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
+
+            # Execute a request
+            query = "SELECT participant FROM observation WHERE id_observation=%s"
+            cursor.execute(query, (id_observation,))  # Pass label as a tuple
+
+            # Fetch the first result
+            result = cursor.fetchone()
+
+            # Make sure to fetch all results to clear the cursor before closing it, even if you don't use them.
+            while cursor.fetchone() is not None:
+                pass
+
+            return result[0] if result else None
+
+        except mysql.connector.Error as err:
+            print(f"Database error: {err}")
+            return None
+
+        finally:
+            # Closing the cursor and connection
+            cursor.close()
+            conn.close()
+
+    def get_scenario(self, id_observation):
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
+
+            # Execute a request
+            query = "SELECT configuration.label FROM configuration, observation WHERE observation.id_config=configuration.id_config AND observation.id_observation=%s"
+            cursor.execute(query, (id_observation,))  # Pass label as a tuple
+
+            # Fetch the first result
+            result = cursor.fetchone()
+
+            # Make sure to fetch all results to clear the cursor before closing it, even if you don't use them.
+            while cursor.fetchone() is not None:
+                pass
+
+            return result[0] if result else None
+
+        except mysql.connector.Error as err:
+            print(f"Database error: {err}")
+            return None
+
+        finally:
+            # Closing the cursor and connection
+            cursor.close()
+            conn.close()
+
+    def get_sensor_infos_for_type(self, sensor_type_id):
+        """ Retrieves sensor information for a specific type from the database. """
+        try:
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
+
+            query = "SELECT label, description FROM sensor WHERE id_type=%s AND id_observation=%s"
+            cursor.execute(query, (sensor_type_id, globals.global_new_id_observation))
+
+            sensor_infos = cursor.fetchall()
+
+            cursor.close()
+            conn.close()
+            return sensor_infos
+
+        except mysql.connector.Error as err:
+            print(f"Database error: {err}")
+        return []

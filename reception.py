@@ -148,14 +148,17 @@ if __name__ == "__main__":
         os.kill(pid_start_and_stop, signal.SIGTERM)
         print("signal sent")
     else:
+        print("Monitor observation started")
         local.monitor_observation_started(datetime_now)
+        print("FIN Monitor observation started")
 
     thread_availability = threading.Thread(target=local_mqtt.check_availability)
     thread_availability.start()
 
+    print("CREATION HANDLER")
     # Wait for a signal comming from start_and_stop program
     signal.signal(signal.SIGTERM, handler_program_stop)
-
+    print("LOOP")
     # Blocking call that processes network traffic, dispatches callbacks and
     # handles reconnecting.
     coordinator.loop_forever()

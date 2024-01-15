@@ -23,7 +23,9 @@ from view.labellisation_sensor_page import LabelisationSensor
 from view.sensor_pairing_management_page import SensorPairingManagement
 import webbrowser
 import sys
-
+from model import local
+# from model import remote
+import globals
 
 
 class App(ThemedTk):
@@ -51,20 +53,26 @@ class App(ThemedTk):
         self.style = ThemedStyle(self)
         self.style.set_theme("breeze")  # Write the theme you would like
 
-        self.show_frame()
+        # Protool incas of closing window
+        self.protocol("WM_DELETE_WINDOW", self.closing_protocol)
 
-    def show_frame(self):
-        """!
-        @brief The show_frame function allows the creation of the main frame and call the new observation page
-        @param self : the instance
-        @return Nothing
-        """
         # Creating main frame
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Call the New observation window in order to
-        self.call_new_observation_page()
+        self.is_observation_running()
+
+    def is_observation_running(self):
+        """!
+        @brief This function checks if an observation is running and depending on the result will either redirect the
+        user to the new observation page (no observation is running) or the summary user page (an observation is running)
+        @param self : the instance
+        @return Nothing
+        """
+        if local.get_active_observation() == None:
+            self.call_new_observation_page()
+        else:
+            self.call_summary_user_page()
 
     def call_new_observation_page(self):
         """!
@@ -85,6 +93,32 @@ class App(ThemedTk):
         # Redirection to login as an admin button
         ttk.Button(new_observation_page.frame, text="Import configuration",
                    command=lambda: self.is_a_config_chosen(new_observation_page)).pack()
+
+    def call_summary_user_page(self):
+        """!
+        @brief This function initialises and calls summary_user.py in order to show the page and also adds
+        navigation button
+        @param self : the instance
+        @return Nothing
+        """
+        # Redirecting to the login page
+        summary_user_page = SummaryUser(self)
+        summary_user_page.show_page()
+
+        # Cancel button
+        cancel_button = ttk.Button(self.main_frame, text="Exit",
+                                   command=lambda: self.redirect_to_new_observation_from_anywhere(summary_user_page))
+        cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        # Back button
+        back_button = ttk.Button(self.main_frame, text="Back",
+                                 command=lambda: self.redirect_to_pairing_from_anywhere(summary_user_page))
+        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        # Start observation button
+        button = ttk.Button(self.main_frame, text="Stop observation")
+        button.config(command=lambda: self.stop_observation(button, summary_user_page))
+        button.pack(side=tk.LEFT, padx=10, expand=True)
 
     def redirect_to_new_observation_from_anywhere(self, page):
         """!
@@ -386,7 +420,6 @@ class App(ThemedTk):
                                  (summary_admin_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
-
     def redirect_to_summary_user_from_pairing(self, sensor_pairing_page):
         """!
         @brief This function saves the information about the pairing of the sensor and calls the 'Summary user' page
@@ -491,3 +524,15 @@ class App(ThemedTk):
         # Creation of a main frame
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+    def closing_protocol(self):
+        """!
+        @brief This function deals with the closing of the app
+        @param self : the instance
+        @return Nothing
+        """
+        if messagebox.askokcancel("Quit", "Are you sure you want to quit PRISM@Home ?"):
+            if globals.global_connected_admin_login is not None:
+                print("Deconnexion normalement")
+                local.update_user_connexion_status(globals.global_connected_admin_login, globals.global_connected_admin_password, 0)
+            self.destroy()
