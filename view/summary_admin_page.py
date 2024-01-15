@@ -109,7 +109,7 @@ class SummaryAdmin:
         self.data_frame = ttk.Frame(self.frame_canvas)
         self.data_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
-        for index, (sensor_id, label_entry, description_entry) in enumerate(entries_for_type, start=1):
+        for index, (sensor_id, label_entry, description_entry, id_unique) in enumerate(entries_for_type, start=1):
             sensor_frame = ttk.Frame(self.data_frame)
             sensor_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
