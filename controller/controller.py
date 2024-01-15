@@ -21,9 +21,8 @@ from view.sensor_pairing_management_page import SensorPairingManagement
 import webbrowser
 import sys
 from model import local
-from model import remote
+# from model import remote
 import globals
-
 
 
 class App(ThemedTk):
@@ -60,7 +59,6 @@ class App(ThemedTk):
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
         self.is_observation_running()
-
 
     def is_observation_running(self):
         """!
@@ -418,7 +416,6 @@ class App(ThemedTk):
                                  (summary_admin_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
-
     def redirect_to_summary_user_from_pairing(self, sensor_pairing_page):
         """!
         @brief This function saves the information about the pairing of the sensor and calls the 'Summary user' page
@@ -481,7 +478,7 @@ class App(ThemedTk):
         messagebox.showinfo("Start observation", "The observation is starting.")
 
         # Changing the label and the function associated to the button
-        button.config(text="Stop observation",command=lambda: self.stop_observation(button, summary_user_page))
+        button.config(text="Stop observation", command=lambda: self.stop_observation(button, summary_user_page))
 
     def stop_observation(self, button, summary_user_page):
         """!
@@ -499,7 +496,7 @@ class App(ThemedTk):
         messagebox.showinfo("Stop observation", "The observation is stopped.")
 
         # Changing the label and the function associated to the button
-        button.config(text="Start observation",command=lambda: self.start_observation(button, summary_user_page))
+        button.config(text="Start observation", command=lambda: self.start_observation(button, summary_user_page))
 
     def clear_the_page(self, page):
         """!
@@ -514,6 +511,7 @@ class App(ThemedTk):
         self.main_frame.destroy()
 
     def create_new_main_frame(self):
+
         """!
         @brief This function creates a new empty frame that will contain the elements of a new page
         @param self : the instance
@@ -530,8 +528,7 @@ class App(ThemedTk):
         @return Nothing
         """
         if messagebox.askokcancel("Quit", "Are you sure you want to quit PRISM@Home ?"):
-            # local.disconnect_from_local_db()
-            # remote.disconnect_from_remote_db()
-            if not globals.global_connected_admin_login is None:
-                ModifyOrCreateConfiguration(self).log_out_the_admin()
+            if globals.global_connected_admin_login is not None:
+                print("Deconnexion normalement")
+                local.update_user_connexion_status(globals.global_connected_admin_login, globals.global_connected_admin_password, 0)
             self.destroy()

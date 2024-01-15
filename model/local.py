@@ -193,9 +193,10 @@ def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3
 
         finally:
             if retry:
-                if cursor:
+                if conn:
+                    if query_type !="SELECT":
+                        conn.commit()
                     cursor.close()
-                if retry:
                     conn.close()
 
     # Si toutes les tentatives échouent
