@@ -6,7 +6,7 @@ from model import local
 
 if __name__ == "__main__":
     local.connect_to_local_db()
-    #remote.connect_to_remote_db()
+    remote.connect_to_remote_db()
 
     # Creating an instance of the application
     app = App()
