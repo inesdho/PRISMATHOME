@@ -38,25 +38,11 @@ local_cursor_protect = False
 caching = False
 
 config = {
-    "host": "localhost",
-    "user": "root",
+    "host": "192.168.1.122",
+    "user": "prisme",
     "password": "Q3fhllj2",
     "database": "prisme_home_1"
 }
-
-
-def take_cursor_protection():
-    global local_cursor_protect
-    while local_cursor_protect:
-        pass
-    local_cursor_protect = True
-    print("\033[96mPrise protection\033[0m")
-
-
-def release_cursor_protection():
-    global local_cursor_protect
-    local_cursor_protect = False
-    print("\033[95mrelease protection\033[0m")
 
 
 def connect_to_local_db_from_thread():
@@ -70,12 +56,7 @@ def connect_to_local_db_from_thread():
     try:
 
         # Connexion to the database
-        local_db_thread_distant = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
+        local_db_thread_distant = mysql.connector.connect(config)
         local_cursor_thread_distant = local_db_thread_distant.cursor()
         print("Connected to local database from thread")
     except Exception as e:
@@ -386,6 +367,7 @@ def monitor_battery_low(sensor_id, datetime):
     return send_query('insert', 'monitoring', ['id_sensor', 'id_system', 'timestamp', 'id_error'], values)
 
 
+# TODO : faire fonction 2 en 1
 def monitor_system_shut_down_by_participant(datetime):
     """!
     Insert the monitoring message "System shut down by participant"
@@ -414,6 +396,7 @@ def monitor_system_started_up_by_participant(datetime):
     return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
 
 
+# TODO : faire fonction 2 en 1
 def monitor_observation_started(datetime):
     """!
     Insert the monitoring message "Observation started"
@@ -442,6 +425,7 @@ def monitor_observation_stopped(datetime):
     return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
 
 
+# TODO : faire fonction 2 en 1
 def monitor_availability_offline(sensor_id, datetime):
     """!
     Insert the monitoring message "Sensor availability offline"
@@ -598,7 +582,7 @@ def get_sensors_from_configuration(id_config):
                 })
             return sensors
     except Exception as e:
-        print("Erreur dans la convertion du résultat : ", e)
+        print("Erreur dans la conversion du résultat : ", e)
 
     # Return None if no sensors found or if an error occurred
     return None
@@ -614,45 +598,20 @@ def get_sensor_info_from_observation(id_observation, sensor_type=None):
     @return: a list of labels and descriptions for each sensor corresponding to the criteria, None if no sensors
     found or an error occurred
     """
-    global local_db, local_cursor
-    try:
-        # Check if the local database connection is established
-        if local_db is not None and local_db.is_connected():
-            if sensor_type is None:  # Grab all labels
-                query = "SELECT label, description FROM sensor WHERE id_observation =%s"
-                values = (id_observation,)
-            else:
-                query = "SELECT label, description FROM sensor WHERE id_observation =%s AND id_type = %s"
-                values = (id_observation, sensor_type)
 
-            with local_cursor_protection:
-                local_cursor.execute(query, values)
-                # Fetch the result
-                result = local_cursor.fetchall()
+    if sensor_type is None:  # Grab all labels
+        query = "SELECT label, description FROM sensor WHERE id_observation =%s"
+        values = (id_observation,)
+    else:
+        query = "SELECT label, description FROM sensor WHERE id_observation =%s AND id_type = %s"
+        values = (id_observation, sensor_type)
 
-            if result:
-                return [{"label": row[0], "description": row[1]} for row in result]
-            else:
-                return None
+    result = execute_query_with_reconnect(query, values)
 
-        else:
-            # If not connected to the local database, attempt to reconnect and retry
-            print("Error while executing select statement: database is not connected, retrying")
-            connect_to_local_db()
-            if sensor_type is None:
-                return get_sensor_info_from_observation(id_observation)
-            else:
-                return get_sensor_info_from_observation(id_observation, sensor_type)
-
-    except Exception as e:
-        # Handle any exceptions that may occur during the query execution
-        print(f"Error getting config labels: {e}")
-        if (e.errno == 2013):
-            connect_to_local_db()
-            if sensor_type is None:
-                return get_sensor_info_from_observation(id_observation)
-            else:
-                return get_sensor_info_from_observation(id_observation, sensor_type)
+    if result:
+        return [{"label": row[0], "description": row[1]} for row in result]
+    else:
+        return None
 
 
 # DONE
@@ -689,26 +648,26 @@ def get_user_from_login_and_password(login, password):
     query = "SELECT * FROM user WHERE login = %s AND password = %s"
 
     result = execute_query_with_reconnect(query, (login, encrypted_password))
-
-    return result[0] if result is not None else None
+    print("result = " + str(result))
+    if result is not None and len(result) > 0:
+        return result[0]
+    else:
+        return None
 
 
 # DONE
 def update_user_connexion_status(id_user, connexion_status):
     """!
-    Sets the connexion status to either 1 (connected) or 0 (disconnected) in the local db for the user
-    TODO : edit this function
-    @param id_user: The user's id
+    Sets the connexion status to either 1 (connected) or 0 (disconnected) in the local db for the user.
+    @param id_user: user's id
     @param connexion_status: The connexion status wanted
     @return: 1 if successful, otherwise None
     """
 
-    encrypted_password = encrypt_password(password)
     query = "UPDATE user SET connected = %s WHERE login = %s AND password = %s"
 
     result = send_query_local("UPDATE", "user", ("connected",), (connexion_status, id_user),
                               "id_user = %s")
-
     if result != -1:
         return 1
 
@@ -815,35 +774,14 @@ def get_config_label_from_observation_id(id_observation):
     database
     @return: One or more configuration labels if successful, None otherwise
     """
-    global local_db, local_cursor
-    try:
-        # Check if the local database connection is established
-        if local_db is not None and local_db.is_connected():
-            query = ("SELECT configuration.label FROM configuration, observation "
-                     "WHERE observation.id_config=configuration.id_config AND observation.id_observation=%s")
+    query = ("SELECT configuration.label FROM configuration, observation "
+             "WHERE observation.id_config=configuration.id_config AND observation.id_observation=%s")
 
-            with local_cursor_protection:
-                local_cursor.execute(query)
-                # Fetch the result
-                result = local_cursor.fetchone()
-
-            if result:
-                return result
-            else:
-                return None
-
-        else:
-            # If not connected to the local database, attempt to reconnect and retry
-            print("Error while executing select statement: database is not connected, retrying")
-            connect_to_local_db()
-            return get_config_label_from_observation_id(id_observation)
-
-    except Exception as e:
-        # Handle any exceptions that may occur during the query execution
-        print(f"Error getting config label: {e}")
-        if (e.errno == 2013):
-            connect_to_local_db()
-            return get_config_label_from_observation_id(id_observation)
+    result = execute_query_with_reconnect(query, (id_observation,))
+    if result:
+        return result
+    else:
+        return None
 
 
 # DONE
@@ -969,9 +907,9 @@ def create_configuration(id_config, id_user, label, description, sensor_list):
         if result == -1:
             raise Exception("Error while inserting configuration")
 
-        for sensor_type_id, label, description in sensor_list:  # Go through the sensor list
+        for sensor_type_id, sensor_label, sensor_description in sensor_list:  # Go through the sensor list
 
-            values = (id_config, sensor_type_id, label, description)
+            values = (id_config, sensor_type_id, sensor_label, sensor_description)
             # Send each query and check for errors
             result = send_query_local('insert', 'sensor_config',
                                       ['id_config', 'id_sensor_type', 'sensor_label', 'sensor_description'],
@@ -996,7 +934,8 @@ def create_configuration(id_config, id_user, label, description, sensor_list):
     values = (id_config, id_user, label, description)
     send_query_remote('insert', 'configuration', ['id_config', 'id_user', 'label', 'description'], values, None)
 
-    for i, (sensor_type_id, label, description) in enumerate(sensor_list, start=1):  # Le compteur commence à 1
+    for i, (sensor_type_id, sensor_label, sensor_description) in enumerate(sensor_list, start=1):  # Le compteur
+        # commence à 1
         values = (id_config, sensor_type_id, label, description)
 
         send_query_remote('insert', 'sensor_config',
@@ -1043,9 +982,7 @@ def get_sensors_from_observation(id_observation):
     @return A list of dictionaries with keys "type" and "label" for each sensor. None list if no sensors are found.
     """
 
-    query = """
-    SELECT s.label, st.type 
-    FROM sensor s 
+    query = """SELECT s.label, st.type FROM sensor s 
     JOIN sensor_type st ON s.id_type = st.id_type 
     WHERE s.id_observation = %s;
     """
@@ -1068,46 +1005,26 @@ def get_observation_info(id_observation, field=None):
     @return A list of the fields and their values. None list if nothing was found or an error occurred.
     Returns only one value if field was set.
     """
-
-    global local_db, local_cursor
-    try:
-        if local_db is not None and local_db.is_connected():
-            if field is None:  # No particular fields wanted
-                query = """SELECT * FROM observation o WHERE o.id_observation = %s;"""
-                with local_cursor_protection:
-                    local_cursor.execute(query, (id_observation,))
-                    result = local_cursor.fetchone()
-                if result:
-                    return [{"id_observation": result[0],
-                             "id_system": result[1],
-                             "participant": result[2],
-                             "id_config": result[3],
-                             "id_session": result[4],
-                             "session_label": result[5],
-                             "active": result[6]}]
-                else:
-                    return None
-            else:  # Select one particular field
-                query = """SELECT %s FROM observation o WHERE o.id_observation = %s;"""
-                with local_cursor_protection:
-                    local_cursor.execute(query, (field, id_observation,))
-                    result = local_cursor.fetchone()
-                if result:
-                    return result
-                else:
-                    return None
+    if field is None:  # No particular fields wanted
+        query = """SELECT * FROM observation o WHERE o.id_observation = %s;"""
+        result = execute_query_with_reconnect(query, (id_observation,))
+        if result:
+            return [{"id_observation": result[0],
+                     "id_system": result[1],
+                     "participant": result[2],
+                     "id_config": result[3],
+                     "id_session": result[4],
+                     "session_label": result[5],
+                     "active": result[6]}]
         else:
-            # If not connected to the local database, attempt to reconnect and retry
-            print(
-                "get_observation_info Error while executing select statement : database is not connected, retrying")
-            connect_to_local_db()
-            return get_observation_info(id_observation)
-    except Exception as e:
-        # Handle any exceptions that may occur during the query execution
-        print(f"Error finding observation info : {e}")
-        if e.errno == 2013:
-            connect_to_local_db()
-            return get_observation_info(id_observation)
+            return None
+    else:  # Select one particular field
+        query = """SELECT %s FROM observation o WHERE o.id_observation = %s;"""
+        result = execute_query_with_reconnect(query, (field, id_observation,))
+        if result:
+            return result
+        else:
+            return None
 
 
 def config_label_exists(label):
@@ -1117,32 +1034,12 @@ def config_label_exists(label):
      @param label: The label to look for
      @return: True if it exists, False if not. Returns -1 if an error occurred
      """
-    global local_db, local_cursor
-    try:
-        # Check if the local database connection is established
-        if local_db is not None and local_db.is_connected():
-            query = "SELECT COUNT(*) FROM configuration WHERE label = %s"
+    query = """SELECT COUNT(*) FROM configuration WHERE label = %s;"""
 
-            with local_cursor_protection:
-                local_cursor.execute(query, (label,))
+    result = execute_query_with_reconnect(query, (label,))
 
-                # Fetch the result
-                result = local_cursor.fetchone()
-            if result[0] == 0:
-                return False
-            else:
-                return True
-        else:
-            # If not connected to the local database, attempt to reconnect and retry
-            print("config_label_exists Error while executing select statement : database is not connected, retrying")
-            connect_to_local_db()
-            return config_label_exists(label)
-
-    except Exception as e:
-        # Handle any exceptions that may occur during the query execution
-        print(f"Error checking conflicting labels: {e}")
-        if (e.errno == 2013):
-            connect_to_local_db()
-            return config_label_exists(label)
-    # Return -1 if there are errors
-    return -1
+    print(f"result config_label_exists with label {label} : {result}")
+    if result[0][0] == 0:
+        return False
+    else:
+        return True

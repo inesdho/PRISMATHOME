@@ -29,6 +29,14 @@ db_protection = False
 ids_to_modify = ['id_sensor', 'id_data', 'id_observation']
 tables_to_prepend = ['sensor', 'data', 'observation']
 
+config = {
+    "host": "192.168.1.122",
+    "user": "prisme",
+    "password": "Q3fhllj2",
+    "database": "prisme@home_ICM"
+}
+
+
 def take_db_protection():
     global db_protection
     while db_protection:
@@ -39,6 +47,7 @@ def take_db_protection():
 def release_db_protection():
     global db_protection
     db_protection = False
+
 
 def connect_to_remote_db():
     """!
@@ -53,12 +62,7 @@ def connect_to_remote_db():
     while not disconnect_request:
         try:
             take_db_protection()
-            db = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="Q3fhllj2",
-                database="prisme@home_ICM"
-            )
+            db = mysql.connector.connect(**config)
             cursor = db.cursor()
             release_db_protection()
             print("Connected to remote database")
@@ -76,6 +80,7 @@ def connect_to_remote_db():
     else:
         print("Disconnect request")
         time.sleep(2)
+
 
 def disconnect_from_remote_db():
     """!
@@ -142,6 +147,7 @@ def execute_remote_query(query, values=None, synchronise=False):
                 connection_thread = threading.Thread(target=connect_to_remote_db)
                 connection_thread.start()
             return 0
+
 
 def synchronise_queries():
     """!
