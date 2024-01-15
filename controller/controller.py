@@ -21,6 +21,8 @@ from view.sensor_pairing_management_page import SensorPairingManagement
 import webbrowser
 import sys
 from model import local
+from model import remote
+import globals
 
 
 
@@ -50,6 +52,8 @@ class App(ThemedTk):
         self.style = ThemedStyle(self)
         self.style.set_theme("breeze")  # Write the theme you would like
 
+        # Protool incas of closing window
+        self.protocol("WM_DELETE_WINDOW", self.closing_protocol)
 
         # Creating main frame
         self.main_frame = ttk.Frame(self)
@@ -510,7 +514,6 @@ class App(ThemedTk):
         self.main_frame.destroy()
 
     def create_new_main_frame(self):
-
         """!
         @brief This function creates a new empty frame that will contain the elements of a new page
         @param self : the instance
@@ -519,3 +522,16 @@ class App(ThemedTk):
         # Creation of a main frame
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+    def closing_protocol(self):
+        """!
+        @brief This function deals with the closing of the app
+        @param self : the instance
+        @return Nothing
+        """
+        if messagebox.askokcancel("Quit", "Are you sure you want to quit PRISM@Home ?"):
+            # local.disconnect_from_local_db()
+            # remote.disconnect_from_remote_db()
+            if not globals.global_connected_admin_login is None:
+                ModifyOrCreateConfiguration.log_out_the_admin()
+            self.destroy()
