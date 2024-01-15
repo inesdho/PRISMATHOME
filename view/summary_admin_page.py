@@ -121,10 +121,11 @@ class SummaryAdmin:
         local.create_configuration(globals.global_id_config,
                                    globals.global_id_user,
                                    globals.global_scenario_name_configuration,
-                                   globals.global_description_configuration)
+                                   globals.global_description_configuration,
+                                   globals.global_sensor_entries)
 
         # Insert each sensor's data into the database
-        local.create_sensor_configs(globals.global_id_config, globals.global_sensor_entries)
+        #local.create_sensor_configs(globals.global_id_config, globals.global_sensor_entries)
 
         self.clear_sensor_entries()
 

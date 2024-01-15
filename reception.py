@@ -58,7 +58,7 @@ def get_pid_of_script(script_name):
             if script_name in line:
                 parts = line.split()
                 # Le PID est généralement le deuxième élément dans la sortie de 'ps aux'
-                return parts[1]
+                return int(parts[1])
     except Exception as e:
         print(f"Erreur lors de la recherche du PID: {e}")
     return None
@@ -133,8 +133,12 @@ if __name__ == "__main__":
     # Get the parent process pid
     pid_parent = os.getppid()
 
+    print(f"pid_parent :'{pid_parent}'")
+
     # Get de start_and_stop process pid
     pid_start_and_stop = get_pid_of_script("start_and_stop.py")
+
+    print(f"pid_start_and_stop : '{pid_start_and_stop}'")
 
     # If the program was started by start_and_stop.py, it will :
     # - Send a signal to the start_and_stop program to indicate that reception.py is ready.

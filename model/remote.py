@@ -108,9 +108,13 @@ def execute_remote_query(query, values=None, synchronise=False):
     @return 1 if successfully inserted, 0 otherwise
     """
     print("Enterring execute_remote_query")
-    global db, cursor, flag_synchro
+    global db, cursor, flag_synchro, thread_active
 
     try:
+        if thread_active:
+            local.caching = True
+            return 0
+
         if not synchronise:
             while flag_synchro:
                 pass
@@ -142,65 +146,26 @@ def synchronise_queries():
     Synchronises data between local database and remote database :
     Grabs all non sent queries from the local database's 'remote_queries' table and sends them to the remote database
     """
-    local.connect_to_local_db_from_thread()
     print("Synchronising data between local and remote databases")
 
-    if db is not None and db.is_connected():
-        try:
-            print("local.caching = ", local.caching)
-            while local.caching:
-                print("Wait for the end of caching")
-            print("Fin while local.caching")
-            try:
-                print("Entering 2nd try sychro")
-                #if local.local_db is not None and local.local_db.is_connected():
-                # Fetch all entries from the 'remote_queries' table
-                print("Waiting for local.cursor protection")
+    while local.caching:
+        pass
 
-                print("Executing query SELECT * FROM remote_queries")
-                local.local_cursor_thread_distant.execute("SELECT * FROM remote_queries")
-                print("Selected")
-                queries = local.local_cursor_thread_distant.fetchall()
-                print("Fetched")
+    print("Executing query SELECT * FROM remote_queries")
+    query = "SELECT * FROM remote_queries"
+    queries = execute_query_with_reconnect(query)
 
-                if queries is None:
-                    print("\033[93msynchronise_queries : No queries\033[0m")
-                    return
-                """else:
-                    print("\033[93msynchronise_queries : PB DB\033[0m")
-                    local.connect_to_local_db()
-                    synchronise_queries()
-                    return"""
-
-            except Exception as e:
-                print(f"\033[91mError select from remote_queries: {e}\033[0m")
-                if e.errno == 2013:
-                    local.connect_to_local_db_from_thread()
-                    synchronise_queries()
-                    return
-                print("Try to synchronise again")
-                synchronise_queries()
-                return
-            try:
-                for query_entry in queries:
-                    print("Syncro req : ", query_entry[1])
-                    query = query_entry[1]
-                    success = execute_remote_query(query,None,True)
-                    if success:
-                        #if local.local_db is not None and local.local_db.is_connected():
-                        # If the query was executed successfully, delete the entry from the local table
-                        local.local_cursor_thread_distant.execute("DELETE FROM remote_queries WHERE query = %s", (query,))
-                        local.local_db_thread_distant.commit()
-            except Exception as e:
-                print(f"\033[91mError deleting remote_queries: {e}\033[0m")
-
-        except Exception as e:
-            print(f"\033[91mError syncing failed queries: {e}\033[0m")
-    else:
-        print("\033[91mDistant database not connected\033[0m")
-        # Create thread to check on the database
-        if thread_active == 0:
-            connection_thread = threading.Thread(target=connect_to_remote_db)
-            connection_thread.start()
+    if not queries:
+        print("\033[93msynchronise_queries : No queries\033[0m")
         return
+
+    for query_entry in queries:
+        print("Syncro req : ", query_entry[1])
+        query = query_entry[1]
+        success = execute_remote_query(query, None, True)
+        if success:
+            # If the query was executed successfully, delete the entry from the local table
+            #TODO faire le delete avec l'id (à rajouter dans la bdd)
+            local.send_query_local('delete', 'remote_queries', None, None, f"query = {query}")
+
     print("Synchro sortie normale")

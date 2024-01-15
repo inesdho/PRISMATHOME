@@ -423,8 +423,10 @@ class SensorPairingManagement:
             sensor["ieee_address"] = "0x1234567891237894"  # Adresse IEEE fictive pour les tests
         """
         # Create the observation
-        local.create_observation(globals.global_participant_selectionned, globals.global_id_config_selectionned, globals.global_id_session_selectionned, globals.global_session_label_selctionned)
+        local.create_observation_with_sensors(globals.global_participant_selectionned, globals.global_id_config_selectionned, globals.global_id_session_selectionned, globals.global_session_label_selctionned, self.sensor_entries)
 
         # Create sensors in the database
-        local.create_sensors(globals.global_new_id_observation, self.sensor_entries)
+        #local.create_sensors(globals.global_new_id_observation, self.sensor_entries)
+
+        # Set True to stop the thread displaying sensor values
         globals.thread_done = True

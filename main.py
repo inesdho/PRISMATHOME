@@ -7,10 +7,13 @@ from model import remote
 from model import local
 
 if __name__ == "__main__":
-    # Starting the application
-    app = App()
     local.connect_to_local_db()
     remote.connect_to_remote_db()
+
+    #local.test_transaction()
+
+    # Starting the application
+    app = App()
 
     if messagebox.askyesno("Import data", "Do you want to try to import data from the remote database into the local."
                                           "database ?"):
@@ -24,7 +27,6 @@ if __name__ == "__main__":
             app.destroy()
 
     app.mainloop()
-
 
 
 
