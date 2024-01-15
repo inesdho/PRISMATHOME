@@ -271,12 +271,42 @@ class SummaryUser:
             cursor.close()
             conn.close()
 
+    # TODO : Déplacer les 2 fonctions ci dessous dans une lib de fonction systèmes
+    def send_sigterm(self, pid):
+        script_path = "/home/prisme/Prisme@home/PRISMATHOME/kill_program.sh"
+        subprocess.run(["sh", script_path, str(pid)], check=True)
+
+    def get_pid_of_script(self, script_name):
+        """!
+        @brief Get the pid of the script "script_name"
+        @param script_name The name of the script that we want to get the pid
+        @return The pid of the script "script_name"
+        """
+        try:
+            # Exécution de la commande 'ps' pour obtenir les processus en cours
+            process = subprocess.run(['ps', 'aux'], stdout=subprocess.PIPE, text=True)
+            # Filtrage des lignes qui contiennent le nom du script
+            lines = process.stdout.split('\n')
+            for line in lines:
+                if script_name in line:
+                    parts = line.split()
+                    # Le PID est généralement le deuxième élément dans la sortie de 'ps aux'
+                    return int(parts[1])
+        except Exception as e:
+            print(f"Erreur lors de la recherche du PID: {e}")
+        return None
 
     def stop_observation(self):
         # TODO Mathilde : voir où appeller la fonction car lorsque que je la met au bonne endroit ca
         #  pose probleme
         #  + voir avec les indus comment stopper la reception des datas
-        os.kill(self.program_pid, signal.SIGTERM)
+
+        if self.program_pid is None:
+            self.program_pid = self.get_pid_of_script("reception.py")
+            self.send_sigterm(self.program_pid)
+        else:
+            os.kill(self.program_pid, signal.SIGTERM)
+
         try:
             conn = mysql.connector.connect(
                 host="localhost",

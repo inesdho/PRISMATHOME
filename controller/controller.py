@@ -21,6 +21,7 @@ from view.sensor_pairing_management_page import SensorPairingManagement
 import webbrowser
 import sys
 from model import local
+import globals
 
 
 
@@ -65,7 +66,8 @@ class App(ThemedTk):
         @param self : the instance
         @return Nothing
         """
-        if local.get_active_observation() == None:
+        globals.global_new_id_observation = local.get_active_observation()
+        if globals.global_new_id_observation == None:
             self.call_new_observation_page()
         else:
             self.call_summary_user_page()
@@ -100,6 +102,9 @@ class App(ThemedTk):
         # Redirecting to the login page
         summary_user_page = SummaryUser(self)
         summary_user_page.show_page()
+
+        # Creation of a main frame
+        self.create_new_main_frame()
 
         # Cancel button
         cancel_button = ttk.Button(self.main_frame, text="Exit",
