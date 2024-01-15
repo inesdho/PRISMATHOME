@@ -60,11 +60,11 @@ class SummaryAdmin:
 
         # Create the title of the different field
         ttk.Label(frame_title, background="lightgrey", width=20, text="Sensor", borderwidth=1, relief="solid",
-                  padding=5, font=globals.global_font_text, anchor="center").pack(side=tk.LEFT)
+                  padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
         ttk.Label(frame_title, background="lightgrey", width=20, text="Label", borderwidth=1, relief="solid",
-                  padding=5, font=globals.global_font_text, anchor="center").pack(side=tk.LEFT)
+                  padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
         ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid",
-                  padding=5, font=globals.global_font_text, anchor="center").pack(side=tk.LEFT)
+                  padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
 
         self.data_frame = ttk.Frame(self.frame_canvas)
         self.data_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
@@ -115,15 +115,15 @@ class SummaryAdmin:
 
             # Showing the type of the sensor
             ttk.Label(sensor_frame, text=f"{sensor_type} sensor {index}", width=20, anchor='w', wraplength=140,
-                      background="white", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
+                      background="white", borderwidth=1, relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
             # Creating a text widget tht will contain the label associated with the sensor
             ttk.Label(sensor_frame, text=f"{label_entry}", borderwidth=1, background="white", width=20,
-                      relief="solid", padding=5).pack(side=tk.LEFT)
+                      relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
             # Showing the description of the sensor
             ttk.Label(sensor_frame, text=f"{description_entry}", borderwidth=1, background="white", width=80,
-                      relief="solid", padding=5).pack(side=tk.LEFT)
+                      relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
         # Configure the scroll region to follow the content of the frame
         self.frame_canvas.update_idletasks()

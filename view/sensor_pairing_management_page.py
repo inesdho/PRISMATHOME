@@ -60,11 +60,11 @@ class SensorPairingManagement:
 
         # Create the title of the different field
         ttk.Label(frame_title, background="lightgrey", width=20, text="Sensor", borderwidth=1, relief="solid",
-                  padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+                  padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
         ttk.Label(frame_title, background="lightgrey", width=20, text="Label", borderwidth=1, relief="solid",
-                  padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+                  padding=5,  anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
         ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid",
-                  padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+                  padding=5,  anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
 
         self.sensor_entries = local.get_sensors_from_configuration(globals.global_id_config_selected)
 
