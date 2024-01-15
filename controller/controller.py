@@ -21,9 +21,8 @@ from view.sensor_pairing_management_page import SensorPairingManagement
 import webbrowser
 import sys
 from model import local
-from model import remote
+# from model import remote
 import globals
-
 
 
 class App(ThemedTk):
@@ -52,13 +51,14 @@ class App(ThemedTk):
         self.style = ThemedStyle(self)
         self.style.set_theme("breeze")  # Write the theme you would like
 
+        # Protool incas of closing window
+        self.protocol("WM_DELETE_WINDOW", self.closing_protocol)
 
         # Creating main frame
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
         self.is_observation_running()
-
 
     def is_observation_running(self):
         """!
@@ -416,7 +416,6 @@ class App(ThemedTk):
                                  (summary_admin_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
-
     def redirect_to_summary_user_from_pairing(self, sensor_pairing_page):
         """!
         @brief This function saves the information about the pairing of the sensor and calls the 'Summary user' page
@@ -479,7 +478,7 @@ class App(ThemedTk):
         messagebox.showinfo("Start observation", "The observation is starting.")
 
         # Changing the label and the function associated to the button
-        button.config(text="Stop observation",command=lambda: self.stop_observation(button, summary_user_page))
+        button.config(text="Stop observation", command=lambda: self.stop_observation(button, summary_user_page))
 
     def stop_observation(self, button, summary_user_page):
         """!
@@ -497,7 +496,7 @@ class App(ThemedTk):
         messagebox.showinfo("Stop observation", "The observation is stopped.")
 
         # Changing the label and the function associated to the button
-        button.config(text="Start observation",command=lambda: self.start_observation(button, summary_user_page))
+        button.config(text="Start observation", command=lambda: self.start_observation(button, summary_user_page))
 
     def clear_the_page(self, page):
         """!
@@ -521,3 +520,15 @@ class App(ThemedTk):
         # Creation of a main frame
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+    def closing_protocol(self):
+        """!
+        @brief This function deals with the closing of the app
+        @param self : the instance
+        @return Nothing
+        """
+        if messagebox.askokcancel("Quit", "Are you sure you want to quit PRISM@Home ?"):
+            if globals.global_connected_admin_login is not None:
+                print("Deconnexion normalement")
+                local.update_user_connexion_status(globals.global_connected_admin_login, globals.global_connected_admin_password, 0)
+            self.destroy()

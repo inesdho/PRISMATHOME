@@ -117,27 +117,32 @@ class ModifyOrCreateConfiguration:
         @param self : the instance
         @return Nothing
         """
-        # Connexion to the MySQL database
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
+        print("Entrée dans fonction de logout_the_admin")
+        try:
+            # Connexion to the MySQL database
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
 
-        # Update the connexion status in the database
-        query_update = "UPDATE prisme_home_1.user SET connected=0 WHERE login=%s AND password=%s"
-        cursor.execute(query_update, (globals.global_connected_admin_login, globals.global_connected_admin_password))
-        conn.commit()
+            # Update the connexion status in the database
+            query_update = "UPDATE prisme_home_1.user SET connected=0 WHERE login=%s AND password=%s"
+            cursor.execute(query_update, (globals.global_connected_admin_login, globals.global_connected_admin_password))
+            conn.commit()
+            print("DECONNEXION COMMITED")
 
-        # Deleteing the login and the password of the connected admin
-        globals.global_connected_admin_login = None
-        globals.global_connected_admin_password = None
+            # Deleteing the login and the password of the connected admin
+            globals.global_connected_admin_login = None
+            globals.global_connected_admin_password = None
 
-        # Close the connexion to the database
-        cursor.close()
-        conn.close()
+            # Close the connexion to the database
+            cursor.close()
+            conn.close()
+        except Exception as e:
+            print("Erreur lors de la deconnexion : ", e)
 
     def clear_page(self):
         """!
