@@ -78,22 +78,29 @@ class SummaryAdmin:
         # Get the sensor types from DB
         all_sensor_types = local.get_sensor_type_list()
 
+        # TODO ines/mathilde : Commenter, code pas compréhensible et fait planter les requêtes
         for sensor_type_id, sensor_type in all_sensor_types:
-                # Convert sensor_type_id to str for comparison
-                sensor_type_id_str = str(sensor_type_id)
-                # Filter entries for this sensor type
-                entries_for_type = [
-                    entry for entry in globals.global_sensor_entries
-                    if str(entry[0]).startswith(sensor_type_id_str)  # Ensure both are strings
-                ]
-                if entries_for_type:
-                    sensor_type_button = ttk.Button(
-                        self.button_frame,
-                        text=sensor_type,
-                        command=lambda type=sensor_type, entries_for_type=entries_for_type: self.display_sensor_info(type, entries_for_type),
-                        padding=5
-                    )
-                    sensor_type_button.pack(side=tk.LEFT, padx=5)
+
+            print("globals.global_sensor_entries : ",globals.global_sensor_entries)
+
+            # Convert sensor_type_id to str for comparison
+            sensor_type_id_str = str(sensor_type_id)
+            # Filter entries for this sensor type
+            entries_for_type = [
+                entry for entry in globals.global_sensor_entries
+                if str(entry[0]).startswith(sensor_type_id_str)  # Ensure both are strings
+            ]
+
+            print("entries_for_type = ",entries_for_type)
+
+            if entries_for_type:
+                sensor_type_button = ttk.Button(
+                    self.button_frame,
+                    text=sensor_type,
+                    command=lambda type=sensor_type, entries_for_type=entries_for_type: self.display_sensor_info(type, entries_for_type),
+                    padding=5
+                )
+                sensor_type_button.pack(side=tk.LEFT, padx=5)
 
     def display_sensor_info(self, sensor_type, entries_for_type):
         """!
