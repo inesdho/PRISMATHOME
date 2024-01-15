@@ -347,6 +347,7 @@ def monitor_battery_low(sensor_id, datetime):
     return send_query('insert', 'monitoring', ['id_sensor', 'id_system', 'timestamp', 'id_error'], values)
 
 
+# TODO : faire fonction 2 en 1
 def monitor_system_shut_down_by_participant(datetime):
     """!
     Insert the monitoring message "System shut down by participant"
@@ -375,6 +376,7 @@ def monitor_system_started_up_by_participant(datetime):
     return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
 
 
+# TODO : faire fonction 2 en 1
 def monitor_observation_started(datetime):
     """!
     Insert the monitoring message "Observation started"
@@ -403,6 +405,7 @@ def monitor_observation_stopped(datetime):
     return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
 
 
+# TODO : faire fonction 2 en 1
 def monitor_availability_offline(sensor_id, datetime):
     """!
     Insert the monitoring message "Sensor availability offline"
@@ -559,10 +562,36 @@ def get_sensors_from_configuration(id_config):
                 })
             return sensors
     except Exception as e:
-        print("Erreur dans la convertion du résultat : ", e)
+        print("Erreur dans la conversion du résultat : ", e)
 
     # Return None if no sensors found or if an error occurred
     return None
+
+
+def get_sensor_info_from_observation(id_observation, sensor_type=None):
+    """!
+    Gets the labels and descriptions of all sensors for a specific observation. A sensor type can be selected in
+    order to only get results for this type of sensor
+
+    @param id_observation: the observation's id
+    @param sensor_type: (optional : the type of sensor to look for)
+    @return: a list of labels and descriptions for each sensor corresponding to the criteria, None if no sensors
+    found or an error occurred
+    """
+
+    if sensor_type is None:  # Grab all labels
+        query = "SELECT label, description FROM sensor WHERE id_observation =%s"
+        values = (id_observation,)
+    else:
+        query = "SELECT label, description FROM sensor WHERE id_observation =%s AND id_type = %s"
+        values = (id_observation, sensor_type)
+
+    result = execute_query_with_reconnect(query, values)
+
+    if result:
+        return [{"label": row[0], "description": row[1]} for row in result]
+    else:
+        return None
 
 
 # DONE
@@ -599,32 +628,49 @@ def get_user_from_login_and_password(login, password):
     query = "SELECT * FROM user WHERE login = %s AND password = %s"
 
     result = execute_query_with_reconnect(query, (login, encrypted_password))
-
-    return result[0] if result is not None else None
+    if result is not None and len(result) > 0:
+        return result[0]
+    else:
+        return None
 
 
 # DONE
-def update_user_connexion_status(login, password, connexion_status):
+def update_user_connexion_status(id_user, connexion_status):
     """!
-    Sets the connexion status to either 1 (connected) or 0 (disconnected) in the local db
-
-    @param login: The user's login.
-    @param password: The user's password in non encrypted form
+    Sets the connexion status to either 1 (connected) or 0 (disconnected) in the local db for the user.
+    @param id_user: user's id
     @param connexion_status: The connexion status wanted
     @return: 1 if successful, otherwise None
     """
 
-    encrypted_password = encrypt_password(password)
     query = "UPDATE user SET connected = %s WHERE login = %s AND password = %s"
 
-    result = send_query_local("UPDATE", "user", ("connected",), (connexion_status, login, encrypted_password),
-                              "login = %s AND password = %s")
-
+    result = send_query_local("UPDATE", "user", ("connected",), (connexion_status, id_user),
+                              "id_user = %s")
     if result != -1:
         return 1
 
     # Return None if the user is not found or there are errors
     return None
+
+
+def update_observation_status(observation_status, id_observation=None):
+    """!
+    Sets the observation status to either 1 (active) or 0 (inactive) in both databases
+
+    @param id_observation: The observation's id (optional, the id stored globally by the program will be used if
+    this is not set)
+    @param observation_status: The observation status wanted 1 for active and 0 for inactive
+    @return: the result of send_query
+    """
+    if id_observation is None:
+        id_observation = globals.global_new_id_observation
+    values = (observation_status,)
+    return send_query('update', 'observation',
+                      ['active'],
+                      values,
+                      "id_observation=" + str(id_observation))
+    # TODO : voir avec Paul s'il faut faire d'autres traitements pour stopper reception.py
 
 
 # DONE
@@ -697,6 +743,24 @@ def get_config_labels_ids(id_config=None):
 
         if result:
             return result[0]
+
+
+def get_config_label_from_observation_id(id_observation):
+    """!
+    Gets the lconfig label from a configuration matching
+
+    @param id_observation: The config's id, if left at None, the function will get all config labels in the local
+    database
+    @return: One or more configuration labels if successful, None otherwise
+    """
+    query = ("SELECT configuration.label FROM configuration, observation "
+             "WHERE observation.id_config=configuration.id_config AND observation.id_observation=%s")
+
+    result = execute_query_with_reconnect(query, (id_observation,))
+    if result:
+        return result
+    else:
+        return None
 
 
 # DONE
@@ -822,9 +886,9 @@ def create_configuration(id_config, id_user, label, description, sensor_list):
         if result == -1:
             raise Exception("Error while inserting configuration")
 
-        for sensor_type_id, label, description in sensor_list:  # Go through the sensor list
+        for sensor_type_id, sensor_label, sensor_description in sensor_list:  # Go through the sensor list
 
-            values = (id_config, sensor_type_id, label, description)
+            values = (id_config, sensor_type_id, sensor_label, sensor_description)
             # Send each query and check for errors
             result = send_query_local('insert', 'sensor_config',
                                       ['id_config', 'id_sensor_type', 'sensor_label', 'sensor_description'],
@@ -849,7 +913,7 @@ def create_configuration(id_config, id_user, label, description, sensor_list):
     values = (id_config, id_user, label, description)
     send_query_remote('insert', 'configuration', ['id_config', 'id_user', 'label', 'description'], values, None)
 
-    for i, (sensor_type_id, label, description) in enumerate(sensor_list, start=1):  # Le compteur commence à 1
+    for sensor_type_id, sensor_label, sensor_description in sensor_list:
         values = (id_config, sensor_type_id, label, description)
 
         send_query_remote('insert', 'sensor_config',
@@ -888,7 +952,7 @@ def get_active_observation():
 
 # DONE
 def get_sensors_from_observation(id_observation):
-    """
+    """!
     Retrieve all sensor labels and their associated types for a given observation ID.
 
     @param id_observation : The ID of the observation.
@@ -896,9 +960,7 @@ def get_sensors_from_observation(id_observation):
     @return A list of dictionaries with keys "type" and "label" for each sensor. None list if no sensors are found.
     """
 
-    query = """
-    SELECT s.label, st.type 
-    FROM sensor s 
+    query = """SELECT s.label, st.type FROM sensor s 
     JOIN sensor_type st ON s.id_type = st.id_type 
     WHERE s.id_observation = %s;
     """
@@ -909,3 +971,53 @@ def get_sensors_from_observation(id_observation):
         return [{"label": row[0], "type": row[1]} for row in result]
     else:
         return None
+
+
+def get_observation_info(id_observation, field=None):
+    """
+    Retrieves all available information given observation ID. If param field is set, returns only this field
+
+    @param id_observation : The ID of the observation.
+    @param field : the particular field requested (if none selected, all fields will be returned)
+
+    @return A list of the fields and their values. None list if nothing was found or an error occurred.
+    Returns only one value if field was set.
+    """
+    if field is None:  # No particular fields wanted
+        query = """SELECT * FROM observation o WHERE o.id_observation = %s;"""
+        result = execute_query_with_reconnect(query, (id_observation,))
+        if result:
+            return [{"id_observation": result[0],
+                     "id_system": result[1],
+                     "participant": result[2],
+                     "id_config": result[3],
+                     "id_session": result[4],
+                     "session_label": result[5],
+                     "active": result[6]}]
+        else:
+            return None
+    else:  # Select one particular field
+        query = """SELECT %s FROM observation o WHERE o.id_observation = %s;"""
+        result = execute_query_with_reconnect(query, (field, id_observation,))
+        if result:
+            return result
+        else:
+            return None
+
+
+def config_label_exists(label):
+    """!
+     Checks if a config with this label already exists in the local database
+
+     @param label: The label to look for
+     @return: True if it exists, False if not. Returns -1 if an error occurred
+     """
+    query = """SELECT COUNT(*) FROM configuration WHERE label = %s;"""
+
+    result = execute_query_with_reconnect(query, (label,))
+
+    print(f"result config_label_exists with label {label} : {result}")
+    if result[0][0] == 0:
+        return False
+    else:
+        return True

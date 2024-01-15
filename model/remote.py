@@ -62,6 +62,7 @@ def connect_to_remote_db():
         # Loop until the connection works
         connect_to_remote_db()
 
+
 def disconnect_from_remote_db():
     """!
         Disconnects from the remote database
@@ -128,11 +129,13 @@ def execute_remote_query(query, values=None, synchronise=False):
             cursor.close()
             conn.close()
 
+
 def synchronise_queries():
     """!
     Synchronises data between local database and remote database :
     Grabs all non sent queries from the local database's 'remote_queries' table and sends them to the remote database
     """
+
     print("Synchronising data between local and remote databases")
 
     # Wait until caching is finished

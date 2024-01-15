@@ -10,9 +10,6 @@ global_description_configuration = None
 global_id_config_selected = None
 global_new_id_observation = None
 
-global_connected_admin_login = None
-global_connected_admin_password = None
-
 global_participant_selected = None
 global_session_label_selected = None
 global_id_system_selected = None
