@@ -533,5 +533,5 @@ class App(ThemedTk):
             # local.disconnect_from_local_db()
             # remote.disconnect_from_remote_db()
             if not globals.global_connected_admin_login is None:
-                ModifyOrCreateConfiguration.log_out_the_admin()
+                ModifyOrCreateConfiguration(self).log_out_the_admin()
             self.destroy()
