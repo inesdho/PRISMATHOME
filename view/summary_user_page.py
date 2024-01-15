@@ -40,8 +40,7 @@ class SummaryUser:
         label.pack(pady=20)
 
         # Information about the configuration
-        scenario_label = ttk.Label(self.frame, text="Configuration : " +
-                                                    self.get_scenario(globals.global_new_id_observation), padding=10,
+        scenario_label = ttk.Label(self.frame, text="Configuration : " + self.get_scenario(globals.global_new_id_observation), padding=10,
                                    anchor="w", font=globals.global_font_title1)
         scenario_label.pack(fill=tk.BOTH)
         session_label = ttk.Label(self.frame, text="Session : " + self.get_session(globals.global_new_id_observation),
@@ -71,13 +70,13 @@ class SummaryUser:
 
         # Create the title of the different field
         ttk.Label(frame_title, background="lightgrey", width=20, text="Sensor", borderwidth=1, relief="solid",
-                  padding=5, font=globals.global_font_text, anchor="center").pack(side=tk.LEFT)
+                  padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
         ttk.Label(frame_title, background="lightgrey", width=20, text="Label", borderwidth=1, relief="solid",
-                  padding=5, font=globals.global_font_text, anchor="center").pack(side=tk.LEFT)
+                  padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
         ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid",
-                  padding=5, font=globals.global_font_text, anchor="center").pack(side=tk.LEFT)
+                  padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
         ttk.Label(frame_title, background="lightgrey", width=20, text="State", borderwidth=1, relief="solid",
-                  padding=5, font=globals.global_font_text, anchor="center").pack(side=tk.LEFT)
+                  padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
 
         self.data_frame = ttk.Frame(self.frame_canvas)
         self.data_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
@@ -142,19 +141,19 @@ class SummaryUser:
 
             # Showing the type of the sensor
             ttk.Label(sensor_frame, text=f"{sensor_type}", width=20, anchor='w', wraplength=140,
-                      background="white", borderwidth=1, relief="solid", padding=5).pack(side=tk.LEFT)
+                      background="white", borderwidth=1, relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
             # Creating a text widget tht will contain the label associated with the sensor
             ttk.Label(sensor_frame, text=f"{sensor_label}", borderwidth=1, background="white", width=20,
-                      relief="solid", padding=5).pack(side=tk.LEFT)
+                      relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
             # Showing the description of the sensor
             ttk.Label(sensor_frame, text=f"{sensor_description}", borderwidth=1, background="white", width=80,
-                      relief="solid", padding=5).pack(side=tk.LEFT)
+                      relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
             # Showing the current state of the sensor
             ttk.Label(sensor_frame, text=f"Etat en direct", borderwidth=1, background="white", width=20,
-                      relief="solid", padding=5, anchor="center").pack(side=tk.LEFT)
+                      relief="solid", padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
 
         # Configure the scroll region to follow the content of the frame
         self.frame_canvas.update_idletasks()
