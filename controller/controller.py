@@ -22,6 +22,8 @@ from view.selection_sensor_quantity_page import QuantitySensor
 from view.labellisation_sensor_page import LabelisationSensor
 from view.sensor_pairing_management_page import SensorPairingManagement
 import webbrowser
+import sys
+
 
 
 class App(ThemedTk):
@@ -35,8 +37,15 @@ class App(ThemedTk):
         """
         ThemedTk.__init__(self)
         self.title("PRISM@Home")
-        self.attributes('-fullscreen', True)
-        self.bind('<Escape>', lambda e: self.attributes('-fullscreen', False))
+
+        my_os = sys.platform
+
+        if my_os == 'Linux':
+            self.attributes('-zoomed', True)
+            self.bind('<Escape>', lambda e: self.attributes('-zoomed', False))
+        elif my_os == 'win32' or my_os == 'cygwin':
+            self.attributes('-fullscreen', True)
+            self.bind('<Escape>', lambda e: self.attributes('-fullscreen', False))
 
         # Theme of the application
         self.style = ThemedStyle(self)
@@ -302,8 +311,7 @@ class App(ThemedTk):
         if selection_sensor_quantity_page.chose_at_least_one_sensor():
             # Calls this function in order to store into global variables the datas entered by the user in the sensor
             # quantity page
-            # TODO : CHANGER LE NOM DE LA FONCTION INCOHERENT
-            selection_sensor_quantity_page.on_next_button_click()
+            selection_sensor_quantity_page.save_sensors_quantity_into_globals()
             self.redirect_to_labellisation_sensor_from_anywhere(selection_sensor_quantity_page)
         else:
             messagebox.showerror("Error", "Please select at least one sensor")

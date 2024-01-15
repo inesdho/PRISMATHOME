@@ -69,7 +69,7 @@ class QuantitySensor:
         self.frame.destroy()
         self.frame_sensors.destroy()
 
-    def on_next_button_click(self):
+    def save_sensors_quantity_into_globals(self):
         """!
         @brief This function saves the quantity of sensors for each type of sensor that the user selected into global
         variables

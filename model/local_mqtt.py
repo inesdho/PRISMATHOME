@@ -1,11 +1,17 @@
 import paho.mqtt.client as mqtt
 import time
 import json
+import globals
+from datetime import datetime
+from model import local
 
 ## Constant for the broker port
 BROKER_PORT = 1883
 ## Constant for the broker addr
 BROKER_ADDR = "127.0.0.1"
+
+check_availability_stop = False
+
 
 def connect_to_mqtt_broker(client):
     """!
@@ -21,6 +27,7 @@ def connect_to_mqtt_broker(client):
         time.sleep(1)
         # Loop until the connection works
         connect_to_mqtt_broker(client)
+
 
 def get_all_sensors_on_zigbee2mqtt(details_wanted):
     """!
@@ -101,6 +108,7 @@ def get_all_sensors_on_zigbee2mqtt(details_wanted):
     client.loop_forever()
     return connected_sensors_list
 
+
 def change_permit_join(state_wanted):
     """!
     Changes the permit_join parameter, which allows zigbee2mqtt to search for new sensors
@@ -133,7 +141,7 @@ def change_permit_join(state_wanted):
         client.disconnect()
         client.loop_stop()
 
-    client = mqtt.Client("Coordinator")
+    client = mqtt.Client("change_permit_join")
     client.on_message = on_message
     connect_to_mqtt_broker(client)
 
@@ -146,6 +154,7 @@ def change_permit_join(state_wanted):
     client.loop_forever()
 
     return transmission_state
+
 
 def rename_sensor(previous_name, new_name):
     """!
@@ -160,7 +169,7 @@ def rename_sensor(previous_name, new_name):
             # 3 : Unknown
     """
     transmission_state = 3
-    cpt=0
+    cpt = 0
 
     # This function allows the user to rename a sensor, using the currently known firendly name (or
     # the IEEE address) and the new name
@@ -180,7 +189,6 @@ def rename_sensor(previous_name, new_name):
         @return None
         """
 
-
         nonlocal transmission_state
         nonlocal cpt
 
@@ -188,7 +196,6 @@ def rename_sensor(previous_name, new_name):
         if cpt == 0:
             cpt = 1
         else:
-            print("coucou")
             return
 
         # Convert the feedback in json
@@ -213,7 +220,7 @@ def rename_sensor(previous_name, new_name):
                 transmission_state = rename_sensor(previous_name, new_name)
 
             else:
-                print("WTF 1 : ",rename_feedback)
+                print("WTF 1 : ", rename_feedback)
                 transmission_state = 3
         else:
             print("WTF 2 : ", rename_feedback)
@@ -223,7 +230,7 @@ def rename_sensor(previous_name, new_name):
         client.loop_stop()
 
     # Connection to the MQTT Client
-    client = mqtt.Client("Coordinator")
+    client = mqtt.Client("rename_sensor"+previous_name)
     client.on_message = on_message
     connect_to_mqtt_broker(client)
 
@@ -245,6 +252,7 @@ def rename_sensor(previous_name, new_name):
     client.loop_forever()
     return transmission_state
 
+
 def get_sensor_value(sensor_friendly_name, label_widget):
     """!
     @brief Get the sensor value of the sensor_friendly_name
@@ -253,9 +261,10 @@ def get_sensor_value(sensor_friendly_name, label_widget):
 
     @return The string value if the sensor 
     """
+    global thread_done
     print("Lancement du thread pour capteur", sensor_friendly_name)
     # The value of the sensor to return
-    value=""
+    value = ""
 
     def on_message(client, userdata, msg):
         nonlocal value
@@ -265,31 +274,31 @@ def get_sensor_value(sensor_friendly_name, label_widget):
         sensor_label = msg.topic.split('/')[2]
         ## The datas sended by the sensor extracted from the mqtt message in json format
         sensor_datas = json.loads(msg.payload)
-        print("Sensor type : ",sensor_type)
+        print("Sensor type : ", sensor_type)
         print("Reception message ", sensor_friendly_name)
 
         match sensor_type:
             case "Button":
                 if 'action' in sensor_datas:
-                    value = "Action : "+str(sensor_datas["action"])
-                else:
-                    value = "Unknown"
-                
-            case "Door" :
-                if 'contact' in sensor_datas:  
-                    value = "Contact : "+str(sensor_datas["contact"])
+                    value = "Action : " + str(sensor_datas["action"])
                 else:
                     value = "Unknown"
 
-            case "Motion" :
-                if 'occupancy' in sensor_datas: 
-                    value = "Occupancy : "+str(sensor_datas["occupancy"])
+            case "Door":
+                if 'contact' in sensor_datas:
+                    value = "Contact : " + str(sensor_datas["contact"])
                 else:
                     value = "Unknown"
 
-            case "Vibration" :
-                if 'vibration' in sensor_datas: 
-                    value = "Vibration : "+str(sensor_datas["vibration"])
+            case "Motion":
+                if 'occupancy' in sensor_datas:
+                    value = "Occupancy : " + str(sensor_datas["occupancy"])
+                else:
+                    value = "Unknown"
+
+            case "Vibration":
+                if 'vibration' in sensor_datas:
+                    value = "Vibration : " + str(sensor_datas["vibration"])
                 else:
                     value = "Unknown"
 
@@ -303,7 +312,7 @@ def get_sensor_value(sensor_friendly_name, label_widget):
             client.loop_stop()
 
     # The mqtt client to collect the data from the broker
-    mqtt_client = mqtt.Client("get_sensor_value"+sensor_friendly_name)
+    mqtt_client = mqtt.Client("get_sensor_value" + sensor_friendly_name)
 
     # The on_message function of the mqtt client
     mqtt_client.on_message = on_message
@@ -311,9 +320,19 @@ def get_sensor_value(sensor_friendly_name, label_widget):
     # Connection to mqtt broker
     connect_to_mqtt_broker(mqtt_client)
 
-    mqtt_client.subscribe("zigbee2mqtt/"+sensor_friendly_name)
+    mqtt_client.subscribe("zigbee2mqtt/" + sensor_friendly_name)
 
-    mqtt_client.loop_forever()
+    mqtt_client.loop_start()
+
+    print("thread done = ", globals.thread_done)
+
+    while not globals.thread_done:
+        time.sleep(1)
+
+    print("Sortie du thread get_sensor_value pour capteur : ", sensor_friendly_name)
+    mqtt_client.loop_stop()
+    mqtt_client.disconnect()
+
 
 def get_new_sensors():
     """!
@@ -326,6 +345,7 @@ def get_new_sensors():
     @return None
     """
     sensor_details = {}
+
     def on_message(client, userdata, msg):
         """!
         Function that is called when a message is received from a topic
@@ -358,3 +378,238 @@ def get_new_sensors():
 
     client.loop_forever()
     return sensor_details
+
+
+def check_availability():
+    """!
+    This function will detect all the sensors paired with ZigBee2MQTT. Gathered information
+    will be then sent to the user
+
+    @return nothing
+    """
+    ##  Double list, which contains the sensors and their status
+
+    availabilities = [
+        ["Sensor"],
+        ["Status"],
+    ]
+
+    ## The topic list we need to subcribe to
+
+    list_of_topics = []
+
+    def on_message_getall(client, userdata, msg):
+        """!
+        Function that is called when a message is received from a topic
+        In that case, it is zigbee2mqtt/bridge/devices
+        It will gather all of the devices and subscribe to the availability fields corresponding
+
+        @param client: Client
+        @param userdata: Unused
+        @param msg: JSON message, which contains all of the informations of the sensors
+
+        @return None
+        """
+
+        nonlocal availabilities
+        nonlocal list_of_topics
+        # Gets all of the sensor connected in the system
+        connected_devices = get_all_sensors_on_zigbee2mqtt("fname")
+
+        for i in range(len(connected_devices)):
+
+            # Only getting the friendly names
+            fname = str(connected_devices[i].get('name', 'Unknown'))
+            # Checks if the sensor already exists
+            if not fname in availabilities[0]:
+
+                # Subscribing to the topic
+                topic = "zigbee2mqtt/" + fname + "/availability"
+                client.subscribe(topic)
+
+                # Only happens on the first iteration
+                if "Sensor" in availabilities[0][0]:
+                    availabilities[0][0] = connected_devices[i].get('name', 'Unknown')
+                    availabilities[1][0] = 'none'
+
+                # Happens every time, except for the first iteration
+                else:
+                    # Inserts the name of the sensor in the list, and also the temporary "none" state
+                    availabilities[0].insert(i, connected_devices[i].get('name', 'Unknown'))
+                    availabilities[1].insert(i, 'none')
+
+                # Adding the topic to the list
+                list_of_topics.insert(i, topic)
+
+    def on_message(client, userdata, msg):
+        """!
+        Function that is called when a message is received from a topic
+        In that case, it is zigbee2mqtt/FRIENDLY_NAME/availability
+        The FRIENDLY_NAME is the name of the sensor coming from the on_message_getall function
+
+        @param client: Client
+        @param userdata: Unused
+        @param msg: JSON message, which contains all of the informations of the sensors
+
+        @return None
+        """
+        nonlocal availabilities
+        nonlocal list_of_topics
+
+        # Checks if the payload is empty or not. Can happen only when a sensor is renamed
+        if not "b''" in str(msg.payload):
+
+            # Gets the message received
+            availability_message = json.loads(msg.payload.decode())
+
+            # Searching for every sensor connected
+            for i in range(len(list_of_topics)):
+
+                # Checks which index is corresponding
+                fname = msg.topic.replace('zigbee2mqtt/', '').replace('/availability', '')
+
+                # Divides the friendly name to send data to the database
+                data_to_database = fname.split("/")
+                if len(data_to_database) < 2:
+                    return
+
+                datetime_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+
+                # Tries to find the topic received in the availabilities list
+                if fname in availabilities[0][i]:
+                    # Case where the state of the new sensor is NOT in the system
+                    if 'none' in availabilities[1][i]:
+
+                        # That sensor is online
+                        if 'online' in availability_message['state']:
+                            availabilities[1][i] = "online"
+
+                        # That sensor is offline
+                        elif 'offline' in availability_message['state']:
+                            availabilities[1][i] = "offline"
+                            sensor_id = local.get_sensor_from_type_label(data_to_database[0], data_to_database[1])
+                            if sensor_id:
+                                local.monitor_availability_offline(sensor_id, datetime_now)
+
+                    # Case where the sensor is already in the system
+                    elif 'online' in availabilities[1][i]:
+                        if 'offline' in availability_message['state']:
+                            availabilities[1][i] = "offline"
+                            sensor_id = local.get_sensor_from_type_label(data_to_database[0], data_to_database[1])
+                            if sensor_id:
+                                local.monitor_availability_offline(sensor_id, datetime_now)
+
+                    elif 'offline' in availabilities[1][i]:
+                        if 'online' in availability_message['state']:
+                            availabilities[1][i] = "online"
+                            sensor_id = local.get_sensor_from_type_label(data_to_database[0], data_to_database[1])
+                            if sensor_id:
+                                local.monitor_availability_online(sensor_id, datetime_now)
+
+    def on_message_rename(client, userdata, msg):
+        """!
+        Function that is called when a message is received from a topic
+        In that case, it is zigbee2mqtt/bridge/response/device/rename
+        It is called when a sensor is renamed, which also renames the sensor in availabilities and
+        modifies the topics
+
+        @param client: Client
+        @param userdata: Unused
+        @param msg: JSON message, which contains all of the informations of the sensors
+
+        @return None
+        """
+        rename_feedback = json.loads(msg.payload)
+        found = False
+
+        # Checks if the rename was correctly done
+        if 'ok' in rename_feedback['status']:
+
+            # Gets the previous and the new names
+            previous_name = rename_feedback.get('data', {}).get('from', 'Unknown')
+            new_name = rename_feedback.get('data', {}).get('to', 'Unknown')
+
+            for i in range(len(availabilities[0])):
+
+                # Checks if the sensor has already been found
+                if found == False:
+
+                    # Tries to find which sensor has been renamed
+                    if previous_name in availabilities[0][i]:
+                        # Unsubscribing to the previous topic
+                        topic = "zigbee2mqtt/" + previous_name + "/availability"
+                        client.unsubscribe(topic)
+
+                        # Subscribing to the new topic
+                        topic = "zigbee2mqtt/" + new_name + "/availability"
+                        client.subscribe(topic)
+
+                        # Removing the sensor, the state and the topic from the topic list. We don't
+                        # need to add the new sensor as this will be done in the on_message_getall
+                        # function
+                        del (availabilities[0][i])
+                        del (availabilities[1][i])
+                        del (list_of_topics[i])
+                        found = True
+
+    def on_message_remove(client, userdata, msg):
+        """!
+        Function that is called when a message is received from a topic
+        In that case, it is zigbee2mqtt/bridge/response/device/remove
+        It will remove the sensor from the availabilites list, and unsubscribe to the topic
+        corresponding to it
+
+        @param client: Client
+        @param userdata: Unused
+        @param msg: JSON message, which contains all of the informations of the sensors
+
+        @return None
+        """
+        remove_feedback = json.loads(msg.payload)
+        print(remove_feedback)
+
+        # Checks if the remove was correctly done
+        if 'ok' in remove_feedback['status']:
+
+            # Gets which sensor was removed
+            fname_removed = remove_feedback.get('data', {}).get('id', 'Unknown')
+
+            for i in range(len(availabilities)):
+
+                # Tries to find which sensor has been renamed
+                if fname_removed in availabilities[0][i]:
+                    # Unsubcribing to the topic
+                    topic = "zigbee2mqtt/" + fname_removed + "/availability"
+                    client.unsubscribe(topic)
+
+                    # Removing the sensor, the state and the topic from the topic list.
+                    del (availabilities[0][i])
+                    del (availabilities[1][i])
+                    del (list_of_topics[i])
+
+    client = mqtt.Client("get_availability")
+    client.on_message = on_message
+    connect_to_mqtt_broker(client)
+
+    # Filtering the topics. Messages received on zigbee/bridge/devices will be sent to the
+    # on_message_getall function
+    client.message_callback_add("zigbee2mqtt/bridge/devices", on_message_getall)
+
+    # When a sensor is renamed
+    client.message_callback_add("zigbee2mqtt/bridge/response/device/rename", on_message_rename)
+
+    # When a sensor is removed
+    client.message_callback_add("zigbee2mqtt/bridge/response/device/remove", on_message_remove)
+
+    # Subscription to the appropriate topics
+    client.subscribe("zigbee2mqtt/bridge/devices")
+    client.subscribe("zigbee2mqtt/bridge/response/device/remove")
+    client.subscribe("zigbee2mqtt/bridge/response/device/rename")
+
+    client.loop_start()
+
+    while not check_availability_stop:
+        time.sleep(1)
+
+    client.loop_stop()
+    client.disconnect()
