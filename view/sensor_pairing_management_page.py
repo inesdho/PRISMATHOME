@@ -9,6 +9,7 @@ from model import local
 import model.local_mqtt
 import time
 import threading
+import getpass
 
 
 class SensorPairingManagement:
@@ -422,8 +423,12 @@ class SensorPairingManagement:
         """for sensor in self.sensor_entries:
             sensor["ieee_address"] = "0x1234567891237894"  # Adresse IEEE fictive pour les tests
         """
+        user = getpass.getuser()
+
+        print("user: ", user)
+
         # Create the observation
-        local.create_observation_with_sensors(globals.global_participant_selected, globals.global_id_config_selected, globals.global_id_session_selected, globals.global_session_label_selected, self.sensor_entries)
+        local.create_observation_with_sensors(user, globals.global_participant_selected, globals.global_id_config_selected, globals.global_id_session_selected, globals.global_session_label_selected, self.sensor_entries)
 
         # Create sensors in the database
         #local.create_sensors(globals.global_new_id_observation, self.sensor_entries)
