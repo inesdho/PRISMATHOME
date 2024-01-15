@@ -739,7 +739,7 @@ def get_config_labels_ids(id_config=None):
 
 
 # DONE
-def create_observation_with_sensors(participant, id_config, id_session, session_label, sensor_list, active=0,
+def create_observation_with_sensors(user, participant, id_config, id_session, session_label, sensor_list, active=0,
                                     id_system=None):
     """!
     Creates a new observation with associated sensors from the given parameters and inserts them in both databases.
@@ -768,9 +768,9 @@ def create_observation_with_sensors(participant, id_config, id_session, session_
         if id_system is None:
             id_system = get_system_id()
 
-        values = (id_system, participant, id_config, id_session, session_label, active)
+        values = (id_system, user, participant, id_config, id_session, session_label, active)
         id_observation = send_query_local('insert', 'observation',
-                                          ['id_system', 'participant', 'id_config', 'id_session', 'session_label',
+                                          ['id_system', 'creator', 'participant', 'id_config', 'id_session', 'session_label',
                                            'active'],
                                           values, None, cursor)
 
@@ -811,10 +811,10 @@ def create_observation_with_sensors(participant, id_config, id_session, session_
         if error:
             return False
 
-    values = (id_system, participant, id_config, id_session, session_label, active)
+    values = (id_system, user, participant, id_config, id_session, session_label, active)
     # Insertion in the remote database for observation
     send_query_remote('insert', 'observation',
-                      ['id_system', 'participant', 'id_config', 'id_session', 'session_label', 'active'],
+                      ['id_system', 'creator', 'participant', 'id_config', 'id_session', 'session_label', 'active'],
                       values, None, id_list[0])
 
     # Insertion in the remote database for sensors
