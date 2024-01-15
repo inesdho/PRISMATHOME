@@ -44,46 +44,6 @@ config = {
     "database": "prisme_home_1"
 }
 
-
-def take_cursor_protection():
-    global local_cursor_protect
-    while local_cursor_protect:
-        pass
-    local_cursor_protect = True
-    print("\033[96mPrise protection\033[0m")
-
-
-def release_cursor_protection():
-    global local_cursor_protect
-    local_cursor_protect = False
-    print("\033[95mrelease protection\033[0m")
-
-
-def connect_to_local_db_from_thread():
-    """!
-    Tries to connect to the local database and loops until successfully connected
-
-    @return None
-    """
-    print("try to connect to local database")
-    global local_db_thread_distant, local_cursor_thread_distant
-    try:
-
-        # Connexion to the database
-        local_db_thread_distant = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        local_cursor_thread_distant = local_db_thread_distant.cursor()
-        print("Connected to local database from thread")
-    except Exception as e:
-        time.sleep(1)
-        # Loop until the connection works
-        connect_to_local_db_from_thread()
-
-
 # DONE
 def connect_to_local_db():
     """!
@@ -640,7 +600,7 @@ def get_user_from_login_and_password(login, password):
 
     result = execute_query_with_reconnect(query, (login, encrypted_password))
 
-    return result if result is not None else None
+    return result[0] if result is not None else None
 
 
 # DONE

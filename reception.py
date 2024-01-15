@@ -92,8 +92,8 @@ def handler_program_stop(signum, frame):
         local.monitor_observation_stopped(datetime_now)
 
     # Disconnecting from DBs
-    local.disconnect_from_local_db()
-    remote.disconnect_from_remote_db()
+    #local.disconnect_from_local_db()
+    #remote.disconnect_from_remote_db()
 
     # Send a signal to start_and_stop program to indicate that the program is closed
     if pid_parent == pid_start_and_stop:

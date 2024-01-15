@@ -67,7 +67,8 @@ class App(ThemedTk):
         @param self : the instance
         @return Nothing
         """
-        if local.get_active_observation() == None:
+        globals.global_new_id_observation = local.get_active_observation()
+        if globals.global_new_id_observation == None:
             self.call_new_observation_page()
         else:
             self.call_summary_user_page()
@@ -102,6 +103,9 @@ class App(ThemedTk):
         # Redirecting to the login page
         summary_user_page = SummaryUser(self)
         summary_user_page.show_page()
+
+        # Creation of a main frame
+        self.create_new_main_frame()
 
         # Cancel button
         cancel_button = ttk.Button(self.main_frame, text="Exit",
@@ -528,6 +532,7 @@ class App(ThemedTk):
         @return Nothing
         """
         if messagebox.askokcancel("Quit", "Are you sure you want to quit PRISM@Home ?"):
+            globals.thread_done = True
             if globals.global_connected_admin_login is not None:
                 print("Deconnexion normalement")
                 local.update_user_connexion_status(globals.global_connected_admin_login, globals.global_connected_admin_password, 0)

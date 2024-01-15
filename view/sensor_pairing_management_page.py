@@ -423,6 +423,7 @@ class SensorPairingManagement:
         """for sensor in self.sensor_entries:
             sensor["ieee_address"] = "0x1234567891237894"  # Adresse IEEE fictive pour les tests
         """
+        # TODO : Faire une fonction getUser dans le futur fichier de fonction systèmes
         user = getpass.getuser()
 
         print("user: ", user)

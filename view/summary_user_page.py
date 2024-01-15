@@ -415,6 +415,8 @@ class SummaryUser:
             )
             cursor = conn.cursor()
 
+            print("ID observation : ", id_observation)
+
             # Execute a request
             query = "SELECT configuration.label FROM configuration, observation WHERE observation.id_config=configuration.id_config AND observation.id_observation=%s"
             cursor.execute(query, (id_observation,))  # Pass label as a tuple
