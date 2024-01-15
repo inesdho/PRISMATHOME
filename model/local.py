@@ -640,7 +640,7 @@ def get_user_from_login_and_password(login, password):
 
     result = execute_query_with_reconnect(query, (login, encrypted_password))
 
-    return result[0] if result is not None else None
+    return result if result is not None else None
 
 
 # DONE
