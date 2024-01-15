@@ -81,7 +81,6 @@ class LoginAsAdministrator:
         print(password)
 
         user = local.get_user_from_login_and_password(username, password)
-        print(user)
 
         # Check if the user was found in the database
         if user:

@@ -55,10 +55,25 @@ class QuantitySensor:
             sensor_var = tk.StringVar()
             combobox = ttk.Combobox(sensor_frame, values=[0, 1, 2, 3, 4, 5], state="readonly", width=5,
                                     textvariable=sensor_var)
-            combobox.set(0)  # Default values
+            combobox.set(self.how_many_sensors_for_this_type(id))  # Default values
             combobox.pack(padx=10, pady=5)
             sensor_frame.pack(side=tk.LEFT, padx=10)
             self.sensor_vars[id] = sensor_var  # Stock the variable for a further use
+
+    def how_many_sensors_for_this_type(self, sensor_type_wanted):
+        """!
+        @brief This functions returns the number of sensors the user decided to attribute the type of sensor in param
+        @param self : the instance
+        @param sensor_type_wanted : the id of type of sensor for which we want the information
+        @return The number of sensor selected previously by the user for this type of sensor, if no sensor was selected
+        returns 0
+        """
+        if globals.sensor_counts is not None:
+            for sensor_type, count in globals.sensor_counts.items():
+                if sensor_type == sensor_type_wanted:
+                    return count
+        return 0
+
 
     def clear_page(self):
         """!

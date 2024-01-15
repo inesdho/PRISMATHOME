@@ -157,7 +157,9 @@ class App(ThemedTk):
         @return Nothing
         """
         if new_observation_page.configuration_combobox.get() == "":
-            messagebox.showerror("Error", "Please select a configuration")
+            messagebox.showerror("Error", "Please select a configuration.")
+        elif new_observation_page.configuration_combobox.get() == "No configuration available":
+            messagebox.showerror("Error", "Please create or import a configuration to start the observation.")
         else:
             new_observation_page.on_import_button_click()
             self.redirect_to_pairing_from_anywhere(new_observation_page)
