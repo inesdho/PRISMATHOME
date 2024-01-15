@@ -55,7 +55,7 @@ class LabelisationSensor:
                 unique_id = f"{sensor_type_id}_{i}"
 
                 # Find the previous values entered if they are any
-                existing_entry = next((entry for entry in globals.global_sensor_entries if entry[0] == unique_id), None)
+                existing_entry = next((entry for entry in globals.global_sensor_entries if entry[3] == unique_id), None)
 
                 # Check if the previous values exist
                 initial_label = existing_entry[1] if existing_entry else "Label"
@@ -70,18 +70,22 @@ class LabelisationSensor:
                     sensor_type_id = None
 
                 # Give sensor_type_id to the method create_labeled_entry
-                self.create_labeled_entry(sensor_type_id, label_text, initial_label, initial_description)
+                self.create_labeled_entry(i, sensor_type_id, label_text, initial_label, initial_description)
 
         # Configure the scroll region to follow the content of the frame
         self.frame_canvas.update_idletasks()
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
-    def create_labeled_entry(self, sensor_type_id, label_text, initial_label, initial_description):
+    def create_labeled_entry(self, i, sensor_type_id, label_text, initial_label, initial_description):
         """!
         @brief This function creates label entries according to the sensor quantity of each type selected by the user in the
         selection sensor quantity page. The user can then enter the label and descrition to attribute to each sensor
         @param self : the instance
+        @param i : which number of sensor for this type of sensor is this sensor
+        @param sensor_type_id : the id of the type of sensor
         @param label_text : the label of the sensor, sensor_type_id
+        @param initial_label : the label to display on the initialisation of the page
+        @param initial_description : the description to display on the initialisation of the page
         @return Nothing
         """
         entry_frame = ttk.Frame(self.frame_canvas)
@@ -101,8 +105,10 @@ class LabelisationSensor:
                                          default_text=initial_description)
         entry_description.get_entry().pack(side=tk.LEFT)
 
+        unique_id = f"{sensor_type_id}_{i}"
+
         # Add the sensor_type_id to the list of sensor_entries with the label and description
-        self.sensor_entries.append((sensor_type_id, entry_label, entry_description))
+        self.sensor_entries.append((sensor_type_id, entry_label, entry_description, unique_id))
 
     def get_sensor_data(self):
         """!
@@ -112,10 +118,10 @@ class LabelisationSensor:
         """
         globals.global_sensor_entries.clear()
         # Iterate through the sensor_entries list and print the label and description for each sensor
-        for sensor_type_id, label_entry, description_entry in self.sensor_entries:
+        for sensor_type_id, label_entry, description_entry, unique_id in self.sensor_entries:
             label = label_entry.get()
             description = description_entry.get()
-            globals.global_sensor_entries.append((sensor_type_id, label, description))
+            globals.global_sensor_entries.append((sensor_type_id, label, description, unique_id))
 
     def clear_page(self):
         """!
