@@ -25,12 +25,13 @@ class App(ThemedTk):
 
     def __init__(self):
         """!
-        @brief The __init__ function creates and set the theme and parameter of the window that will contain the pages of the
-        user interface
+        @brief The __init__ function creates and set the theme and parameter of the window that will contain the pages
+        of the user interface
         @param self : the instance
         @return Nothing
         """
         ThemedTk.__init__(self)
+        ThemedTk.lift(self)
         self.title("PRISM@Home")
         self.attributes('-fullscreen', True)
         self.bind('<Escape>', lambda e: self.attributes('-fullscreen', False))
@@ -425,7 +426,7 @@ class App(ThemedTk):
         @brief This function starts the observation and change the label of the button
         @param self : the instance
         @param button : the start observation button
-        @:param summary_user_page : the summary user page
+        @param summary_user_page : the summary user page
         @return Nothing
         """
 
@@ -443,7 +444,7 @@ class App(ThemedTk):
         @brief This function allows the user to stop the observation and change the label of the button
         @param self : the instance
         @param button : the stop observation button
-        @:param summary_user_page : the summary user page
+        @param summary_user_page : the summary user page
         @return Nothing
         """
 
