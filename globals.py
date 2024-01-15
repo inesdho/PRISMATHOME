@@ -15,6 +15,8 @@ global_session_label_selected = None
 global_id_system_selected = None
 global_id_session_selected = None
 
+global_is_modification = False
+
 thread_done = False
 
 global_font_title = ("Calibi", 16, "bold")
