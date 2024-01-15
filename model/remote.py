@@ -96,7 +96,7 @@ def execute_remote_query(query, values=None, synchronise=False):
     if db is not None and db.is_connected():  # checks if connected to the remote DB
         try:
             if not synchronise:
-                while flag_synchro:
+                while flag_synchro:     # Waiting for synchronization to be complete
                     pass
 
             if values is not None:

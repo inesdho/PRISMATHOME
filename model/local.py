@@ -13,7 +13,7 @@ import errno
 
 import globals
 
-import mariadb.connector
+import mysql.connector
 import time
 import hashlib
 import threading
@@ -143,7 +143,9 @@ def send_query(query_type, table, fields=None, values=None, condition=None):
 
     try:
         # Storing data in local DB
+        print(f"\033[92mLocal waiting for cursor protection\033[0m")
         with local_cursor_protection:
+            print(f"\033[92mLocal cursor protection acquired\033[0m")
             local_cursor.execute(query, values)
             local_db.commit()
             last_id = local_cursor.lastrowid
@@ -1044,7 +1046,7 @@ def config_label_exists(label):
      Checks if a config with this label already exists in the local database
 
      @param label: The label to look for
-     @return: The number of labels in the database that are identical to the on provided
+     @return: True if it exists, False if not. Returns -1 if an error occurred
      """
     global local_db, local_cursor
     try:
@@ -1057,10 +1059,10 @@ def config_label_exists(label):
 
                 # Fetch the result
                 result = local_cursor.fetchone()
-            if result == 0:
-                return result
+            if result[0] == 0:
+                return False
             else:
-                return 1
+                return True
         else:
             # If not connected to the local database, attempt to reconnect and retry
             print("config_label_exists Error while executing select statement : database is not connected, retrying")
@@ -1073,5 +1075,5 @@ def config_label_exists(label):
         if (e.errno == 2013):
             connect_to_local_db()
             return config_label_exists(label)
-    # Return None if the sensor type is not found or there are errors
-    return None
+    # Return -1 if there are errors
+    return -1
