@@ -26,7 +26,7 @@ class QuantitySensor:
         self.master = master
         self.frame = ttk.Frame(self.master)
 
-    def show_page(self):
+    def show_page(self, is_modification):
         """!
         @brief The show_page function creates and displays all the elements of the "selection sensor quantity" page
         @param self : the instance
@@ -44,6 +44,12 @@ class QuantitySensor:
         # Create a frame for the sensor selectors inside the main frame
         self.frame_sensors = tk.Frame(self.frame, padx=10, pady=10)
         self.frame_sensors.pack()
+
+        if(is_modification):
+            #TODO
+            sensor_types = local.get_sensor_type_list()
+
+
 
         # Calls a function to fetch all the existing sensor types in the database
         sensor_types = local.get_sensor_type_list()

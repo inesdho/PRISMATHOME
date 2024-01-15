@@ -12,6 +12,8 @@ from tkinter import ttk
 import mysql.connector
 from ttkthemes.themed_style import ThemedStyle
 import globals
+from model import local
+
 
 from view.login_as_admin_page import LoginAsAdministrator
 from controller.entry_manager import EntryManager
@@ -46,11 +48,22 @@ class ModifyOrCreateConfiguration:
         # Creates the elements related to the selection of a configuration to modify
         label_scenario_name = tk.Label(self.left_frame, text="Scenario name :")
         label_scenario_name.pack(anchor="nw")
-        self.scenario_combobox = ttk.Combobox(self.left_frame, values=["Example", "Exemple 2", "Exemple 3"],
-                                              state="readonly",
-                                              width=30)
-        self.scenario_combobox.set("Example")
-        self.scenario_combobox.pack(fill="x")
+
+        # Get the configuration labels and ids
+        configurations = local.get_config_labels_ids()
+
+        if configurations is not None:
+            # Creation of a tuple list
+            self.configuration_values = [(config['label'], config['id_config']) for config in configurations]
+
+            # Creation of a combobox with the list of configuration labels
+            self.configuration_combobox = ttk.Combobox(self.left_frame, width=30)
+            self.configuration_combobox['values'] = [label for label, id_config in self.configuration_values]
+            self.configuration_combobox.pack(fill="x")
+        else:
+            configurations = []
+            self.configuration_combobox = ttk.Combobox(self.frame, values=configurations, width=29)
+            self.configuration_combobox.pack(pady=10)
 
         # Right Frame for configuration Creation
         self.right_frame = tk.Frame(self.master, bd=2, relief="sunken", padx=5, pady=5)
