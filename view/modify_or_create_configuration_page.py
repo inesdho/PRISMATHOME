@@ -31,6 +31,7 @@ class ModifyOrCreateConfiguration:
         """
         self.master = master
         self.frame = ttk.Frame(self.master)
+        self.frame.pack(fill=tk.BOTH, expand=True)
 
     def show_page(self):
         """!
@@ -38,15 +39,12 @@ class ModifyOrCreateConfiguration:
         @param self : the instance
         @return Nothing
         """
-        self.frame = ttk.Frame(self.master)
-        self.frame.pack(fill=tk.BOTH, expand=True)
-
         # Left Frame for configuration modification
         self.left_frame = tk.Frame(self.master, bd=2, relief="sunken", padx=5, pady=5)
         self.left_frame.place(relx=0.02, rely=0.09, relwidth=0.46, relheight=0.50)
 
         # Creates the elements related to the selection of a configuration to modify
-        label_scenario_name = tk.Label(self.left_frame, text="Scenario name :")
+        label_scenario_name = tk.Label(self.left_frame, text="Scenario name :", font=globals.global_font_text)
         label_scenario_name.pack(anchor="nw")
 
         # Get the configuration labels and ids
@@ -70,12 +68,12 @@ class ModifyOrCreateConfiguration:
         self.right_frame.place(relx=0.50, rely=0.09, relwidth=0.48, relheight=0.50)
 
         # Creates the elemtents related to the creation of a new configuration
-        tk.Label(self.right_frame, text="Scenario name :").pack(anchor="nw")
+        tk.Label(self.right_frame, text="Scenario name :", font=globals.global_font_text).pack(anchor="nw")
         self.right_frame.update()
         self.name_entry = EntryManager(self.right_frame, min=1, max=30, has_width=self.right_frame.winfo_width(),
                                        default_text="Enter label")
 
-        tk.Label(self.right_frame, text="Description :").pack(anchor="nw")
+        tk.Label(self.right_frame, text="Description :", font=globals.global_font_text).pack(anchor="nw")
         # Create a Text widget for multi-line text entry
         self.description_text_entry = TextManager(self.right_frame, min=1, max=800,
                                                   has_width=self.right_frame.winfo_width(),
@@ -132,27 +130,32 @@ class ModifyOrCreateConfiguration:
         @param self : the instance
         @return Nothing
         """
-        # Connexion to the MySQL database
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Q3fhllj2",
-            database="prisme_home_1"
-        )
-        cursor = conn.cursor()
+        print("Entrée dans fonction de logout_the_admin")
+        try:
+            # Connexion to the MySQL database
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Q3fhllj2",
+                database="prisme_home_1"
+            )
+            cursor = conn.cursor()
 
-        # Update the connexion status in the database
-        query_update = "UPDATE prisme_home_1.user SET connected=0 WHERE login=%s AND password=%s"
-        cursor.execute(query_update, (globals.global_connected_admin_login, globals.global_connected_admin_password))
-        conn.commit()
+            # Update the connexion status in the database
+            query_update = "UPDATE prisme_home_1.user SET connected=0 WHERE login=%s AND password=%s"
+            cursor.execute(query_update, (globals.global_connected_admin_login, globals.global_connected_admin_password))
+            conn.commit()
+            print("DECONNEXION COMMITED")
 
-        # Deleteing the login and the password of the connected admin
-        globals.global_connected_admin_login = None
-        globals.global_connected_admin_password = None
+            # Deleteing the login and the password of the connected admin
+            globals.global_connected_admin_login = None
+            globals.global_connected_admin_password = None
 
-        # Close the connexion to the database
-        cursor.close()
-        conn.close()
+            # Close the connexion to the database
+            cursor.close()
+            conn.close()
+        except Exception as e:
+            print("Erreur lors de la deconnexion : ", e)
 
     def clear_page(self):
         """!

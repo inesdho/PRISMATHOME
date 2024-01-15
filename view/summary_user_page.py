@@ -12,6 +12,10 @@ import globals
 from model import local
 import mysql.connector
 import subprocess
+import os
+import signal
+import threading
+import model.local_mqtt
 
 
 class SummaryUser:
@@ -25,7 +29,63 @@ class SummaryUser:
         """
         self.master = master
         self.frame = ttk.Frame(self.master)
-        self.frame.pack(fill=tk.BOTH)
+        self.sensor_entries = []  # List to hold the label, description entries for each sensor, and sensor type ID
+
+        self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
+
+        # Creation of the frame that will contain the buttons
+        self.button_frame = ttk.Frame(self.master)
+        self.button_frame.pack(padx=5, pady=10)
+
+        # Displays the title of the page
+        label = ttk.Label(self.frame, text="Summary", font=globals.global_font_title, padding=10)
+        label.pack(pady=20)
+
+        # Information about the configuration
+        scenario_label = ttk.Label(self.frame, text="Configuration : " + self.get_scenario(globals.global_new_id_observation), padding=10,
+                                   anchor="w", font=globals.global_font_title1)
+        scenario_label.pack(fill=tk.BOTH)
+        session_label = ttk.Label(self.frame, text="Session : " + self.get_session(globals.global_new_id_observation),
+                                  padding=10, anchor="w", font=globals.global_font_title1)
+        session_label.pack(fill=tk.BOTH)
+        participant_label = ttk.Label(self.frame, text="Particpant : " +
+                                                       self.get_participant(globals.global_new_id_observation),
+                                      padding=10, anchor="w", font=globals.global_font_title1)
+        participant_label.pack(fill=tk.BOTH)
+
+        self.button_frame = ttk.Frame(self.frame)
+        self.button_frame.pack(padx=5, pady=10)
+
+        # Creation of a canvas in order to add a scrollbar in case to many lines of sensors are displayed
+        self.canvas = tk.Canvas(self.frame, bd=2, relief="ridge", highlightthickness=2)
+        self.scrollbar = ttk.Scrollbar(self.frame, orient="vertical", command=self.canvas.yview)
+        self.scrollbar.pack(side=tk.RIGHT, fill="y")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        self.frame_canvas = ttk.Frame(self.canvas)
+        self.canvas.create_window((0, 0), anchor='nw', window=self.frame_canvas)
+
+        # Creation of the frame tate will contain the title of the field
+        frame_title = ttk.Frame(self.frame_canvas)
+        frame_title.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
+
+        # Create the title of the different field
+        ttk.Label(frame_title, background="lightgrey", width=20, text="Sensor", borderwidth=1, relief="solid",
+                  padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
+        ttk.Label(frame_title, background="lightgrey", width=20, text="Label", borderwidth=1, relief="solid",
+                  padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
+        ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid",
+                  padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
+        ttk.Label(frame_title, background="lightgrey", width=20, text="State", borderwidth=1, relief="solid",
+                  padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
+
+        self.data_frame = ttk.Frame(self.frame_canvas)
+        self.data_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
+
+        self.program_pid = None
+
+        self.sensor_type_frame_list = []
 
     def show_page(self):
         """!
@@ -34,30 +94,7 @@ class SummaryUser:
         @param is_observation : True if the page is to be displayed in the context of an observation
         @return Nothing
         """
-        # Title of the page
-        title_label = ttk.Label(self.frame, text='Summary', font=16)
-        title_label.pack(pady=10)
 
-        # Information about the configuration
-        scenario_frame = ttk.Frame(self.frame)
-        scenario_frame.pack(fill=tk.BOTH)
-        # TODO ajouter la valeur de scenario
-        scenario_label = ttk.Label(scenario_frame, text="Configuration : " + self.get_scenario(globals.global_new_id_observation), padding=10)
-        scenario_label.pack(side=tk.LEFT)
-
-        session_frame = ttk.Frame(self.frame)
-        session_frame.pack(fill=tk.BOTH)
-        session_label = ttk.Label(session_frame, text="Session : " + self.get_session(globals.global_new_id_observation), padding=10)
-        session_label.pack(side=tk.LEFT)
-
-        participant_frame = ttk.Frame(self.frame)
-        participant_frame.pack(fill=tk.BOTH)
-        participant_label = ttk.Label(participant_frame, text="Participant : " + self.get_participant(globals.global_new_id_observation), padding=10)
-        participant_label.pack(side=tk.LEFT)
-
-        # Creation of the frame that will contain the buttons
-        button_frame = ttk.Frame(self.frame)
-        button_frame.pack(padx=5, pady=10)
 
         # Connect to the database and retrieve sensor types
         try:
@@ -72,47 +109,118 @@ class SummaryUser:
             all_sensor_types = cursor.fetchall()
 
             for sensor_type_id, sensor_type in all_sensor_types:
-                sensor_type_button = ttk.Button(
-                    button_frame,
-                    text=sensor_type,
-                    command=lambda id=sensor_type_id, type=sensor_type: self.display_sensor_info(id, type),
-                    padding=5
-                )
-                sensor_type_button.pack(side=tk.LEFT)
+                # Retrieve information from sensors of this type from the database
+                sensor_infos = self.get_sensor_infos_for_type(sensor_type_id)
+                if sensor_infos:
+                    sensor_type_button = ttk.Button(
+                        self.button_frame,
+                        text=sensor_type,
+                        command=lambda type=sensor_type: self.display_sensor_info(type),
+                        padding=5
+                    )
+                    sensor_type_button.pack(side=tk.LEFT)
+
+                self.create_sensor_info(sensor_infos, sensor_type)
 
             cursor.close()
             conn.close()
         except mysql.connector.Error as err:
             print(f"Error: {err}")
 
-        # Creation of the frame that will contain the datas relative to the sensors
-        self.sensor_text = tk.Text(self.frame)
-        self.sensor_text.pack(fill=tk.BOTH, expand=tk.TRUE)
+    def create_sensor_info(self, sensor_infos, sensor_type):
 
-    def display_sensor_info(self, sensor_type_id, sensor_type):
+        for sensor_info in sensor_infos:
+            sensor_frame = ttk.Frame(self.data_frame)
+
+            self.sensor_type_frame_list.append({
+                "type": sensor_type,
+                "frame": sensor_frame
+            })
+            #sensor_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
+
+            sensor_label = sensor_info[0]
+            sensor_description = sensor_info[1]
+
+            # Showing the type of the sensor
+            ttk.Label(sensor_frame, text=f"{sensor_type}", width=20, anchor='w', wraplength=140,
+                      background="white", borderwidth=1, relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+
+            # Creating a text widget tht will contain the label associated with the sensor
+            ttk.Label(sensor_frame, text=f"{sensor_label}", borderwidth=1, background="white", width=20,
+                      relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+
+            # Showing the description of the sensor
+            ttk.Label(sensor_frame, text=f"{sensor_description}", borderwidth=1, background="white", width=80,
+                      relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+
+            # Showing the current state of the sensor
+            label_state = ttk.Label(sensor_frame, text=f"Etat en direct", borderwidth=1, background="white", width=20,
+                      relief="solid", padding=5, anchor="center", font=globals.global_font_text)
+
+            match sensor_type:
+                case "Button":
+                    label_state.configure(text="Action : Unknown")
+                case "Door":
+                    label_state.configure(text="Contact : Unknown")
+                case "Motion":
+                    label_state.configure(text="Occupancy : Unknown")
+                case "Vibration":
+                    label_state.configure(text="Vibration : Unknown")
+
+            label_state.pack(side=tk.LEFT)
+
+            globals.thread_done = False
+
+            sensor_friendly_name = sensor_type + "/" + sensor_label
+
+            my_thread = threading.Thread(target=model.local_mqtt.get_sensor_value,
+                                         args=(sensor_friendly_name, label_state))
+            my_thread.start()
+
+    def display_sensor_info(self, sensor_type):
         """!
-        @brief Displays information about all sensors of a selected type in the text widget.
+        @brief Displays information about all sensors of a selected type.
         @param self: Instance reference.
-        @param sensor_type_id: ID of the sensor type whose information is to be displayed.
+        @param sensor_infos: all the sensors associated with a type of sensor.
         @param sensor_type: Type of sensor.
         @return None
         """
-        self.sensor_text.configure(state='normal')
-        self.sensor_text.delete("1.0", tk.END)
+        for sensor_type_frame in self.sensor_type_frame_list:
+            if sensor_type_frame["type"] != sensor_type:
+                sensor_type_frame["frame"].pack_forget()
+            else:
+                sensor_type_frame["frame"].pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
-        # Retrieve information from sensors of this type from the database
-        sensor_infos = self.get_sensor_infos_for_type(sensor_type_id)
+        """globals.thread_done = True
+        #self.data_frame.destroy()
 
-        if not sensor_infos:
-            self.sensor_text.insert(tk.END, f"No information available for {sensor_type} sensors.\n")
-        else:
-            for sensor_info in sensor_infos:
-                sensor_label = sensor_info[0]
-                sensor_description = sensor_info[1]
-                sensor_display = f"{sensor_type} sensor:\nLabel: {sensor_label}\nDescription: {sensor_description}\n\n"
-                self.sensor_text.insert(tk.END, sensor_display)
+        for sensor_info in sensor_infos:
+            sensor_frame = ttk.Frame(self.data_frame)
+            sensor_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
-        self.sensor_text.configure(state='disabled')
+            sensor_label = sensor_info[0]
+            sensor_description = sensor_info[1]
+
+            # Showing the type of the sensor
+            ttk.Label(sensor_frame, text=f"{sensor_type}", width=20, anchor='w', wraplength=140,
+                      background="white", borderwidth=1, relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+
+            # Creating a text widget tht will contain the label associated with the sensor
+            ttk.Label(sensor_frame, text=f"{sensor_label}", borderwidth=1, background="white", width=20,
+                      relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+
+            # Showing the description of the sensor
+            ttk.Label(sensor_frame, text=f"{sensor_description}", borderwidth=1, background="white", width=80,
+                      relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+
+            # Showing the current state of the sensor
+            label_state = ttk.Label(sensor_frame, text=f"Etat en direct", borderwidth=1, background="white", width=20,
+                      relief="solid", padding=5, anchor="center", font=globals.global_font_text)
+
+        """
+        # Configure the scroll region to follow the content of the frame
+        self.frame_canvas.update_idletasks()
+        self.canvas.config(scrollregion=self.canvas.bbox("all"))
 
     def clear_page(self):
         """!
@@ -138,6 +246,8 @@ class SummaryUser:
         # Start the main program
         main_program = subprocess.Popen(command)
 
+        self.program_pid = main_program.pid
+
         try:
             conn = mysql.connector.connect(
                 host="localhost",
@@ -161,11 +271,42 @@ class SummaryUser:
             cursor.close()
             conn.close()
 
+    # TODO : Déplacer les 2 fonctions ci dessous dans une lib de fonction systèmes
+    def send_sigterm(self, pid):
+        script_path = "/home/prisme/Prisme@home/PRISMATHOME/kill_program.sh"
+        subprocess.run(["sh", script_path, str(pid)], check=True)
+
+    def get_pid_of_script(self, script_name):
+        """!
+        @brief Get the pid of the script "script_name"
+        @param script_name The name of the script that we want to get the pid
+        @return The pid of the script "script_name"
+        """
+        try:
+            # Exécution de la commande 'ps' pour obtenir les processus en cours
+            process = subprocess.run(['ps', 'aux'], stdout=subprocess.PIPE, text=True)
+            # Filtrage des lignes qui contiennent le nom du script
+            lines = process.stdout.split('\n')
+            for line in lines:
+                if script_name in line:
+                    parts = line.split()
+                    # Le PID est généralement le deuxième élément dans la sortie de 'ps aux'
+                    return int(parts[1])
+        except Exception as e:
+            print(f"Erreur lors de la recherche du PID: {e}")
+        return None
 
     def stop_observation(self):
         # TODO Mathilde : voir où appeller la fonction car lorsque que je la met au bonne endroit ca
         #  pose probleme
         #  + voir avec les indus comment stopper la reception des datas
+
+        if self.program_pid is None:
+            self.program_pid = self.get_pid_of_script("reception.py")
+            self.send_sigterm(self.program_pid)
+        else:
+            os.kill(self.program_pid, signal.SIGTERM)
+
         try:
             conn = mysql.connector.connect(
                 host="localhost",

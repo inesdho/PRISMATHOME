@@ -19,40 +19,58 @@ from view.selection_sensor_quantity_page import QuantitySensor
 from view.labellisation_sensor_page import LabelisationSensor
 from view.sensor_pairing_management_page import SensorPairingManagement
 import webbrowser
+import sys
+from model import local
+# from model import remote
+import globals
 
 
 class App(ThemedTk):
 
     def __init__(self):
         """!
-        @brief The __init__ function creates and set the theme and parameter of the window that will contain the pages of the
-        user interface
+        @brief The __init__ function creates and set the theme and parameter of the window that will contain the pages
+        of the user interface
         @param self : the instance
         @return Nothing
         """
         ThemedTk.__init__(self)
+        ThemedTk.lift(self)
         self.title("PRISM@Home")
-        self.attributes('-fullscreen', True)
-        self.bind('<Escape>', lambda e: self.attributes('-fullscreen', False))
+
+        my_os = sys.platform
+
+        if my_os == 'Linux':
+            self.attributes('-zoomed', True)
+            self.bind('<Escape>', lambda e: self.attributes('-zoomed', False))
+        elif my_os == 'win32' or my_os == 'cygwin':
+            self.attributes('-fullscreen', True)
+            self.bind('<Escape>', lambda e: self.attributes('-fullscreen', False))
 
         # Theme of the application
         self.style = ThemedStyle(self)
         self.style.set_theme("breeze")  # Write the theme you would like
 
-        self.show_frame()
+        # Protool incas of closing window
+        self.protocol("WM_DELETE_WINDOW", self.closing_protocol)
 
-    def show_frame(self):
-        """!
-        @brief The show_frame function allows the creation of the main frame and call the new observation page
-        @param self : the instance
-        @return Nothing
-        """
         # Creating main frame
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Call the New observation window in order to
-        self.call_new_observation_page()
+        self.is_observation_running()
+
+    def is_observation_running(self):
+        """!
+        @brief This function checks if an observation is running and depending on the result will either redirect the
+        user to the new observation page (no observation is running) or the summary user page (an observation is running)
+        @param self : the instance
+        @return Nothing
+        """
+        if local.get_active_observation() == None:
+            self.call_new_observation_page()
+        else:
+            self.call_summary_user_page()
 
     def call_new_observation_page(self):
         """!
@@ -73,6 +91,32 @@ class App(ThemedTk):
         # Redirection to login as an admin button
         ttk.Button(new_observation_page.frame, text="Import configuration",
                    command=lambda: self.is_a_config_chosen(new_observation_page)).pack()
+
+    def call_summary_user_page(self):
+        """!
+        @brief This function initialises and calls summary_user.py in order to show the page and also adds
+        navigation button
+        @param self : the instance
+        @return Nothing
+        """
+        # Redirecting to the login page
+        summary_user_page = SummaryUser(self)
+        summary_user_page.show_page()
+
+        # Cancel button
+        cancel_button = ttk.Button(self.main_frame, text="Exit",
+                                   command=lambda: self.redirect_to_new_observation_from_anywhere(summary_user_page))
+        cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        # Back button
+        back_button = ttk.Button(self.main_frame, text="Back",
+                                 command=lambda: self.redirect_to_pairing_from_anywhere(summary_user_page))
+        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        # Start observation button
+        button = ttk.Button(self.main_frame, text="Stop observation")
+        button.config(command=lambda: self.stop_observation(button, summary_user_page))
+        button.pack(side=tk.LEFT, padx=10, expand=True)
 
     def redirect_to_new_observation_from_anywhere(self, page):
         """!
@@ -111,7 +155,9 @@ class App(ThemedTk):
         @return Nothing
         """
         if new_observation_page.configuration_combobox.get() == "":
-            messagebox.showerror("Error", "Please select a configuration")
+            messagebox.showerror("Error", "Please select a configuration.")
+        elif new_observation_page.configuration_combobox.get() == "No configuration available":
+            messagebox.showerror("Error", "Please create or import a configuration to start the observation.")
         else:
             new_observation_page.on_import_button_click()
             self.redirect_to_pairing_from_anywhere(new_observation_page)
@@ -297,8 +343,7 @@ class App(ThemedTk):
         if selection_sensor_quantity_page.chose_at_least_one_sensor():
             # Calls this function in order to store into global variables the datas entered by the user in the sensor
             # quantity page
-            # TODO : CHANGER LE NOM DE LA FONCTION INCOHERENT
-            selection_sensor_quantity_page.on_next_button_click()
+            selection_sensor_quantity_page.save_sensors_quantity_into_globals()
             self.redirect_to_labellisation_sensor_from_anywhere(selection_sensor_quantity_page)
         else:
             messagebox.showerror("Error", "Please select at least one sensor")
@@ -373,7 +418,6 @@ class App(ThemedTk):
                                  (summary_admin_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
-
     def redirect_to_summary_user_from_pairing(self, sensor_pairing_page):
         """!
         @brief This function saves the information about the pairing of the sensor and calls the 'Summary user' page
@@ -425,7 +469,7 @@ class App(ThemedTk):
         @brief This function starts the observation and change the label of the button
         @param self : the instance
         @param button : the start observation button
-        @:param summary_user_page : the summary user page
+        @param summary_user_page : the summary user page
         @return Nothing
         """
 
@@ -436,14 +480,14 @@ class App(ThemedTk):
         messagebox.showinfo("Start observation", "The observation is starting.")
 
         # Changing the label and the function associated to the button
-        button.config(text="Stop observation",command=lambda: self.stop_observation(button, summary_user_page))
+        button.config(text="Stop observation", command=lambda: self.stop_observation(button, summary_user_page))
 
     def stop_observation(self, button, summary_user_page):
         """!
         @brief This function allows the user to stop the observation and change the label of the button
         @param self : the instance
         @param button : the stop observation button
-        @:param summary_user_page : the summary user page
+        @param summary_user_page : the summary user page
         @return Nothing
         """
 
@@ -454,7 +498,7 @@ class App(ThemedTk):
         messagebox.showinfo("Stop observation", "The observation is stopped.")
 
         # Changing the label and the function associated to the button
-        button.config(text="Start observation",command=lambda: self.start_observation(button, summary_user_page))
+        button.config(text="Start observation", command=lambda: self.start_observation(button, summary_user_page))
 
     def clear_the_page(self, page):
         """!
@@ -478,3 +522,15 @@ class App(ThemedTk):
         # Creation of a main frame
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+    def closing_protocol(self):
+        """!
+        @brief This function deals with the closing of the app
+        @param self : the instance
+        @return Nothing
+        """
+        if messagebox.askokcancel("Quit", "Are you sure you want to quit PRISM@Home ?"):
+            if globals.global_connected_admin_login is not None:
+                print("Deconnexion normalement")
+                local.update_user_connexion_status(globals.global_connected_admin_login, globals.global_connected_admin_password, 0)
+            self.destroy()

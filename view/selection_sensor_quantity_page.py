@@ -26,20 +26,19 @@ class QuantitySensor:
         self.master = master
         self.frame = ttk.Frame(self.master)
 
+        # Create a main frame which will be centered in the window
+        self.frame.pack(expand=True)
+
+        # Displays the title of the page
+        label = ttk.Label(self.frame, text="Sensor quantity selection", font=globals.global_font_title)
+        label.pack(pady=20)
+
     def show_page(self, is_modification):
         """!
         @brief The show_page function creates and displays all the elements of the "selection sensor quantity" page
         @param self : the instance
         @return Nothing
         """
-
-        # Create a main frame which will be centered in the window
-        self.frame = ttk.Frame(self.master)
-        self.frame.pack(expand=True)
-
-        # Displays the title of the page
-        label = ttk.Label(self.frame, text="Sensor quantity selection", font=16)
-        label.pack(pady=20)
 
         # Create a frame for the sensor selectors inside the main frame
         self.frame_sensors = tk.Frame(self.frame, padx=10, pady=10)
@@ -61,10 +60,25 @@ class QuantitySensor:
             sensor_var = tk.StringVar()
             combobox = ttk.Combobox(sensor_frame, values=[0, 1, 2, 3, 4, 5], state="readonly", width=5,
                                     textvariable=sensor_var)
-            combobox.set(0)  # Default values
+            combobox.set(self.how_many_sensors_for_this_type(id))  # Default values
             combobox.pack(padx=10, pady=5)
             sensor_frame.pack(side=tk.LEFT, padx=10)
             self.sensor_vars[id] = sensor_var  # Stock the variable for a further use
+
+    def how_many_sensors_for_this_type(self, sensor_type_wanted):
+        """!
+        @brief This functions returns the number of sensors the user decided to attribute the type of sensor in param
+        @param self : the instance
+        @param sensor_type_wanted : the id of type of sensor for which we want the information
+        @return The number of sensor selected previously by the user for this type of sensor, if no sensor was selected
+        returns 0
+        """
+        if globals.sensor_counts is not None:
+            for sensor_type, count in globals.sensor_counts.items():
+                if sensor_type == sensor_type_wanted:
+                    return count
+        return 0
+
 
     def clear_page(self):
         """!
@@ -75,7 +89,7 @@ class QuantitySensor:
         self.frame.destroy()
         self.frame_sensors.destroy()
 
-    def on_next_button_click(self):
+    def save_sensors_quantity_into_globals(self):
         """!
         @brief This function saves the quantity of sensors for each type of sensor that the user selected into global
         variables

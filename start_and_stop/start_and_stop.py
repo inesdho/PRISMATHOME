@@ -147,6 +147,8 @@ if __name__ == "__main__":
 
     id_observation = model.local.get_active_observation()
 
+    print("start_and_stop : id_observation : ", id_observation)
+
     arguments = []
 
     if (id_observation is not None
