@@ -14,6 +14,8 @@ import mysql.connector
 import subprocess
 import os
 import signal
+import threading
+import model.local_mqtt
 
 
 class SummaryUser:
@@ -83,6 +85,8 @@ class SummaryUser:
 
         self.program_pid = None
 
+        self.sensor_type_frame_list = []
+
     def show_page(self):
         """!
         @brief The show_page function creates and displays all the elements of the "summary" page
@@ -90,6 +94,8 @@ class SummaryUser:
         @param is_observation : True if the page is to be displayed in the context of an observation
         @return Nothing
         """
+
+
         # Connect to the database and retrieve sensor types
         try:
             conn = mysql.connector.connect(
@@ -109,17 +115,69 @@ class SummaryUser:
                     sensor_type_button = ttk.Button(
                         self.button_frame,
                         text=sensor_type,
-                        command=lambda sensor_infos=sensor_infos, type=sensor_type: self.display_sensor_info(sensor_infos, type),
+                        command=lambda type=sensor_type: self.display_sensor_info(type),
                         padding=5
                     )
                     sensor_type_button.pack(side=tk.LEFT)
+
+                self.create_sensor_info(sensor_infos, sensor_type)
 
             cursor.close()
             conn.close()
         except mysql.connector.Error as err:
             print(f"Error: {err}")
 
-    def display_sensor_info(self, sensor_infos, sensor_type):
+    def create_sensor_info(self, sensor_infos, sensor_type):
+
+        for sensor_info in sensor_infos:
+            sensor_frame = ttk.Frame(self.data_frame)
+
+            self.sensor_type_frame_list.append({
+                "type": sensor_type,
+                "frame": sensor_frame
+            })
+            #sensor_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
+
+            sensor_label = sensor_info[0]
+            sensor_description = sensor_info[1]
+
+            # Showing the type of the sensor
+            ttk.Label(sensor_frame, text=f"{sensor_type}", width=20, anchor='w', wraplength=140,
+                      background="white", borderwidth=1, relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+
+            # Creating a text widget tht will contain the label associated with the sensor
+            ttk.Label(sensor_frame, text=f"{sensor_label}", borderwidth=1, background="white", width=20,
+                      relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+
+            # Showing the description of the sensor
+            ttk.Label(sensor_frame, text=f"{sensor_description}", borderwidth=1, background="white", width=80,
+                      relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+
+            # Showing the current state of the sensor
+            label_state = ttk.Label(sensor_frame, text=f"Etat en direct", borderwidth=1, background="white", width=20,
+                      relief="solid", padding=5, anchor="center", font=globals.global_font_text)
+
+            match sensor_type:
+                case "Button":
+                    label_state.configure(text="Action : Unknown")
+                case "Door":
+                    label_state.configure(text="Contact : Unknown")
+                case "Motion":
+                    label_state.configure(text="Occupancy : Unknown")
+                case "Vibration":
+                    label_state.configure(text="Vibration : Unknown")
+
+            label_state.pack(side=tk.LEFT)
+
+            globals.thread_done = False
+
+            sensor_friendly_name = sensor_type + "/" + sensor_label
+
+            my_thread = threading.Thread(target=model.local_mqtt.get_sensor_value,
+                                         args=(sensor_friendly_name, label_state))
+            my_thread.start()
+
+    def display_sensor_info(self, sensor_type):
         """!
         @brief Displays information about all sensors of a selected type.
         @param self: Instance reference.
@@ -127,10 +185,14 @@ class SummaryUser:
         @param sensor_type: Type of sensor.
         @return None
         """
-        self.data_frame.destroy()
+        for sensor_type_frame in self.sensor_type_frame_list:
+            if sensor_type_frame["type"] != sensor_type:
+                sensor_type_frame["frame"].pack_forget()
+            else:
+                sensor_type_frame["frame"].pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
-        self.data_frame = ttk.Frame(self.frame_canvas)
-        self.data_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
+        """globals.thread_done = True
+        #self.data_frame.destroy()
 
         for sensor_info in sensor_infos:
             sensor_frame = ttk.Frame(self.data_frame)
@@ -152,9 +214,10 @@ class SummaryUser:
                       relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
             # Showing the current state of the sensor
-            ttk.Label(sensor_frame, text=f"Etat en direct", borderwidth=1, background="white", width=20,
-                      relief="solid", padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
+            label_state = ttk.Label(sensor_frame, text=f"Etat en direct", borderwidth=1, background="white", width=20,
+                      relief="solid", padding=5, anchor="center", font=globals.global_font_text)
 
+        """
         # Configure the scroll region to follow the content of the frame
         self.frame_canvas.update_idletasks()
         self.canvas.config(scrollregion=self.canvas.bbox("all"))

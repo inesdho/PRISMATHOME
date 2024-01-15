@@ -435,3 +435,5 @@ class SensorPairingManagement:
 
         # Set True to stop the thread displaying sensor values
         globals.thread_done = True
+        # Wait for the end of thread displaying sensor values
+        time.sleep(1)
