@@ -420,9 +420,8 @@ class SensorPairingManagement:
 
     def on_validate_button_click(self):
         # TODO vérifier que tous les capteurs ont été appairées
-        """for sensor in self.sensor_entries:
+        for sensor in self.sensor_entries:
             sensor["ieee_address"] = "0x1234567891237894"  # Adresse IEEE fictive pour les tests
-        """
 
         # Get the linux user connected
         user = getpass.getuser()

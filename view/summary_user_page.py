@@ -100,6 +100,7 @@ class SummaryUser:
         try:
             all_sensor_types = local.get_sensor_type_list()
 
+            print("on est allé jusque là")
             for sensor_type_id, sensor_type in all_sensor_types:
                 # Retrieve information from sensors of this type from the database
                 sensor_infos = local.get_sensor_info_from_observation(globals.global_new_id_observation, sensor_type_id)
