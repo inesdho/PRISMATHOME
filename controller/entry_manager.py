@@ -117,8 +117,8 @@ class EntryManager:
         self.entry.bind("<Key>", self.which_key)
 
         # Binding the focus on the entry
-        self.entry.bind("<FocusOut>", self.on_entry_focus_out)
-        self.entry.bind("<FocusIn>", self.on_entry_focus_in)
+        #self.entry.bind("<FocusOut>", self.on_entry_focus_out)
+        #self.entry.bind("<FocusIn>", self.on_entry_focus_in)
 
     def which_key(self, event):
         """!

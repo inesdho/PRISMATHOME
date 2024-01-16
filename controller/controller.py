@@ -25,9 +25,6 @@ from view.sensor_pairing_management_page import SensorPairingManagement
 from system import system_function
 import webbrowser
 import sys
-from model import local
-# from model import remote
-import globals
 
 
 class App(ThemedTk):
@@ -50,6 +47,8 @@ class App(ThemedTk):
         elif my_os == 'win32' or my_os == 'cygwin':
             self.attributes('-fullscreen', True)
             self.bind('<Escape>', lambda e: self.attributes('-fullscreen', False))
+
+        self.wm_attributes('-topmost',1)
 
         # Theme of the application
         self.style = ThemedStyle(self)
@@ -95,7 +94,7 @@ class App(ThemedTk):
 
         # Redirection to login as an admin button
         ttk.Button(new_observation_page.frame, text="Import configuration",
-                   command=lambda: self.is_a_config_chosen(new_observation_page)).pack()
+                   command=lambda: self.redirect_to_pairing_from_new_observation(new_observation_page)).pack()
 
     def call_summary_user_page(self):
         """!
@@ -154,7 +153,7 @@ class App(ThemedTk):
         # Redirecting to the new observation page
         self.redirect_to_new_observation_from_anywhere(modify_or_create_configuration_page)
 
-    def is_a_config_chosen(self, new_observation_page):
+    def redirect_to_pairing_from_new_observation(self, new_observation_page):
         """!
         @brief This function checks that the user has chosen a configuration for the observation. If no configuration
         was chosen, an error pop up is displayed, else the user can access the pairing page
@@ -166,6 +165,8 @@ class App(ThemedTk):
             messagebox.showerror("Error", "Please select a configuration.")
         elif new_observation_page.configuration_combobox.get() == "No configuration available":
             messagebox.showerror("Error", "Please create or import a configuration to start the observation.")
+        elif new_observation_page.participant_entry.get() == "" or new_observation_page.session_entry.get() == "":
+            messagebox.showerror("Error", "Please fill all the field before continuing.")
         else:
             new_observation_page.on_import_button_click()
             self.redirect_to_pairing_from_anywhere(new_observation_page)
@@ -495,7 +496,7 @@ class App(ThemedTk):
         @brief This function starts the observation and change the label of the button
         @param self : the instance
         @param button : the start observation button
-        @:param summary_user_page : the summary user page
+        @param summary_user_page : the summary user page
         @return Nothing
         """
         arguments = []
@@ -533,8 +534,7 @@ class App(ThemedTk):
         system_function.send_sigterm(program_pid)
 
         # Calling the function to stop the observation
-        # TODO Mathilde : voir où appeller la fonction car lorsque que je la met au bonne endroit ca pose probleme
-        #  + voir avec les indus comment stopper la reception des datas
+        # voir avec les indus comment stopper la reception des datas
         local.update_observation_status(0)
 
         messagebox.showinfo("Stop observation", "The observation is stopped.")

@@ -847,9 +847,9 @@ def create_observation_with_sensors(user, participant, id_config, id_session, se
 
     values = (id_system, user, participant, id_config, id_session, session_label, active)
     # Insertion in the remote database for observation
-    send_query_remote('insert', 'observation',
-                      ['id_system', 'creator', 'participant', 'id_config', 'id_session', 'session_label', 'active'],
-                      values, None, id_list[0])
+    # send_query_remote('insert', 'observation',
+    #['id_system', 'creator', 'participant', 'id_config', 'id_session', 'session_label', 'active'],
+    #values, None, id_list[0])
 
     # Insertion in the remote database for sensors
     for i, sensor in enumerate(sensor_list, start=1):
@@ -1007,8 +1007,9 @@ def get_observation_info(id_observation, field=None):
         else:
             return None
     else:  # Select one particular field
-        query = """SELECT %s FROM observation o WHERE o.id_observation = %s;"""
-        result = execute_query_with_reconnect(query, (field, id_observation,))
+        print("un seul field choisi :", field)
+        query = f"""SELECT {field} FROM observation o WHERE o.id_observation = %s;"""
+        result = execute_query_with_reconnect(query, (id_observation,))
         if result:
             return result[0][0]
         else:
