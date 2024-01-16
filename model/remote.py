@@ -35,6 +35,7 @@ config = {
     "database": "prisme@home_ICM"
 }
 
+
 # DONE
 def connect_to_remote_db():
     """!
@@ -74,7 +75,6 @@ def disconnect_from_remote_db():
 
     # Disconnect from the database
     pool.closeall()
-
 
 
 def execute_remote_query(query, values=None, synchronise=False):
@@ -154,7 +154,7 @@ def synchronise_queries():
         success = local.execute_remote_query(query, None, True)
         if success:
             # If the query was executed successfully, delete the entry from the local table
-            #TODO faire le delete avec l'id (à rajouter dans la bdd)
+            # TODO faire le delete avec l'id (à rajouter dans la bdd)
             local.send_query_local('delete', 'remote_queries', None, None, f"query = {query}")
 
     print("Synchro sortie normale")

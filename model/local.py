@@ -44,6 +44,7 @@ config = {
     "database": "prisme_home_1"
 }
 
+
 # DONE
 def connect_to_local_db():
     """!
@@ -116,7 +117,6 @@ def add_system_id(local_id):
 
 
 def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3):
-
     # A flag to retry or not on connection lost
     # if a transaction is started to rollback changes
     retry = True
@@ -154,7 +154,7 @@ def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3
         finally:
             if retry:
                 if conn:
-                    if query_type !="SELECT":
+                    if query_type != "SELECT":
                         conn.commit()
                     cursor.close()
                     conn.close()
@@ -742,7 +742,7 @@ def get_config_labels_ids(id_config=None):
         result = execute_query_with_reconnect(query, (id_config,))
 
         if result:
-            return result[0]
+            return result[0][0]
 
 
 def get_config_label_from_observation_id(id_observation):
@@ -758,7 +758,7 @@ def get_config_label_from_observation_id(id_observation):
 
     result = execute_query_with_reconnect(query, (id_observation,))
     if result:
-        return result
+        return result[0][0]
     else:
         return None
 
@@ -795,7 +795,8 @@ def create_observation_with_sensors(user, participant, id_config, id_session, se
 
         values = (id_system, user, participant, id_config, id_session, session_label, active)
         id_observation = send_query_local('insert', 'observation',
-                                          ['id_system', 'creator', 'participant', 'id_config', 'id_session', 'session_label',
+                                          ['id_system', 'creator', 'participant', 'id_config', 'id_session',
+                                           'session_label',
                                            'active'],
                                           values, None, cursor)
 
@@ -987,20 +988,21 @@ def get_observation_info(id_observation, field=None):
         query = """SELECT * FROM observation o WHERE o.id_observation = %s;"""
         result = execute_query_with_reconnect(query, (id_observation,))
         if result:
-            return [{"id_observation": result[0],
-                     "id_system": result[1],
-                     "participant": result[2],
-                     "id_config": result[3],
-                     "id_session": result[4],
-                     "session_label": result[5],
-                     "active": result[6]}]
+            elements = result[0]
+            return [{"id_observation": elements[0],
+                     "id_system": elements[1],
+                     "participant": elements[2],
+                     "id_config": elements[3],
+                     "id_session": elements[4],
+                     "session_label": elements[5],
+                     "active": elements[6]}]
         else:
             return None
     else:  # Select one particular field
         query = """SELECT %s FROM observation o WHERE o.id_observation = %s;"""
         result = execute_query_with_reconnect(query, (field, id_observation,))
         if result:
-            return result
+            return result[0][0]
         else:
             return None
 
@@ -1016,7 +1018,6 @@ def config_label_exists(label):
 
     result = execute_query_with_reconnect(query, (label,))
 
-    print(f"result config_label_exists with label {label} : {result}")
     if result[0][0] == 0:
         return False
     else:

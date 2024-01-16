@@ -297,6 +297,7 @@ class App(ThemedTk):
         @param modify_or_create_configuration_page : the modify_or_create_configuration_page
         @return Nothing
         """
+        modify_or_create_configuration_page.on_click_modify_button()
         # Set the modification indicator to True
         globals.global_is_modification = True
 
@@ -556,5 +557,5 @@ class App(ThemedTk):
             globals.thread_done = True
             if globals.global_id_user is not None:
                 print("Deconnexion normalement")
-                local.update_user_connexion_status(global_id_user, 0)
+                local.update_user_connexion_status(globals.global_id_user, 0)
             self.destroy()
