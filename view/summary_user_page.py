@@ -70,7 +70,7 @@ class SummaryUser:
         frame_title.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
         # Create the title of the different field
-        ttk.Label(frame_title, background="lightgrey", width=20, text="Sensor", borderwidth=1, relief="solid",
+        ttk.Label(frame_title, background="#3daee9", width=20, text="Sensor", borderwidth=0.5, relief="solid",
                   padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
         ttk.Label(frame_title, background="#3daee9", width=20, text="Label", borderwidth=0.5, relief="solid",
                   padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
