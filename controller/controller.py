@@ -573,6 +573,7 @@ class App(ThemedTk):
         """
         if messagebox.askokcancel("Quit", "Are you sure you want to quit PRISM@Home ?"):
             globals.thread_done = True
+            globals.global_disconnect_request = True
             if globals.global_id_user is not None:
                 print("Deconnexion normalement")
                 local.update_user_connexion_status(globals.global_id_user, 0)

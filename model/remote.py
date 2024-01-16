@@ -16,6 +16,8 @@ import mysql.connector
 
 from model import local
 
+import globals
+
 # Connexion to the database
 thread_active = 0  # is used to know if the program is actively trying to reconnect to the remote db
 disconnect_request = 0  # is used to stop the connect thread from looping
@@ -29,8 +31,8 @@ ids_to_modify = ['id_sensor', 'id_data', 'id_observation']
 tables_to_prepend = ['sensor', 'data', 'observation']
 
 config = {
-    "host": "localhost",
-    "user": "root",
+    "host": "192.168.1.22",
+    "user": "prisme",
     "password": "Q3fhllj2",
     "database": "prisme@home_ICM"
 }
@@ -47,7 +49,7 @@ def connect_to_remote_db():
     global pool, thread_active
     thread_active = 1
     try:
-        if disconnect_request == 1:
+        if globals.global_disconnect_request:
             return
         # Création d'un pool de connexions
         pool = mysql.connector.pooling.MySQLConnectionPool(
@@ -56,25 +58,12 @@ def connect_to_remote_db():
             **config
         )
         thread_active = 0
-        synchronise_queries()
         print("\033[96mConnected to remote database\033[0m")
+        synchronise_queries()
     except Exception as e:
         time.sleep(1)
         # Loop until the connection works
-        #connect_to_remote_db()
-
-
-def disconnect_from_remote_db():
-    """!
-        Disconnects from the remote database
-        @return:
-    """
-    global disconnect_request, pool
-
-    disconnect_request = 1
-
-    # Disconnect from the database
-    pool.closeall()
+        connect_to_remote_db()
 
 
 def execute_remote_query(query, values=None, synchronise=False):
@@ -115,7 +104,7 @@ def execute_remote_query(query, values=None, synchronise=False):
         return 1
     except (mysql.connector.errors.InterfaceError, mysql.connector.errors.OperationalError) as e:
         # Error inserting the data in distant base
-        print("\033[91mErreur ", error, "En executant : ", query, "values", values, "\033[0m")
+        print("\033[91mErreur connexion à la bdd distante" "En executant : ", query, "values", values, "\033[0m")
 
         # Create thread to check on the database
         local.caching = True
@@ -148,13 +137,15 @@ def synchronise_queries():
     if not queries:
         print("\033[93msynchronise_queries : No queries\033[0m")
         return
-
-    for query_entry in queries:
-        query = query_entry[1]
-        success = local.execute_remote_query(query, None, True)
-        if success:
-            # If the query was executed successfully, delete the entry from the local table
-            # TODO faire le delete avec l'id (à rajouter dans la bdd)
-            local.send_query_local('delete', 'remote_queries', None, None, f"query = {query}")
+    try:
+        for query_entry in queries:
+            query = query_entry[1]
+            success = execute_remote_query(query, None, True)
+            if success:
+                # If the query was executed successfully, delete the entry from the local table
+                # TODO faire le delete avec l'id (à rajouter dans la bdd)
+                local.send_query_local('delete', 'remote_queries', None, None, f"query = \"{query}\"")
+    except Exception as e:
+        print("Error while synchronising : ", e)
 
     print("Synchro sortie normale")

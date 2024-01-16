@@ -1,5 +1,8 @@
 # TODO faire de la doc et des commentaires pour ce fichier
 
+# Bit used to close the connections thread when the window is closed
+global_disconnect_request = False
+
 global_id_user = None
 sensor_counts = {}
 global_id_config = None
@@ -17,6 +20,7 @@ global_id_session_selected = None
 
 global_is_modification = False
 
+# Bit used to close threads get_sensor_value
 thread_done = False
 
 global_id_config_modify= None
