@@ -38,8 +38,8 @@ local_cursor_protect = False
 caching = False
 
 config = {
-    "host": "localhost",
-    "user": "root",
+    "host": "192.168.1.22",
+    "user": "prisme",
     "password": "Q3fhllj2",
     "database": "prisme_home_1"
 }
@@ -568,6 +568,23 @@ def get_sensors_from_configuration(id_config):
     return None
 
 
+def get_sensor_configs():
+    """!
+        Gets all sensor configs from the local database.
+
+        @return: The sensor configs list if found, otherwise None.
+        """
+
+    query = "SELECT id_config, id_sensor_type, sensor_label, sensor_description FROM sensor_config"
+
+    result = execute_query_with_reconnect(query)
+
+    if result:
+        return [(row[0], row[1], row[2], row[3]) for row in result]
+    else:
+        return None
+
+
 def get_sensor_info_from_observation(id_observation, sensor_type=None):
     """!
     Gets the labels and descriptions of all sensors for a specific observation. A sensor type can be selected in
@@ -579,21 +596,14 @@ def get_sensor_info_from_observation(id_observation, sensor_type=None):
     found or an error occurred
     """
 
-    print("Getting sensor info for id obs", id_observation)
-
-    if sensor_type is not None:
-        print("Getting sensor info fo sensor type", sensor_type)
-
     if sensor_type is None:  # Grab all labels
         query = "SELECT label, description FROM sensor WHERE id_observation =%s"
         values = (id_observation,)
     else:
-        print("Sensor_type not none")
         query = "SELECT label, description FROM sensor WHERE id_observation =%s AND id_type = %s"
         values = (id_observation, sensor_type)
 
     result = execute_query_with_reconnect(query, values)
-    print("Result = ", result)
 
     if result:
         return [{"label": row[0], "description": row[1]} for row in result]
@@ -619,6 +629,23 @@ def get_error_id_from_label(label):
 
     # Return None if the sensor type is not found or there are errors
     return None
+
+
+def get_users():
+    """!
+        Gets all users from the local database.
+
+        @return: The user list if found, otherwise None.
+        """
+
+    query = "SELECT id_user, login, password, connected FROM user"
+
+    result = execute_query_with_reconnect(query)
+
+    if result:
+        return [(row[0], row[1], row[2]) for row in result]
+    else:
+        return None
 
 
 # DONE
@@ -785,7 +812,6 @@ def create_observation_with_sensors(user, participant, id_config, id_session, se
     @param active: The status of the session (1=active, 0=inactive)
     @return True if successful, False if one or more errors occurred
     """
-    print("CREATE OBSERVATION : sensor_list :", sensor_list)
     conn = None
     cursor = None
     error = False
@@ -921,7 +947,7 @@ def create_configuration(id_config, id_user, label, description, sensor_list):
     send_query_remote('insert', 'configuration', ['id_config', 'id_user', 'label', 'description'], values, None)
 
     for sensor_type_id, sensor_label, sensor_description in sensor_list:
-        values = (id_config, sensor_type_id, label, description)
+        values = (id_config, sensor_type_id, sensor_label, sensor_description)
 
         send_query_remote('insert', 'sensor_config',
                           ['id_config', 'id_sensor_type', 'sensor_label', 'sensor_description'],
@@ -937,7 +963,6 @@ def encrypt_password(password):
     @return: The encrypted password
     """
     return hashlib.sha256(password.encode()).hexdigest()
-
 
 # DONE
 def get_active_observation():
@@ -1005,13 +1030,26 @@ def get_observation_info(id_observation, field=None):
         else:
             return None
     else:  # Select one particular field
-        print("un seul field choisi :", field)
         query = f"""SELECT {field} FROM observation o WHERE o.id_observation = %s;"""
         result = execute_query_with_reconnect(query, (id_observation,))
         if result:
             return result[0][0]
         else:
             return None
+
+
+def get_configurations():
+    """
+    Retrieves all configurations in the local database
+
+    @return A list of the fields and their values. None list if nothing was found or an error occurred.
+    """
+    query = """SELECT id_config, id_user, label, description FROM configuration;"""
+    result = execute_query_with_reconnect(query)
+    if result:
+        return [(row[0], row[1], row[2], row[3]) for row in result]
+    else:
+        return None
 
 
 def config_label_exists(label):

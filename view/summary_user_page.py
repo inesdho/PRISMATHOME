@@ -72,7 +72,7 @@ class SummaryUser:
         frame_title.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
         # Create the title of the different field
-        ttk.Label(frame_title, background="#3daee9", width=20, text="Sensor", borderwidth=0.5, relief="solid",
+        ttk.Label(frame_title, background="lightgrey", width=20, text="Sensor", borderwidth=1, relief="solid",
                   padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
         ttk.Label(frame_title, background="#3daee9", width=20, text="Label", borderwidth=0.5, relief="solid",
                   padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
@@ -100,7 +100,6 @@ class SummaryUser:
         try:
             all_sensor_types = local.get_sensor_type_list()
 
-            print("on est allé jusque là")
             for sensor_type_id, sensor_type in all_sensor_types:
                 # Retrieve information from sensors of this type from the database
                 sensor_infos = local.get_sensor_info_from_observation(globals.global_new_id_observation, sensor_type_id)
@@ -153,7 +152,7 @@ class SummaryUser:
 
             # Showing the current state of the sensor
             label_state = ttk.Label(sensor_frame, text=f"Etat en direct", borderwidth=0.5, background="white", width=20,
-                      relief="solid", padding=5, anchor="center", font=globals.global_font_text)
+                                    relief="solid", padding=5, anchor="center", font=globals.global_font_text)
 
             print("Creation des label ok")
 
