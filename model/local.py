@@ -930,7 +930,6 @@ def encrypt_password(password):
     """
     return hashlib.sha256(password.encode()).hexdigest()
 
-
 # DONE
 def get_active_observation():
     """!
