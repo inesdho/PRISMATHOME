@@ -48,13 +48,11 @@ class SummaryUser:
                                    padding=10,
                                    anchor="w", font=globals.global_font_title1)
         scenario_label.pack(fill=tk.BOTH)
-        session_label = ttk.Label(self.frame, text="Session : " + local.get_observation_info(
-            globals.global_new_id_observation, 'session_label'),
+        session_label = ttk.Label(self.frame, text="Session : " + local.get_observation_info(globals.global_new_id_observation,'session_label'),
                                   padding=10, anchor="w", font=globals.global_font_title1)
         session_label.pack(fill=tk.BOTH)
         participant_label = ttk.Label(self.frame, text="Particpant : " +
-                                                       local.get_observation_info(globals.global_new_id_observation,
-                                                                                  'participant'),
+                                                       local.get_observation_info(globals.global_new_id_observation,'participant'),
                                       padding=10, anchor="w", font=globals.global_font_title1)
         participant_label.pack(fill=tk.BOTH)
 
