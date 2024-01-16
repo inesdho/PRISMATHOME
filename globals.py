@@ -22,6 +22,8 @@ global_is_modification = False
 
 thread_done = False
 
+global_id_config_modify= None
+
 global_font_title = ("Calibi", 16, "bold")
 global_font_title1 = ("Calibi", 12, "bold")
 global_font_text = ("Calibi", 10, "bold")

@@ -291,6 +291,7 @@ class App(ThemedTk):
         @param modify_or_create_configuration_page : the modify_or_create_configuration_page
         @return Nothing
         """
+        modify_or_create_configuration_page.on_click_modify_button()
         # Set the modification indicator to True
         globals.global_is_modification = True
 

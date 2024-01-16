@@ -33,7 +33,7 @@ class QuantitySensor:
         label = ttk.Label(self.frame, text="Sensor quantity selection", font=globals.global_font_title)
         label.pack(pady=20)
 
-    def show_page(self, is_modification):
+    def show_page(self):
         """!
         @brief The show_page function creates and displays all the elements of the "selection sensor quantity" page
         @param self : the instance
@@ -44,10 +44,10 @@ class QuantitySensor:
         self.frame_sensors = tk.Frame(self.frame, padx=10, pady=10)
         self.frame_sensors.pack()
 
-        if(is_modification):
+        if(globals.global_is_modification):
             #TODO
-            sensor_types = local.get_sensor_type_list()
-
+            print("en modif")
+            print("id de la config a modifier", globals.global_id_config_modify)
 
 
         # Calls a function to fetch all the existing sensor types in the database

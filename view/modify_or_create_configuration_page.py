@@ -167,3 +167,20 @@ class ModifyOrCreateConfiguration:
         self.frame.destroy()
         self.right_frame.destroy()
         self.left_frame.destroy()
+
+
+    def get_selected_id_config(self):
+        """
+           @brief Retrieves the 'id_config' associated with the selected label in the combobox.
+
+           @return The 'id_config' associated with the selected label in the combobox.
+                   Returns None if no item is selected or if the selected item is not found.
+           """
+        selected_label = self.configuration_combobox.get()
+        for label, id_config in self.configuration_values:
+            if label == selected_label:
+                return id_config
+        return None
+
+    def on_click_modify_button(self):
+        globals.global_id_config_modify = self.get_selected_id_config()
