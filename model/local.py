@@ -847,9 +847,7 @@ def create_observation_with_sensors(user, participant, id_config, id_session, se
 
     values = (id_system, user, participant, id_config, id_session, session_label, active)
     # Insertion in the remote database for observation
-    # send_query_remote('insert', 'observation',
-    #['id_system', 'creator', 'participant', 'id_config', 'id_session', 'session_label', 'active'],
-    #values, None, id_list[0])
+    send_query_remote('insert', 'observation', ['id_system', 'creator', 'participant', 'id_config', 'id_session', 'session_label', 'active'], values, None, id_list[0])
 
     # Insertion in the remote database for sensors
     for i, sensor in enumerate(sensor_list, start=1):
