@@ -921,7 +921,7 @@ def create_configuration(id_config, id_user, label, description, sensor_list):
     send_query_remote('insert', 'configuration', ['id_config', 'id_user', 'label', 'description'], values, None)
 
     for sensor_type_id, sensor_label, sensor_description in sensor_list:
-        values = (id_config, sensor_type_id, label, description)
+        values = (id_config, sensor_type_id, sensor_label, sensor_description)
 
         send_query_remote('insert', 'sensor_config',
                           ['id_config', 'id_sensor_type', 'sensor_label', 'sensor_description'],
