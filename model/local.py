@@ -579,14 +579,21 @@ def get_sensor_info_from_observation(id_observation, sensor_type=None):
     found or an error occurred
     """
 
+    print("Getting sensor info for id obs", id_observation)
+
+    if sensor_type is not None:
+        print("Getting sensor info fo sensor type", sensor_type)
+
     if sensor_type is None:  # Grab all labels
         query = "SELECT label, description FROM sensor WHERE id_observation =%s"
         values = (id_observation,)
     else:
+        print("Sensor_type not none")
         query = "SELECT label, description FROM sensor WHERE id_observation =%s AND id_type = %s"
         values = (id_observation, sensor_type)
 
     result = execute_query_with_reconnect(query, values)
+    print("Result = ", result)
 
     if result:
         return [{"label": row[0], "description": row[1]} for row in result]
@@ -778,6 +785,7 @@ def create_observation_with_sensors(user, participant, id_config, id_session, se
     @param active: The status of the session (1=active, 0=inactive)
     @return True if successful, False if one or more errors occurred
     """
+    print("CREATE OBSERVATION : sensor_list :", sensor_list)
     conn = None
     cursor = None
     error = False

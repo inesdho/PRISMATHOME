@@ -8,6 +8,7 @@
 
 import tkinter as tk
 from tkinter import ttk, messagebox
+import subprocess
 
 from ttkthemes import ThemedTk, ThemedStyle
 
@@ -21,6 +22,7 @@ from view.summary_user_page import SummaryUser
 from view.selection_sensor_quantity_page import QuantitySensor
 from view.labellisation_sensor_page import LabelisationSensor
 from view.sensor_pairing_management_page import SensorPairingManagement
+from system import system_function
 import webbrowser
 import sys
 from model import local
@@ -496,9 +498,21 @@ class App(ThemedTk):
         @:param summary_user_page : the summary user page
         @return Nothing
         """
+        arguments = []
+
+        sensor_list = local.get_sensors_from_observation(globals.global_new_id_observation)
+        print("\033[95msensor list: ", sensor_list, "\033[0m")
+        for sensor in sensor_list:
+            arguments.append(sensor["type"] + "/" + sensor["label"])
+
+        print("arguments : ", arguments)
+        command = ["python", "/home/prisme/Prisme@home/PRISMATHOME/reception.py"] + arguments
+
+        # Start the main program
+        main_program = subprocess.Popen(command)
 
         # Calling the function to start the observation
-        local.update_observation_status()
+        local.update_observation_status('1')
 
         messagebox.showinfo("Start observation", "The observation is started.")
 
@@ -510,9 +524,13 @@ class App(ThemedTk):
         @brief This function allows the user to stop the observation and change the label of the button
         @param self : the instance
         @param button : the stop observation button
-        @:param summary_user_page : the summary user page
+        @param summary_user_page : the summary user page
         @return Nothing
         """
+
+        program_pid = system_function.get_pid_of_script("reception.py")
+
+        system_function.send_sigterm(program_pid)
 
         # Calling the function to stop the observation
         # TODO Mathilde : voir où appeller la fonction car lorsque que je la met au bonne endroit ca pose probleme
