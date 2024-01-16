@@ -88,12 +88,17 @@ class App(ThemedTk):
 
         # Redirection to login as an admin button
         ttk.Button(self.main_frame, text="Login as administrator",
-                   command=lambda: self.redirect_to_login_as_admin_from_anywhere(new_observation_page)).place(
-            relx=0.9, rely=0.1)
+                   command=lambda: self.redirect_to_login_as_admin_from_anywhere(new_observation_page))\
+            .pack(side=tk.RIGHT, padx=10, anchor='e')
+
+        # Get data button
+        button_get_data = ttk.Button(self.main_frame, text="Get data", command=lambda: self.get_data())
+        button_get_data.pack(side=tk.RIGHT, padx=10, anchor='e')
 
         # Redirection to login as an admin button
         ttk.Button(new_observation_page.frame, text="Import configuration",
                    command=lambda: self.redirect_to_pairing_from_new_observation(new_observation_page)).pack(pady=10)
+
 
     def call_summary_user_page(self):
         """!
@@ -124,6 +129,10 @@ class App(ThemedTk):
         button.config(command=lambda: self.stop_observation(button, summary_user_page))
         button.pack(side=tk.LEFT, padx=10, expand=True)
 
+        # Get data button
+        button_get_data = ttk.Button(self.main_frame, text="Get data", command=lambda: self.get_data())
+        button_get_data.pack(side=tk.LEFT, padx=10, expand=True)
+
     def redirect_to_new_observation_from_anywhere(self, page):
         """!
         @brief This function clears the previous page before calling the new observation page
@@ -133,9 +142,6 @@ class App(ThemedTk):
         """
         # Clear the previous page content
         self.clear_the_page(page)
-
-        # Creation of a main frame
-        self.create_new_main_frame()
 
         self.call_new_observation_page()
 
@@ -222,8 +228,8 @@ class App(ThemedTk):
 
         # Cancel button to redirect to the new observation page
         ttk.Button(self.main_frame, text="Cancel",
-                   command=lambda: self.redirect_to_new_observation_from_anywhere(login_as_admin_page)).place(
-            relx=0.9, rely=0.1)
+                   command=lambda: self.redirect_to_new_observation_from_anywhere(login_as_admin_page))\
+            .pack(side=tk.TOP, padx=10, expand=True, anchor='e')
 
     def connexion_button_clic(self, login_as_admin_page):
         """!
@@ -263,7 +269,7 @@ class App(ThemedTk):
         logout_button = ttk.Button(self.main_frame, text="Log out",
                                    command=lambda: self.redirect_to_new_observation_from_modify_or_create_a_config(
                                        modify_or_create_configuration_page))
-        logout_button.place(relx=0.9, rely=0.01)
+        logout_button.place(relx=0.9, rely=0.1)
 
         # Modify Button
         modify_button = ttk.Button(modify_or_create_configuration_page.left_frame, text="Modify the configuration",
@@ -510,15 +516,21 @@ class App(ThemedTk):
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Start observation button
-        button = ttk.Button(self.main_frame, text="Start observation")
-        button.config(command=lambda: self.start_observation(button, summary_user_page))
-        button.pack(side=tk.LEFT, padx=10, expand=True)
+        start_stop_button = ttk.Button(self.main_frame, text="Start observation")
+        start_stop_button.config(command=lambda: self.start_observation(start_stop_button, summary_user_page))
+        start_stop_button.pack(side=tk.LEFT, padx=10, expand=True)
 
-    def start_observation(self, button, summary_user_page):
+
+        # Get data button
+        button_get_data = ttk.Button(self.main_frame, text="Get data", command=lambda: self.get_data())
+        button_get_data.pack(side=tk.LEFT, padx=10, expand=True)
+
+    def start_observation(self, start_stop_button, summary_user_page):
         """!
-        @brief This function starts the observation and change the label of the button
+        @brief This function starts the observation and change the label of the button, it also adds a button to get
+        the data from the DB
         @param self : the instance
-        @param button : the start observation button
+        @param start_stop_button : the start observation button
         @param summary_user_page : the summary user page
         @return Nothing
         """
@@ -541,13 +553,13 @@ class App(ThemedTk):
         messagebox.showinfo("Start observation", "The observation is started.")
 
         # Changing the label and the function associated to the button
-        button.config(text="Stop observation", command=lambda: self.stop_observation(button, summary_user_page))
+        start_stop_button.config(text="Stop observation", command=lambda: self.stop_observation(start_stop_button, summary_user_page))
 
-    def stop_observation(self, button, summary_user_page):
+    def stop_observation(self, start_stop_button, summary_user_page):
         """!
         @brief This function allows the user to stop the observation and change the label of the button
         @param self : the instance
-        @param button : the stop observation button
+        @param start_stop_button : the stop observation button
         @param summary_user_page : the summary user page
         @return Nothing
         """
@@ -563,7 +575,16 @@ class App(ThemedTk):
         messagebox.showinfo("Stop observation", "The observation is stopped.")
 
         # Changing the label and the function associated to the button
-        button.config(text="Start observation", command=lambda: self.start_observation(button, summary_user_page))
+        start_stop_button.config(text="Start observation", command=lambda: self.start_observation(start_stop_button, summary_user_page))
+
+    def get_data(self):
+        """!
+        @brief This function
+        @param self : the instance
+        @return Nothing
+        """
+        # TODO Matteo, c'est ici que tu peux mettre tes fonctions stv
+        messagebox.showinfo("Get data", "La fonction get_data est appelée")
 
     def clear_the_page(self, page):
         """!
