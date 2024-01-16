@@ -68,13 +68,13 @@ class NewObservation:
             self.configuration_values = [(config['label'], config['id_config']) for config in configurations]
 
             # Creation of a combobox with the list of configuration labels
-            self.configuration_combobox = ttk.Combobox(self.frame, width=29)
+            self.configuration_combobox = ttk.Combobox(self.frame, state="readonly", width=29)
             self.configuration_combobox['values'] = [label for label, id_config in self.configuration_values]
             self.configuration_combobox.set(self.configuration_values[0][0])
             self.configuration_combobox.pack(pady=10)
         else:
             configurations = ['No configuration available']
-            self.configuration_combobox = ttk.Combobox(self.frame, values=configurations, width=29)
+            self.configuration_combobox = ttk.Combobox(self.frame, state="readonly", values=configurations, width=29)
             self.configuration_combobox.set(configurations[0])
             self.configuration_combobox.pack(pady=10)
 

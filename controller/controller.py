@@ -300,12 +300,14 @@ class App(ThemedTk):
         @param modify_or_create_configuration_page : the modify_or_create_configuration_page
         @return Nothing
         """
-        modify_or_create_configuration_page.on_click_modify_button()
-        # Set the modification indicator to True
-        globals.global_is_modification = True
-
-        # Redirection to selection sensor quantity
-        self.redirect_to_selection_sensor_quantity_from_anywhere(modify_or_create_configuration_page)
+        if modify_or_create_configuration_page.configuration_combobox.get() == 'No configuration available':
+            messagebox.showerror("Error", "No observation exist locally, please create or import one to be able to use the modify function.")
+        else:
+            modify_or_create_configuration_page.on_click_modify_button()
+            # Set the modification indicator to True
+            globals.global_is_modification = True
+            # Redirection to selection sensor quantity
+            self.redirect_to_selection_sensor_quantity_from_anywhere(modify_or_create_configuration_page)
 
     def redirect_to_selection_sensor_quantity_from_create_a_config(self, modify_or_create_a_config_page):
         """!
@@ -317,10 +319,14 @@ class App(ThemedTk):
         @param modify_or_create_a_config_page : the create or modify a configuration page
         @return Nothing
         """
+        label = modify_or_create_a_config_page.configuration_label_entry.get()
+        description = modify_or_create_a_config_page.configuration_description_text.get()
+
+        # Checks if the user has filled the label and the description
+        if label == "" or description == "":
+            messagebox.showerror("Error", "The label and the description must be filled.")
         # Checks if the user has chosen a unique name for the configuration
-        label = modify_or_create_a_config_page.name_entry.get()
-        print("config label = ", label)
-        if local.config_label_exists(label):
+        elif local.config_label_exists(label):
             # Display a message asking the user to choose another name
             messagebox.showerror("Error", "This configuration name already exists. Please choose another one.")
         else:
