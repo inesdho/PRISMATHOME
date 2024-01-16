@@ -147,16 +147,16 @@ class SummaryAdmin:
         # Get the new id config to create it
         globals.global_id_config = local.get_new_config_id()
 
-        # Insert the configuration in DB
+        # Remove the id_unique field in the sensor list which is useless
+        new_sensor_entries = [(sensor_id, label_entry, description_entry)
+                              for index, (sensor_id, label_entry, description_entry, id_unique)
+                              in enumerate(globals.global_sensor_entries, start=1)]
+        # Insert the configuration in DB and the sensor configs
         local.create_configuration(globals.global_id_config,
                                    globals.global_id_user,
                                    globals.global_scenario_name_configuration,
                                    globals.global_description_configuration,
-                                   globals.global_sensor_entries)
-
-        # Insert each sensor's data into the database
-        #local.create_sensor_configs(globals.global_id_config, globals.global_sensor_entries)
-
+                                   new_sensor_entries)
         self.clear_sensor_entries()
 
     def clear_sensor_entries(self):
