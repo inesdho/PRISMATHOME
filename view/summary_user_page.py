@@ -11,8 +11,6 @@ from tkinter import *
 import globals
 from model import local
 import mysql.connector
-import subprocess
-import os
 import signal
 import threading
 import model.local_mqtt
@@ -98,7 +96,6 @@ class SummaryUser:
         @return Nothing
         """
 
-
         # Connect to the database and retrieve sensor types
         try:
             all_sensor_types = local.get_sensor_type_list()
@@ -106,48 +103,58 @@ class SummaryUser:
             for sensor_type_id, sensor_type in all_sensor_types:
                 # Retrieve information from sensors of this type from the database
                 sensor_infos = local.get_sensor_info_from_observation(globals.global_new_id_observation, sensor_type_id)
-                if sensor_infos:
-                    sensor_type_button = ttk.Button(
-                        self.button_frame,
-                        text=sensor_type,
-                        command=lambda type=sensor_type: self.display_sensor_info(type),
-                        padding=5
-                    )
-                    sensor_type_button.pack(side=tk.LEFT)
 
-                self.create_sensor_info(sensor_infos, sensor_type)
+                if sensor_infos:
+                    print("sensor infos", sensor_infos)
+                    print("sensor type", sensor_type)
+                    print("senor_type_id", sensor_type_id)
+                    if sensor_infos:
+                        sensor_type_button = ttk.Button(
+                            self.button_frame,
+                            text=sensor_type,
+                            command=lambda type=sensor_type: self.display_sensor_info(type),
+                            padding=5
+                        )
+                        sensor_type_button.pack(side=tk.LEFT)
+                    print("BEFORE create_sensor_info")
+                    self.create_sensor_info(sensor_infos, sensor_type)
+
         except Exception as err:
             print(f"Error: {err}")
 
     def create_sensor_info(self, sensor_infos, sensor_type):
-
+        print("Entrée create_sensor_info")
         for sensor_info in sensor_infos:
             sensor_frame = ttk.Frame(self.data_frame)
+            print("frame OK")
 
             self.sensor_type_frame_list.append({
                 "type": sensor_type,
                 "frame": sensor_frame
             })
-            #sensor_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
-            sensor_label = sensor_info[0]
-            sensor_description = sensor_info[1]
+            print("Sensor list ok")
+            #sensor_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
             # Showing the type of the sensor
             ttk.Label(sensor_frame, text=f"{sensor_type}", width=20, anchor='w', wraplength=140,
                       background="white", borderwidth=1, relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
+            print("LABEL TYPE CREATED")
+
             # Creating a text widget tht will contain the label associated with the sensor
-            ttk.Label(sensor_frame, text=f"{sensor_label}", borderwidth=1, background="white", width=20,
+            ttk.Label(sensor_frame, text=f"{sensor_info['label']}", borderwidth=1, background="white", width=20,
                       relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
             # Showing the description of the sensor
-            ttk.Label(sensor_frame, text=f"{sensor_description}", borderwidth=1, background="white", width=80,
+            ttk.Label(sensor_frame, text=f"{sensor_info['description']}", borderwidth=1, background="white", width=80,
                       relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
             # Showing the current state of the sensor
             label_state = ttk.Label(sensor_frame, text=f"Etat en direct", borderwidth=1, background="white", width=20,
-                      relief="solid", padding=5, anchor="center", font=globals.global_font_text)
+                                    relief="solid", padding=5, anchor="center", font=globals.global_font_text)
+
+            print("Creation des label ok")
 
             match sensor_type:
                 case "Button":
@@ -163,11 +170,12 @@ class SummaryUser:
 
             globals.thread_done = False
 
-            sensor_friendly_name = sensor_type + "/" + sensor_label
-
+            sensor_friendly_name = sensor_type + "/" + sensor_info['label']
+            print("Lancement thread")
             my_thread = threading.Thread(target=model.local_mqtt.get_sensor_value,
                                          args=(sensor_friendly_name, label_state))
             my_thread.start()
+            print("FIN FUNC")
 
     def display_sensor_info(self, sensor_type):
         """!
@@ -183,33 +191,6 @@ class SummaryUser:
             else:
                 sensor_type_frame["frame"].pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
-        """globals.thread_done = True
-        #self.data_frame.destroy()
-
-        for sensor_info in sensor_infos:
-            sensor_frame = ttk.Frame(self.data_frame)
-            sensor_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
-
-            sensor_label = sensor_info[0]
-            sensor_description = sensor_info[1]
-
-            # Showing the type of the sensor
-            ttk.Label(sensor_frame, text=f"{sensor_type}", width=20, anchor='w', wraplength=140,
-                      background="white", borderwidth=1, relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
-
-            # Creating a text widget tht will contain the label associated with the sensor
-            ttk.Label(sensor_frame, text=f"{sensor_label}", borderwidth=1, background="white", width=20,
-                      relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
-
-            # Showing the description of the sensor
-            ttk.Label(sensor_frame, text=f"{sensor_description}", borderwidth=1, background="white", width=80,
-                      relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
-
-            # Showing the current state of the sensor
-            label_state = ttk.Label(sensor_frame, text=f"Etat en direct", borderwidth=1, background="white", width=20,
-                      relief="solid", padding=5, anchor="center", font=globals.global_font_text)
-
-        """
         # Configure the scroll region to follow the content of the frame
         self.frame_canvas.update_idletasks()
         self.canvas.config(scrollregion=self.canvas.bbox("all"))
@@ -221,31 +202,6 @@ class SummaryUser:
         @return Nothing
         """
         self.frame.destroy()
-
-    # TODO : Déplacer les 2 fonctions ci dessous dans une lib de fonction systèmes
-    def send_sigterm(self, pid):
-        script_path = "/home/prisme/Prisme@home/PRISMATHOME/kill_program.sh"
-        subprocess.run(["sh", script_path, str(pid)], check=True)
-
-    def get_pid_of_script(self, script_name):
-        """!
-        @brief Get the pid of the script "script_name"
-        @param script_name The name of the script that we want to get the pid
-        @return The pid of the script "script_name"
-        """
-        try:
-            # Exécution de la commande 'ps' pour obtenir les processus en cours
-            process = subprocess.run(['ps', 'aux'], stdout=subprocess.PIPE, text=True)
-            # Filtrage des lignes qui contiennent le nom du script
-            lines = process.stdout.split('\n')
-            for line in lines:
-                if script_name in line:
-                    parts = line.split()
-                    # Le PID est généralement le deuxième élément dans la sortie de 'ps aux'
-                    return int(parts[1])
-        except Exception as e:
-            print(f"Erreur lors de la recherche du PID: {e}")
-        return None
 
     def clear_sensor_entries(self):
         """!

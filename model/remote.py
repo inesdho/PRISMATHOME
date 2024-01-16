@@ -61,7 +61,7 @@ def connect_to_remote_db():
     except Exception as e:
         time.sleep(1)
         # Loop until the connection works
-        connect_to_remote_db()
+        #connect_to_remote_db()
 
 
 def disconnect_from_remote_db():

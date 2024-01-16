@@ -420,26 +420,20 @@ class SensorPairingManagement:
 
     def on_validate_button_click(self):
         # TODO vérifier que tous les capteurs ont été appairées
-        """for sensor in self.sensor_entries:
+        for sensor in self.sensor_entries:
             sensor["ieee_address"] = "0x1234567891237894"  # Adresse IEEE fictive pour les tests
-        """
+
         # TODO : Faire une fonction getUser dans le futur fichier de fonction systèmes
         user = getpass.getuser()
 
         print("user: ", user)
 
         # Create the observation
-        #TODO : test this function
-        print("sensor_entries :", globals.global_sensor_entries)
-        new_sensor_entries = [(sensor_id, label_entry, description_entry)
-                              for index, (sensor_id, label_entry, description_entry, id_unique)
-                              in enumerate(globals.global_sensor_entries, start=1)]
-        print("new_sensor_entries :", new_sensor_entries)
         local.create_observation_with_sensors(user, globals.global_participant_selected,
                                               globals.global_id_config_selected,
                                               globals.global_id_session_selected,
                                               globals.global_session_label_selected,
-                                              new_sensor_entries)
+                                              self.sensor_entries)
 
         # Create sensors in the database
         #local.create_sensors(globals.global_new_id_observation, self.sensor_entries)
