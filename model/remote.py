@@ -187,18 +187,22 @@ def fetch_remote_configs(get_users, get_configs):
                         if remote_user not in local_users:   # If the remote user is not found in the local list
                             # append to the insert list to add this user
                             print("id_user à insérer : ", remote_user[0])
-                            local.execute_query_with_reconnect(
+                            insertion = local.execute_query_with_reconnect(
                                 f"INSERT INTO user (id_user, login, password) "
                                 f"VALUES ('{remote_user[0]}', '{remote_user[1]}', '{remote_user[2]}');"
                             )
+                            if insertion is None:
+                                return 0
                 else:
                     print("local_users is none")
                     for remote_user in remote_users:    # Compare remote and local user lists
                         # append to the insert list to add this user
-                        local.execute_query_with_reconnect(
+                        insertion = local.execute_query_with_reconnect(
                             f"INSERT INTO user (id_user, login, password) "
                             f"VALUES ('{remote_user[0]}', '{remote_user[1]}', '{remote_user[2]}');\n"
                         )
+                        if insertion is None:
+                            return 0
         if get_configs == 0:
             return 1
         elif get_configs == 1:
@@ -214,16 +218,21 @@ def fetch_remote_configs(get_users, get_configs):
                 if local_configs is not None:
                     for remote_c in remote_configs:    # Compare remote and local config lists
                         if remote_c not in local_configs:   # If the remote user is not found in the local list
-                            local.execute_query_with_reconnect(
+                            insertion = local.execute_query_with_reconnect(
                                 f"INSERT INTO configuration (id_config, id_user, label, description) "
                                 f"VALUES ('{remote_c[0]}', '{remote_c[1]}', '{remote_c[2]}', '{remote_c[3]}');\n"
                                 )
+                            if insertion is None:
+                                return 0
                 else:
                     for remote_c in remote_configs:    # Compare remote and local config lists
-                        local.execute_query_with_reconnect(
+                        insertion = local.execute_query_with_reconnect(
                             f"INSERT INTO configuration (id_config, id_user, label, description) "
                             f"VALUES ('{remote_c[0]}', '{remote_c[1]}', '{remote_c[2]}', '{remote_c[3]}');\n"
                             )
+                        if insertion is None:
+                            return 0
+
 
             remote_query = "SELECT id_config, id_sensor_type, sensor_label, sensor_description FROM sensor_config"
             cursor.execute(remote_query)
@@ -234,16 +243,20 @@ def fetch_remote_configs(get_users, get_configs):
                 if local_sensor_configs is not None:
                     for remote_sc in remote_sensor_configs:  # Compare remote and local sensor config lists
                         if remote_sc not in local_sensor_configs:  # If the sensor config is not in the local db
-                            local.execute_query_with_reconnect(
+                            insertion = local.execute_query_with_reconnect(
                                 f"INSERT INTO sensor_config (id_config, id_sensor_type, sensor_label, sensor_description) "
                                 f"VALUES ('{remote_sc[0]}', '{remote_sc[1]}', '{remote_sc[2]}', '{remote_sc[3]}');\n"
                             )
+                            if insertion is None:
+                                return 0
                 else:
                     for remote_sc in remote_sensor_configs:  # Compare remote and local sensor config lists
-                        local.execute_query_with_reconnect(
+                        insertion = local.execute_query_with_reconnect(
                             f"INSERT INTO sensor_config (id_config, id_sensor_type, sensor_label, sensor_description) "
                             f"VALUES ('{remote_sc[0]}', '{remote_sc[1]}', '{remote_sc[2]}', '{remote_sc[3]}');\n"
                         )
+                        if insertion is None:
+                            return 0
             return 1
 
         else:
