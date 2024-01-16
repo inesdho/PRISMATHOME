@@ -40,8 +40,6 @@ def data_treatment(client, userdata, mqtt_msg):
     ## The id of the sensor that sent datas
     sensor_id = local.get_sensor_from_type_label(sensor_type, sensor_label)
 
-    print(sensor_datas)
-
     # Selection of the process to execute according to the sensor
     match sensor_type:
 

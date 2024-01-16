@@ -54,8 +54,6 @@ class FunctionSelectionDialog(tk.Toplevel):
         """
         selected_functions = [self.listbox.get(idx) for idx in self.listbox.curselection()]
         self.callback(selected_functions)
-        # Popup close
-        grab_release()
         self.destroy()
 
 
@@ -174,7 +172,6 @@ class UpdateLocalDatabase:
         except mysql.connector.Error as err:
             raise err
             print(f"Erreur MySQL : {err}")
-
         finally:
             # Closing the connections
             if remote_cursor:

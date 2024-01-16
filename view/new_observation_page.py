@@ -10,6 +10,7 @@ import tkinter as tk
 from tkinter import ttk
 import globals
 from model import local
+import getpass
 
 import mysql
 from controller.entry_manager import EntryManager
@@ -47,8 +48,10 @@ class NewObservation:
         # User input
         user_label = ttk.Label(self.frame, text="User", font=globals.global_font_title1)
         user_label.pack()
+        user_label = ttk.Label(self.frame, text=getpass.getuser(), font=18)
+        user_label.pack(pady=10)
         # TODO paul I guess ? remplacer le default texte par la valeur que tu as crée de l'utilisateur de la session
-        self.user_entry = EntryManager(self.frame, min=1, max=30, has_width=30, default_text="User")
+        #self.user_entry = EntryManager(self.frame, min=1, max=30, has_width=30, default_text="User")
 
         """list_configuration_labels = [config['label'] for config in configurations]
         list_configuration_ids = [config['id_config'] for config in configurations]"""

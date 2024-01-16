@@ -10,6 +10,9 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 from ttkthemes import ThemedTk, ThemedStyle
+
+import globals
+from model import local
 from view.new_observation_page import NewObservation
 from view.login_as_admin_page import LoginAsAdministrator
 from view.modify_or_create_configuration_page import ModifyOrCreateConfiguration
@@ -29,13 +32,12 @@ class App(ThemedTk):
 
     def __init__(self):
         """!
-        @brief The __init__ function creates and set the theme and parameter of the window that will contain the pages
-        of the user interface
+        @brief The __init__ function creates and set the theme and parameter of the window that will contain the pages of the
+        user interface
         @param self : the instance
         @return Nothing
         """
         ThemedTk.__init__(self)
-        ThemedTk.lift(self)
         self.title("PRISM@Home")
 
         my_os = sys.platform
@@ -67,7 +69,8 @@ class App(ThemedTk):
         @param self : the instance
         @return Nothing
         """
-        if local.get_active_observation() == None:
+        globals.global_new_id_observation = local.get_active_observation()
+        if globals.global_new_id_observation == None:
             self.call_new_observation_page()
         else:
             self.call_summary_user_page()
@@ -102,6 +105,9 @@ class App(ThemedTk):
         # Redirecting to the login page
         summary_user_page = SummaryUser(self)
         summary_user_page.show_page()
+
+        # Creation of a main frame
+        self.create_new_main_frame()
 
         # Cancel button
         cancel_button = ttk.Button(self.main_frame, text="Exit",
@@ -141,7 +147,7 @@ class App(ThemedTk):
         @return Nothing
         """
         # Logging out the admin
-        modify_or_create_configuration_page.log_out_the_admin()
+        local.update_user_connexion_status(globals.global_id_user, 0)
 
         # Redirecting to the new observation page
         self.redirect_to_new_observation_from_anywhere(modify_or_create_configuration_page)
@@ -309,9 +315,11 @@ class App(ThemedTk):
         @return Nothing
         """
         # Checks if the user has chosen a unique name for the configuration
-        if modify_or_create_a_config_page.does_label_config_already_exists():
+        label = modify_or_create_a_config_page.name_entry.get()
+        print("config label = ", label)
+        if local.config_label_exists(label):
             # Display a message asking the user to choose another name
-            messagebox.showerror("Error", "This configuration's name already exists. Please choose another one.")
+            messagebox.showerror("Error", "This configuration name already exists. Please choose another one.")
         else:
             # Create a new configuration in the database
             modify_or_create_a_config_page.save_label_description_id_of_config_into_globals()
@@ -485,15 +493,14 @@ class App(ThemedTk):
         @brief This function starts the observation and change the label of the button
         @param self : the instance
         @param button : the start observation button
-        @param summary_user_page : the summary user page
+        @:param summary_user_page : the summary user page
         @return Nothing
         """
 
         # Calling the function to start the observation
-        # TODO PAUL : si tu veux faire des modifs c'est dans la fonction start observation de summary user
-        summary_user_page.start_observation()
+        local.update_observation_status()
 
-        messagebox.showinfo("Start observation", "The observation is starting.")
+        messagebox.showinfo("Start observation", "The observation is started.")
 
         # Changing the label and the function associated to the button
         button.config(text="Stop observation", command=lambda: self.stop_observation(button, summary_user_page))
@@ -503,13 +510,14 @@ class App(ThemedTk):
         @brief This function allows the user to stop the observation and change the label of the button
         @param self : the instance
         @param button : the stop observation button
-        @param summary_user_page : the summary user page
+        @:param summary_user_page : the summary user page
         @return Nothing
         """
 
         # Calling the function to stop the observation
-        # TODO PAUL : si tu veux faire des modifs c'est dans la fonction stop observation de summary user
-        summary_user_page.stop_observation()
+        # TODO Mathilde : voir où appeller la fonction car lorsque que je la met au bonne endroit ca pose probleme
+        #  + voir avec les indus comment stopper la reception des datas
+        local.update_observation_status(0)
 
         messagebox.showinfo("Stop observation", "The observation is stopped.")
 
@@ -546,7 +554,8 @@ class App(ThemedTk):
         @return Nothing
         """
         if messagebox.askokcancel("Quit", "Are you sure you want to quit PRISM@Home ?"):
-            if globals.global_connected_admin_login is not None:
+            globals.thread_done = True
+            if globals.global_id_user is not None:
                 print("Deconnexion normalement")
-                local.update_user_connexion_status(globals.global_connected_admin_login, globals.global_connected_admin_password, 0)
+                local.update_user_connexion_status(globals.global_id_user, 0)
             self.destroy()
