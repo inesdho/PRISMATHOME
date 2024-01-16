@@ -34,8 +34,8 @@ class SensorPairingManagement:
         self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
 
         # Displays the title of the page
-        label_page = ttk.Label(self.frame, text="Sensor pairing", font=globals.global_font_title, padding=10)
-        label_page.pack(pady=10)
+        label = ttk.Label(self.frame, text="SENSOR PAIRING", font=globals.global_font_title, foreground='#3daee9')
+        label.pack(pady=30)
 
         # Creation of a canvas in order to add a scrollbar in case to many lines of sensors are displayed
         self.canvas = tk.Canvas(self.frame, bd=2, relief="ridge", highlightthickness=2)
@@ -60,11 +60,11 @@ class SensorPairingManagement:
         frame_title.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
         # Create the title of the different field
-        ttk.Label(frame_title, background="lightgrey", width=20, text="Sensor", borderwidth=1, relief="solid",
+        ttk.Label(frame_title, background="#3daee9", width=20, text="Sensor", borderwidth=0.5, relief="solid",
                   padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
-        ttk.Label(frame_title, background="lightgrey", width=20, text="Label", borderwidth=1, relief="solid",
+        ttk.Label(frame_title, background="#3daee9", width=20, text="Label", borderwidth=0.5, relief="solid",
                   padding=5,  anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
-        ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid",
+        ttk.Label(frame_title, background="#3daee9", width=80, text="Description", borderwidth=0.5, relief="solid",
                   padding=5,  anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
 
         self.sensor_entries = local.get_sensors_from_configuration(globals.global_id_config_selected)
@@ -90,14 +90,14 @@ class SensorPairingManagement:
 
         # Showing the type of the sensor
         ttk.Label(data_frame, text=sensor["type"] + " sensor " + str(index), width=20, anchor='w', wraplength=140,
-                  background="white", borderwidth=1, relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+                  background="white", borderwidth=0.5, relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
         # Creating a text widget tht will contain the label associated with the sensor
-        ttk.Label(data_frame, text=sensor["label"], borderwidth=1, background="white", width=20,
+        ttk.Label(data_frame, text=sensor["label"], borderwidth=0.5, background="white", width=20,
                   relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
         # Showing the description of the sensor
-        ttk.Label(data_frame, background="white", width=80, text=sensor["description"], borderwidth=1,
+        ttk.Label(data_frame, background="white", width=80, text=sensor["description"], borderwidth=0.5,
                   relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
         button_pairing = ttk.Button(data_frame, text=" ")
@@ -420,9 +420,8 @@ class SensorPairingManagement:
 
     def on_validate_button_click(self):
         # TODO vérifier que tous les capteurs ont été appairées
-        """for sensor in self.sensor_entries:
+        for sensor in self.sensor_entries:
             sensor["ieee_address"] = "0x1234567891237894"  # Adresse IEEE fictive pour les tests
-        """
 
         # Get the linux user connected
         user = getpass.getuser()

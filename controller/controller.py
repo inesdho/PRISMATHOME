@@ -22,6 +22,9 @@ from view.summary_user_page import SummaryUser
 from view.selection_sensor_quantity_page import QuantitySensor
 from view.labellisation_sensor_page import LabelisationSensor
 from view.sensor_pairing_management_page import SensorPairingManagement
+from view.modify_labellisation_sensor_page import ModifyLabelisationSensor
+from view.modify_selection_sensor_quantity_page import ModifyQuantitySensor
+from view.modify_summary_admin_page import ModifySummaryAdmin
 from system import system_function
 import webbrowser
 import sys
@@ -57,10 +60,6 @@ class App(ThemedTk):
         # Protool incas of closing window
         self.protocol("WM_DELETE_WINDOW", self.closing_protocol)
 
-        # Creating main frame
-        self.main_frame = ttk.Frame(self)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
-
         self.is_observation_running()
 
     def is_observation_running(self):
@@ -83,18 +82,26 @@ class App(ThemedTk):
         @param self : the instance
         @return Nothing
         """
+        # Creation of a main frame
+        self.create_new_main_frame()
+
         # Redirecting to the login page
         new_observation_page = NewObservation(self)
         new_observation_page.show_page()
 
         # Redirection to login as an admin button
         ttk.Button(self.main_frame, text="Login as administrator",
-                   command=lambda: self.redirect_to_login_as_admin_from_anywhere(new_observation_page)).place(
-            relx=0.9, rely=0.1)
+                   command=lambda: self.redirect_to_login_as_admin_from_anywhere(new_observation_page))\
+            .pack(side=tk.RIGHT, padx=10, anchor='e')
+
+        # Get data button
+        button_get_data = ttk.Button(self.main_frame, text="Get data", command=lambda: self.get_data())
+        button_get_data.pack(side=tk.RIGHT, padx=10, anchor='e')
 
         # Redirection to login as an admin button
         ttk.Button(new_observation_page.frame, text="Import configuration",
-                   command=lambda: self.redirect_to_pairing_from_new_observation(new_observation_page)).pack()
+                   command=lambda: self.redirect_to_pairing_from_new_observation(new_observation_page)).pack(pady=10)
+
 
     def call_summary_user_page(self):
         """!
@@ -125,6 +132,10 @@ class App(ThemedTk):
         button.config(command=lambda: self.stop_observation(button, summary_user_page))
         button.pack(side=tk.LEFT, padx=10, expand=True)
 
+        # Get data button
+        button_get_data = ttk.Button(self.main_frame, text="Get data", command=lambda: self.get_data())
+        button_get_data.pack(side=tk.LEFT, padx=10, expand=True)
+
     def redirect_to_new_observation_from_anywhere(self, page):
         """!
         @brief This function clears the previous page before calling the new observation page
@@ -134,9 +145,6 @@ class App(ThemedTk):
         """
         # Clear the previous page content
         self.clear_the_page(page)
-
-        # Creation of a main frame
-        self.create_new_main_frame()
 
         self.call_new_observation_page()
 
@@ -223,8 +231,8 @@ class App(ThemedTk):
 
         # Cancel button to redirect to the new observation page
         ttk.Button(self.main_frame, text="Cancel",
-                   command=lambda: self.redirect_to_new_observation_from_anywhere(login_as_admin_page)).place(
-            relx=0.9, rely=0.1)
+                   command=lambda: self.redirect_to_new_observation_from_anywhere(login_as_admin_page))\
+            .pack(side=tk.TOP, padx=10, expand=True, anchor='e')
 
     def connexion_button_clic(self, login_as_admin_page):
         """!
@@ -256,6 +264,9 @@ class App(ThemedTk):
         # Set the 'is modification' value to False
         globals.global_is_modification = False
 
+        globals.sensor_counts.clear()
+        globals.global_sensor_entries.clear()
+
         # Creation of the "modify or create configuration page"
         modify_or_create_configuration_page = ModifyOrCreateConfiguration(self.master)
         modify_or_create_configuration_page.show_page()
@@ -264,7 +275,7 @@ class App(ThemedTk):
         logout_button = ttk.Button(self.main_frame, text="Log out",
                                    command=lambda: self.redirect_to_new_observation_from_modify_or_create_a_config(
                                        modify_or_create_configuration_page))
-        logout_button.place(relx=0.9, rely=0.01)
+        logout_button.place(relx=0.9, rely=0.1)
 
         # Modify Button
         modify_button = ttk.Button(modify_or_create_configuration_page.left_frame, text="Modify the configuration",
@@ -300,12 +311,160 @@ class App(ThemedTk):
         @param modify_or_create_configuration_page : the modify_or_create_configuration_page
         @return Nothing
         """
-        modify_or_create_configuration_page.on_click_modify_button()
-        # Set the modification indicator to True
-        globals.global_is_modification = True
+        if modify_or_create_configuration_page.configuration_combobox.get() == 'No configuration available':
+            messagebox.showerror("Error", "No observation exist locally, please create or import one to be able to use the modify function.")
+        else:
+            modify_or_create_configuration_page.on_click_modify_button()
+            # Set the modification indicator to True
+            globals.global_is_modification = True
+            # Redirection to selection sensor quantity
+            self.redirect_to_modify_selection_sensor_quantity_from_anywhere(modify_or_create_configuration_page)
 
-        # Redirection to selection sensor quantity
-        self.redirect_to_selection_sensor_quantity_from_anywhere(modify_or_create_configuration_page)
+    def redirect_to_modify_selection_sensor_quantity_from_anywhere(self, page):
+        """!
+        @brief This function clears the previous page in order to display the content of the "modify selection sensor quantity"
+        page and adds navigations buttons.
+        @param self : the instance
+        @param page : the previous page
+        @return Nothing
+        """
+        # Clear the previous page content
+        self.clear_the_page(page)
+
+        # Creation of the "selection sensor quantity" page
+        modify_selection_sensor_quantity_page = ModifyQuantitySensor(self)
+        modify_selection_sensor_quantity_page.show_page()
+
+        # Creation of a main frame
+        self.create_new_main_frame()
+
+        # Add buttons
+        back_button = ttk.Button(self.main_frame, text="Back",
+                                 command=lambda: self.redirect_to_modify_or_create_configuration_from_anywhere(
+                                     modify_selection_sensor_quantity_page))
+        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        next_button = ttk.Button(self.main_frame, text="Next",
+                                 command=lambda: self.modify_check_if_user_chose_at_least_one_sensor(
+                                     modify_selection_sensor_quantity_page))
+        next_button.pack(side=tk.RIGHT, padx=10, expand=True)
+
+    def modify_check_if_user_chose_at_least_one_sensor(self, modify_selection_sensor_quantity_page):
+        """!
+        @brief This checks if the user selected at least one sensor before they are redirected to the labellisation page.
+        If no sensor was selected, an error message is displayed and the usr can't access to the next page.
+        @param self : the instance
+        @param modify_selection_sensor_quantity_page : the selection_sensor_quantity_page
+        @return Nothing
+        """
+        if modify_selection_sensor_quantity_page.chose_at_least_one_sensor():
+            # Calls this function in order to store into global variables the datas entered by the user in the sensor
+            # quantity page
+            modify_selection_sensor_quantity_page.save_sensors_quantity_into_globals()
+            self.redirect_to_modify_labellisation_sensor_from_anywhere(modify_selection_sensor_quantity_page)
+        else:
+            messagebox.showerror("Error", "Please select at least one sensor.")
+
+    def redirect_to_modify_selection_sensor_quantity_from_modify_labellisation(self, modify_labellisation_sensor_page):
+        """!
+        @brief This function saves the label that the user entrerd before redirecting him to modify selection sensor quantity
+        @param self : the instance
+        @param modify_labellisation_sensor_page : the modify labellisation page
+        @return Nothing
+        """
+        # Saves the data entered by the user in the labellisation page into global variables
+        modify_labellisation_sensor_page.get_sensor_data()
+        # Redirect to the summary admin page
+        self.redirect_to_modify_selection_sensor_quantity_from_anywhere(modify_labellisation_sensor_page)
+
+    def redirect_to_modify_labellisation_sensor_from_anywhere(self, page):
+        """!
+        @brief This function clears the previous page in order to display the content of the "modify labellisation sensor"
+        page and adds navigations buttons. It also allows to save into global variables the data entered by the user in the
+        previous page
+        @param self : the instance
+        @param page : the previous page
+        @return Nothing
+        """
+        # Clear the previous page content
+        self.clear_the_page(page)
+
+        # Creation of the "creation of the labellisation sensor" page
+        modify_labellisation_sensor_page = ModifyLabelisationSensor(self)
+        modify_labellisation_sensor_page.show_page()
+
+        # Creation of a main frame
+        self.create_new_main_frame()
+
+        # Add buttons
+        back_button = ttk.Button(self.main_frame, text="Back",
+                                 command=lambda: self.redirect_to_modify_selection_sensor_quantity_from_modify_labellisation(
+                                     modify_labellisation_sensor_page))
+        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        next_button = ttk.Button(self.main_frame, text="Next",
+                                 command=lambda: self.redirect_to_modify_summary_admin_from_labellisation(
+                                     modify_labellisation_sensor_page))
+        next_button.pack(side=tk.RIGHT, padx=10, expand=True)
+
+    def redirect_to_modify_summary_admin_from_labellisation(self, modify_labellisation_sensor_page):
+        """!
+        @brief This function checks that all the datas that the user have to fill are filled and all the labels are
+        unique. If so the function saves the data in the "modify labellisation" page then redirect to the summary admin page.
+        If not an error message is displayed.
+        entered by the user into global variables
+        @param self : the instance
+        @param modify_labellisation_sensor_page : the modify labellisation page
+        @return Nothing
+        """
+
+        if modify_labellisation_sensor_page.are_all_field_filled():
+            if modify_labellisation_sensor_page.are_all_label_unique():
+                # Saves the data entered by the user in the labellisation page into global variables
+                modify_labellisation_sensor_page.get_sensor_data()
+                # Redirect to the summary adminpage
+                self.redirect_to_modify_summary_admin_from_anywhere(modify_labellisation_sensor_page)
+            else:
+                messagebox.showerror("Error", "All the label must be unique.")
+        else:
+            messagebox.showerror("Error", "Please fill all the label and descriptions.")
+
+    def redirect_to_modify_summary_admin_from_anywhere(self, page):
+        """!
+        @brief This function clears the previous page in order to display the content of the "modify summary admin"
+        page and adds navigations buttons.
+        @param self : the instance
+        @param page : the previous page
+        @return Nothing
+        """
+        # Clear the previous page content
+        self.clear_the_page(page)
+
+        # Creation of the summary admin page
+        modify_summary_admin_page = ModifySummaryAdmin(self)
+        modify_summary_admin_page.show_page()
+
+        # Creation of a main frame
+        self.create_new_main_frame()
+
+        # Cancel button
+        cancel_button = ttk.Button(self.main_frame, text="Cancel",
+                                   command=lambda: self.redirect_to_modify_or_create_configuration_from_anywhere(
+                                       modify_summary_admin_page))
+        cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        # Back button
+        back_button = ttk.Button(self.main_frame, text="Back",
+                                 command=lambda: self.redirect_to_modify_labellisation_sensor_from_anywhere(
+                                     modify_summary_admin_page))
+        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
+        # Validate configuration button
+        back_button = ttk.Button(self.main_frame, text="Validate configuration",
+                                 command=lambda: self.redirect_to_modify_or_create_configuration_after_config_validation
+                                 (modify_summary_admin_page))
+        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+
 
     def redirect_to_selection_sensor_quantity_from_create_a_config(self, modify_or_create_a_config_page):
         """!
@@ -317,10 +476,14 @@ class App(ThemedTk):
         @param modify_or_create_a_config_page : the create or modify a configuration page
         @return Nothing
         """
+        label = modify_or_create_a_config_page.configuration_label_entry.get()
+        description = modify_or_create_a_config_page.configuration_description_text.get()
+
+        # Checks if the user has filled the label and the description
+        if label == "" or description == "":
+            messagebox.showerror("Error", "The label and the description must be filled.")
         # Checks if the user has chosen a unique name for the configuration
-        label = modify_or_create_a_config_page.name_entry.get()
-        print("config label = ", label)
-        if local.config_label_exists(label):
+        elif local.config_label_exists(label):
             # Display a message asking the user to choose another name
             messagebox.showerror("Error", "This configuration name already exists. Please choose another one.")
         else:
@@ -373,7 +536,20 @@ class App(ThemedTk):
             selection_sensor_quantity_page.save_sensors_quantity_into_globals()
             self.redirect_to_labellisation_sensor_from_anywhere(selection_sensor_quantity_page)
         else:
-            messagebox.showerror("Error", "Please select at least one sensor")
+            messagebox.showerror("Error", "Please select at least one sensor.")
+
+    def redirect_to_selection_sensor_quantity_from_labellisation(self, labellisation_sensor_page):
+        """!
+        @brief This function saves the label that the user entrerd before redirecting him to selection sensor quantity
+        @param self : the instance
+        @param labellisation_sensor_page : the labellisation page
+        @return Nothing
+        """
+
+        # Saves the data entered by the user in the labellisation page into global variables
+        labellisation_sensor_page.get_sensor_data()
+        # Redirect to the summary admin page
+        self.redirect_to_selection_sensor_quantity_from_anywhere(labellisation_sensor_page)
 
     def redirect_to_labellisation_sensor_from_anywhere(self, page):
         """!
@@ -396,7 +572,7 @@ class App(ThemedTk):
 
         # Add buttons
         back_button = ttk.Button(self.main_frame, text="Back",
-                                 command=lambda: self.redirect_to_selection_sensor_quantity_from_anywhere(
+                                 command=lambda: self.redirect_to_selection_sensor_quantity_from_labellisation(
                                      labellisation_sensor_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
@@ -407,18 +583,36 @@ class App(ThemedTk):
 
     def redirect_to_summary_admin_from_labellisation(self, labellisation_sensor_page):
         """!
-        @brief This function clears the previous page in order to display the content of the "summary admin"
-        page and adds navigations buttons. It also saves the data in the "labellisation" page
+        @brief This function checks that all the datas that the user have to fill are filled and all the labels are
+        unique. If so the function saves the data in the "labellisation" page then redirect to the summary admin page.
+        If not an error message is displayed.
         entered by the user into global variables
         @param self : the instance
         @param labellisation_sensor_page : the labellisation page
         @return Nothing
         """
-        # Saves the data entered by the user in the labellisation page into global variables
-        labellisation_sensor_page.get_sensor_data()
 
+        if labellisation_sensor_page.are_all_field_filled():
+            if labellisation_sensor_page.are_all_label_unique():
+                # Saves the data entered by the user in the labellisation page into global variables
+                labellisation_sensor_page.get_sensor_data()
+                # Redirect to the summary adminpage
+                self.redirect_to_summary_admin_from_anywhere(labellisation_sensor_page)
+            else:
+                messagebox.showerror("Error", "All the label must be unique.")
+        else:
+            messagebox.showerror("Error", "Please fill all the label and descriptions.")
+
+    def redirect_to_summary_admin_from_anywhere(self, page):
+        """!
+        @brief This function clears the previous page in order to display the content of the "summary admin"
+        page and adds navigations buttons.
+        @param self : the instance
+        @param page : the previous page
+        @return Nothing
+        """
         # Clear the previous page content
-        self.clear_the_page(labellisation_sensor_page)
+        self.clear_the_page(page)
 
         # Creation of the summary admin page
         summary_admin_page = SummaryAdmin(self)
@@ -487,15 +681,21 @@ class App(ThemedTk):
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Start observation button
-        button = ttk.Button(self.main_frame, text="Start observation")
-        button.config(command=lambda: self.start_observation(button, summary_user_page))
-        button.pack(side=tk.LEFT, padx=10, expand=True)
+        start_stop_button = ttk.Button(self.main_frame, text="Start observation")
+        start_stop_button.config(command=lambda: self.start_observation(start_stop_button, summary_user_page))
+        start_stop_button.pack(side=tk.LEFT, padx=10, expand=True)
 
-    def start_observation(self, button, summary_user_page):
+
+        # Get data button
+        button_get_data = ttk.Button(self.main_frame, text="Get data", command=lambda: self.get_data())
+        button_get_data.pack(side=tk.LEFT, padx=10, expand=True)
+
+    def start_observation(self, start_stop_button, summary_user_page):
         """!
-        @brief This function starts the observation and change the label of the button
+        @brief This function starts the observation and change the label of the button, it also adds a button to get
+        the data from the DB
         @param self : the instance
-        @param button : the start observation button
+        @param start_stop_button : the start observation button
         @param summary_user_page : the summary user page
         @return Nothing
         """
@@ -518,13 +718,13 @@ class App(ThemedTk):
         messagebox.showinfo("Start observation", "The observation is started.")
 
         # Changing the label and the function associated to the button
-        button.config(text="Stop observation", command=lambda: self.stop_observation(button, summary_user_page))
+        start_stop_button.config(text="Stop observation", command=lambda: self.stop_observation(start_stop_button, summary_user_page))
 
-    def stop_observation(self, button, summary_user_page):
+    def stop_observation(self, start_stop_button, summary_user_page):
         """!
         @brief This function allows the user to stop the observation and change the label of the button
         @param self : the instance
-        @param button : the stop observation button
+        @param start_stop_button : the stop observation button
         @param summary_user_page : the summary user page
         @return Nothing
         """
@@ -540,7 +740,16 @@ class App(ThemedTk):
         messagebox.showinfo("Stop observation", "The observation is stopped.")
 
         # Changing the label and the function associated to the button
-        button.config(text="Start observation", command=lambda: self.start_observation(button, summary_user_page))
+        start_stop_button.config(text="Start observation", command=lambda: self.start_observation(start_stop_button, summary_user_page))
+
+    def get_data(self):
+        """!
+        @brief This function
+        @param self : the instance
+        @return Nothing
+        """
+        # TODO Matteo, c'est ici que tu peux mettre tes fonctions stv
+        messagebox.showinfo("Get data", "La fonction get_data est appelée")
 
     def clear_the_page(self, page):
         """!
@@ -563,7 +772,7 @@ class App(ThemedTk):
         """
         # Creation of a main frame
         self.main_frame = ttk.Frame(self)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
+        self.main_frame.pack(fill=tk.BOTH, expand=True, padx=5)
 
     def closing_protocol(self):
         """!

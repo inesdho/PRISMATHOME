@@ -129,10 +129,10 @@ class UpdateLocalDatabase:
         try:
             # Connexion to remote database
             remote_conn = mysql.connector.connect(
-                host="127.0.0.1",
+                host="localhost",
                 user="root",
                 password="Q3fhllj2",
-                database="prisme_home_1"
+                database="prisme@home_ICM"
             )
 
             # Connexion to local database
@@ -140,7 +140,7 @@ class UpdateLocalDatabase:
                 host="localhost",
                 user="root",
                 password="Q3fhllj2",
-                database="prismathome"
+                database="prisme_home_1"
             )
 
             # Cursor for the remote database
@@ -193,10 +193,10 @@ class UpdateLocalDatabase:
         try:
             # Connexion to remote database
             remote_conn = mysql.connector.connect(
-                host="127.0.0.1",
+                host="localhost",
                 user="root",
                 password="Q3fhllj2",
-                database="prisme_home_1"
+                database="prisme@home_ICM"
             )
 
             # Connexion to local database
@@ -204,7 +204,7 @@ class UpdateLocalDatabase:
                 host="localhost",
                 user="root",
                 password="Q3fhllj2",
-                database="prismathome"
+                database="prisme_home_1"
             )
 
             # Cursor for the remote database
@@ -256,10 +256,10 @@ class UpdateLocalDatabase:
         try:
             # Connexion to remote database
             remote_conn = mysql.connector.connect(
-                host="127.0.0.1",
+                host="localhost",
                 user="root",
                 password="Q3fhllj2",
-                database="prisme_home_1"
+                database="prisme@home_ICM"
             )
 
             # Connexion to local database
@@ -267,7 +267,7 @@ class UpdateLocalDatabase:
                 host="localhost",
                 user="root",
                 password="Q3fhllj2",
-                database="prismathome"
+                database="prisme_home_1"
             )
 
             # Cursor for the remote database
