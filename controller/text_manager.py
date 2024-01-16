@@ -98,8 +98,8 @@ class TextManager:
         self.text.bind("<Key>", self.which_key)
 
         # Binding the focus on the entry
-        self.text.bind("<FocusOut>", self.on_text_focus_out)
-        self.text.bind("<FocusIn>", self.on_text_focus_in)
+        #self.text.bind("<FocusOut>", self.on_text_focus_out)
+        #self.text.bind("<FocusIn>", self.on_text_focus_in)
 
 
     def which_key(self, event):
