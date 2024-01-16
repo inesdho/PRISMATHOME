@@ -51,7 +51,7 @@ class App(ThemedTk):
             self.attributes('-fullscreen', True)
             self.bind('<Escape>', lambda e: self.attributes('-fullscreen', False))
 
-        self.wm_attributes('-topmost',1)
+        self.lift()
 
         # Theme of the application
         self.style = ThemedStyle(self)
@@ -222,7 +222,7 @@ class App(ThemedTk):
         self.create_new_main_frame()
 
         # Redirecting to the login page
-        login_as_admin_page = LoginAsAdministrator(self.master)
+        login_as_admin_page = LoginAsAdministrator(self)
         login_as_admin_page.show_page()
 
         # Connection button
@@ -263,19 +263,17 @@ class App(ThemedTk):
 
         # Set the 'is modification' value to False
         globals.global_is_modification = False
-
         globals.sensor_counts.clear()
         globals.global_sensor_entries.clear()
 
         # Creation of the "modify or create configuration page"
-        modify_or_create_configuration_page = ModifyOrCreateConfiguration(self.master)
+        modify_or_create_configuration_page = ModifyOrCreateConfiguration(self)
         modify_or_create_configuration_page.show_page()
 
         # Logout Button
-        logout_button = ttk.Button(self.main_frame, text="Log out",
+        ttk.Button(self.main_frame, text="Log out",
                                    command=lambda: self.redirect_to_new_observation_from_modify_or_create_a_config(
-                                       modify_or_create_configuration_page))
-        logout_button.place(relx=0.9, rely=0.1)
+                                       modify_or_create_configuration_page)).place(relx=0.9, rely=0.1)
 
         # Modify Button
         modify_button = ttk.Button(modify_or_create_configuration_page.left_frame, text="Modify the configuration",

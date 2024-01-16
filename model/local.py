@@ -38,8 +38,10 @@ local_cursor_protect = False
 caching = False
 
 config = {
-    "host": "192.168.1.22",
-    "user": "prisme",
+    #"host": "192.168.1.22",
+    "host": "localhost",
+    #"user": "prisme",
+    "user": "root",
     "password": "Q3fhllj2",
     "database": "prisme_home_1"
 }
