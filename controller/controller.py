@@ -57,10 +57,6 @@ class App(ThemedTk):
         # Protool incas of closing window
         self.protocol("WM_DELETE_WINDOW", self.closing_protocol)
 
-        # Creating main frame
-        self.main_frame = ttk.Frame(self)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
-
         self.is_observation_running()
 
     def is_observation_running(self):
@@ -83,6 +79,9 @@ class App(ThemedTk):
         @param self : the instance
         @return Nothing
         """
+        # Creation of a main frame
+        self.create_new_main_frame()
+
         # Redirecting to the login page
         new_observation_page = NewObservation(self)
         new_observation_page.show_page()
@@ -94,7 +93,7 @@ class App(ThemedTk):
 
         # Redirection to login as an admin button
         ttk.Button(new_observation_page.frame, text="Import configuration",
-                   command=lambda: self.redirect_to_pairing_from_new_observation(new_observation_page)).pack()
+                   command=lambda: self.redirect_to_pairing_from_new_observation(new_observation_page)).pack(pady=10)
 
     def call_summary_user_page(self):
         """!
@@ -587,7 +586,7 @@ class App(ThemedTk):
         """
         # Creation of a main frame
         self.main_frame = ttk.Frame(self)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
+        self.main_frame.pack(fill=tk.BOTH, expand=True, padx=5)
 
     def closing_protocol(self):
         """!

@@ -31,11 +31,11 @@ class NewObservation:
         self.configuration_values = []
 
         # Main frame of the new observation window
-        self.frame.pack(fill=tk.BOTH, expand=True)
+        self.frame.pack(fill=tk.BOTH, expand=True, side=tk.TOP)
 
         # Label "New Observation"
-        label = ttk.Label(self.frame, text="New Observation", font=globals.global_font_title)
-        label.pack(pady=20)
+        label = ttk.Label(self.frame, text="NEW OBSERVATION", font=globals.global_font_title, foreground='#3daee9')
+        label.pack(pady=30)
 
 
     def show_page(self):
@@ -48,7 +48,7 @@ class NewObservation:
         # User input
         user_label = ttk.Label(self.frame, text="User", font=globals.global_font_title1)
         user_label.pack()
-        user_label = ttk.Label(self.frame, text=getpass.getuser(), font=18)
+        user_label = ttk.Label(self.frame, text=getpass.getuser(), font=("Calibi", 12))
         user_label.pack(pady=10)
         # TODO paul I guess ? remplacer le default texte par la valeur que tu as crée de l'utilisateur de la session
         #self.user_entry = EntryManager(self.frame, min=1, max=30, has_width=30, default_text="User")
@@ -68,7 +68,7 @@ class NewObservation:
             self.configuration_values = [(config['label'], config['id_config']) for config in configurations]
 
             # Creation of a combobox with the list of configuration labels
-            self.configuration_combobox = ttk.Combobox(self.frame, state="readonly", width=29)
+            self.configuration_combobox = ttk.Combobox(self.frame, state="readonly", width=29, background="white")
             self.configuration_combobox['values'] = [label for label, id_config in self.configuration_values]
             self.configuration_combobox.set(self.configuration_values[0][0])
             self.configuration_combobox.pack(pady=10)

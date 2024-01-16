@@ -28,14 +28,14 @@ class LabelisationSensor:
         self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
 
         # Displays the title of the page
-        label = ttk.Label(self.frame, text="Sensor labellisation", font=globals.global_font_title, padding=10)
-        label.pack(pady=20)
+        label = ttk.Label(self.frame, text="SENSOR LABELLISATION", font=globals.global_font_title, foreground='#3daee9')
+        label.pack(pady=30)
 
         # Creation of a canvas in order to add a scrollbar in case to many lines of sensors are displayed
         self.canvas = tk.Canvas(self.frame, bd=2, relief="ridge", highlightthickness=2)
         self.scrollbar = ttk.Scrollbar(self.frame, orient="vertical", command=self.canvas.yview)
         self.scrollbar.pack(side=tk.RIGHT, fill="y")
-        self.canvas.pack(fill=tk.BOTH, expand=True)
+        self.canvas.pack(fill=tk.BOTH, expand=True, padx=5)
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
 
         self.frame_canvas = ttk.Frame(self.canvas)
@@ -91,15 +91,15 @@ class LabelisationSensor:
         entry_frame = ttk.Frame(self.frame_canvas)
         entry_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
-        label = ttk.Label(entry_frame, text=label_text, width=20)
-        label.pack(side=tk.LEFT)
+        label = ttk.Label(entry_frame, text=label_text, width=20, font=globals.global_font_title1)
+        label.pack(side=tk.LEFT, padx=5)
 
-        label_label = ttk.Label(entry_frame, text="Label :", width=10, font=globals.global_font_text)
+        label_label = ttk.Label(entry_frame, text="Label :", width=10, font=globals.global_font_text, anchor='center')
         label_label.pack(side=tk.LEFT)
         entry_label = EntryManager(entry_frame, min=1, max=80, has_width=20, auto_pack=False, default_text=initial_label)
         entry_label.get_entry().pack(side=tk.LEFT)
 
-        description_label = ttk.Label(entry_frame, text="Description :", width=15, font=globals.global_font_text)
+        description_label = ttk.Label(entry_frame, text="Description :", width=15, font=globals.global_font_text, anchor='center')
         description_label.pack(side=tk.LEFT)
         entry_description = EntryManager(entry_frame, min=1, max=600, has_width=80, has_special_char=True, auto_pack=False,
                                          default_text=initial_description)

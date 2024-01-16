@@ -36,8 +36,8 @@ class SummaryUser:
         self.button_frame.pack(padx=5, pady=10)
 
         # Displays the title of the page
-        label = ttk.Label(self.frame, text="Summary", font=globals.global_font_title, padding=10)
-        label.pack(pady=20)
+        label = ttk.Label(self.frame, text="SUMMARY USER", font=globals.global_font_title, foreground='#3daee9')
+        label.pack(pady=30)
 
         # Information about the configuration
         scenario_label = ttk.Label(self.frame,
@@ -72,13 +72,13 @@ class SummaryUser:
         frame_title.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
         # Create the title of the different field
-        ttk.Label(frame_title, background="lightgrey", width=20, text="Sensor", borderwidth=1, relief="solid",
+        ttk.Label(frame_title, background="#3daee9", width=20, text="Sensor", borderwidth=0.5, relief="solid",
                   padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
-        ttk.Label(frame_title, background="lightgrey", width=20, text="Label", borderwidth=1, relief="solid",
+        ttk.Label(frame_title, background="#3daee9", width=20, text="Label", borderwidth=0.5, relief="solid",
                   padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
-        ttk.Label(frame_title, background="lightgrey", width=80, text="Description", borderwidth=1, relief="solid",
+        ttk.Label(frame_title, background="#3daee9", width=80, text="Description", borderwidth=0.5, relief="solid",
                   padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
-        ttk.Label(frame_title, background="lightgrey", width=20, text="State", borderwidth=1, relief="solid",
+        ttk.Label(frame_title, background="#3daee9", width=20, text="State", borderwidth=0.5, relief="solid",
                   padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
 
         self.data_frame = ttk.Frame(self.frame_canvas)
@@ -139,20 +139,20 @@ class SummaryUser:
 
             # Showing the type of the sensor
             ttk.Label(sensor_frame, text=f"{sensor_type}", width=20, anchor='w', wraplength=140,
-                      background="white", borderwidth=1, relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
+                      background="white", borderwidth=0.5, relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
             print("LABEL TYPE CREATED")
 
             # Creating a text widget tht will contain the label associated with the sensor
-            ttk.Label(sensor_frame, text=f"{sensor_info['label']}", borderwidth=1, background="white", width=20,
+            ttk.Label(sensor_frame, text=f"{sensor_info['label']}", borderwidth=0.5, background="white", width=20,
                       relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
             # Showing the description of the sensor
-            ttk.Label(sensor_frame, text=f"{sensor_info['description']}", borderwidth=1, background="white", width=80,
+            ttk.Label(sensor_frame, text=f"{sensor_info['description']}", borderwidth=0.5, background="white", width=80,
                       relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
             # Showing the current state of the sensor
-            label_state = ttk.Label(sensor_frame, text=f"Etat en direct", borderwidth=1, background="white", width=20,
+            label_state = ttk.Label(sensor_frame, text=f"Etat en direct", borderwidth=0.5, background="white", width=20,
                       relief="solid", padding=5, anchor="center", font=globals.global_font_text)
 
             print("Creation des label ok")
