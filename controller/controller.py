@@ -244,6 +244,9 @@ class App(ThemedTk):
         # Creation of a main frame
         self.create_new_main_frame()
 
+        # Set the 'is modification' value to False
+        globals.global_is_modification = False
+
         # Creation of the "modify or create configuration page"
         modify_or_create_configuration_page = ModifyOrCreateConfiguration(self.master)
         modify_or_create_configuration_page.show_page()
@@ -255,9 +258,8 @@ class App(ThemedTk):
         logout_button.place(relx=0.9, rely=0.01)
 
         # Modify Button
-        # TODO Modifier la redirection pour qu'elle prenne en compte le fait que là on va éditer une config existante
         modify_button = ttk.Button(modify_or_create_configuration_page.left_frame, text="Modify the configuration",
-                                   command=lambda: self.redirect_to_selection_sensor_quantity_from_create_a_config(
+                                   command=lambda: self.redirect_to_selection_sensor_quantity_to_modify_a_config(
                                        modify_or_create_configuration_page))
         modify_button.pack(side="bottom", fill="x")
 
@@ -281,6 +283,20 @@ class App(ThemedTk):
         # Go back to the "modify or create a configuration page"
         self.redirect_to_modify_or_create_configuration_from_anywhere(summary_admin_page)
 
+    def redirect_to_selection_sensor_quantity_to_modify_a_config(self, modify_or_create_configuration_page):
+        """!
+        @brief This function update the global variable indicating if this is a "modify a configuration" context to True
+        and redirect to the 'selection sensor quantity' page
+        @param self : the instance
+        @param modify_or_create_configuration_page : the modify_or_create_configuration_page
+        @return Nothing
+        """
+        # Set the modification indicator to True
+        globals.global_is_modification = True
+
+        # Redirection to selection sensor quantity
+        self.redirect_to_selection_sensor_quantity_from_anywhere(modify_or_create_configuration_page)
+
     def redirect_to_selection_sensor_quantity_from_create_a_config(self, modify_or_create_a_config_page):
         """!
         @brief This function first checks if the label of the config chosen by the user is not already taken. In that
@@ -291,7 +307,6 @@ class App(ThemedTk):
         @param modify_or_create_a_config_page : the create or modify a configuration page
         @return Nothing
         """
-
         # Checks if the user has chosen a unique name for the configuration
         if modify_or_create_a_config_page.does_label_config_already_exists():
             # Display a message asking the user to choose another name
