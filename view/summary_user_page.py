@@ -152,7 +152,9 @@ class SummaryUser:
 
             # Showing the current state of the sensor
             label_state = ttk.Label(sensor_frame, text=f"Etat en direct", borderwidth=1, background="white", width=20,
-                      relief="solid", padding=5, anchor="center", font=globals.global_font_text)
+                                    relief="solid", padding=5, anchor="center", font=globals.global_font_text)
+
+            print("Creation des label ok")
 
             print("Creation des label ok")
 
