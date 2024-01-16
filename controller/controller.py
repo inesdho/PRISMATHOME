@@ -373,7 +373,7 @@ class App(ThemedTk):
             selection_sensor_quantity_page.save_sensors_quantity_into_globals()
             self.redirect_to_labellisation_sensor_from_anywhere(selection_sensor_quantity_page)
         else:
-            messagebox.showerror("Error", "Please select at least one sensor")
+            messagebox.showerror("Error", "Please select at least one sensor.")
 
     def redirect_to_labellisation_sensor_from_anywhere(self, page):
         """!
@@ -407,18 +407,36 @@ class App(ThemedTk):
 
     def redirect_to_summary_admin_from_labellisation(self, labellisation_sensor_page):
         """!
-        @brief This function clears the previous page in order to display the content of the "summary admin"
-        page and adds navigations buttons. It also saves the data in the "labellisation" page
+        @brief This function checks that all the datas that the user have to fill are filled and all the labels are
+        unique. If so the function saves the data in the "labellisation" page then redirect to the summary admin page.
+        If not an error message is displayed.
         entered by the user into global variables
         @param self : the instance
         @param labellisation_sensor_page : the labellisation page
         @return Nothing
         """
-        # Saves the data entered by the user in the labellisation page into global variables
-        labellisation_sensor_page.get_sensor_data()
 
+        if labellisation_sensor_page.are_all_field_filled():
+            if labellisation_sensor_page.are_all_label_unique():
+                # Saves the data entered by the user in the labellisation page into global variables
+                labellisation_sensor_page.get_sensor_data()
+                # Redirect to the summary adminpage
+                self.redirect_to_summary_admin_from_anywhere(labellisation_sensor_page)
+            else:
+                messagebox.showerror("Error", "All the label must be unique.")
+        else:
+            messagebox.showerror("Error", "Please fill all the label and descriptions.")
+
+    def redirect_to_summary_admin_from_anywhere(self, page):
+        """!
+        @brief This function clears the previous page in order to display the content of the "summary admin"
+        page and adds navigations buttons.
+        @param self : the instance
+        @param page : the previous page
+        @return Nothing
+        """
         # Clear the previous page content
-        self.clear_the_page(labellisation_sensor_page)
+        self.clear_the_page(page)
 
         # Creation of the summary admin page
         summary_admin_page = SummaryAdmin(self)

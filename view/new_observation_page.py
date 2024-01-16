@@ -81,12 +81,12 @@ class NewObservation:
         # Session input
         session_label = ttk.Label(self.frame, text="Session", font=globals.global_font_title1)
         session_label.pack()
-        self.session_entry = EntryManager(self.frame, min=1, max=100, has_width=30, default_text="Session")
+        self.session_entry = EntryManager(self.frame, min=1, max=100, has_width=30)
 
         # Participant input
         participant_label = ttk.Label(self.frame, text="Participant", font=globals.global_font_title1)
         participant_label.pack()
-        self.participant_entry = EntryManager(self.frame, min=1, max=70, has_width=30, default_text="Participant")
+        self.participant_entry = EntryManager(self.frame, min=1, max=70, has_width=30)
 
     def clear_page(self):
         """!

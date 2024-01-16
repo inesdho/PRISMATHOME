@@ -58,8 +58,8 @@ class LabelisationSensor:
                 existing_entry = next((entry for entry in globals.global_sensor_entries if entry[3] == unique_id), None)
 
                 # Check if the previous values exist
-                initial_label = existing_entry[1] if existing_entry else "Label"
-                initial_description = existing_entry[2] if existing_entry else "Description"
+                initial_label = existing_entry[1] if existing_entry else ""
+                initial_description = existing_entry[2] if existing_entry else ""
 
                 sensor_type = local.get_sensor_type_from_id_type(sensor_type_id)
 
@@ -130,3 +130,31 @@ class LabelisationSensor:
         @return Nothing
         """
         self.frame.destroy()
+
+    def are_all_field_filled(self):
+        """!
+        @brief This functions checks that all the entry are filled
+        @param the instance
+        @return True if all the entry are filled, else return false
+        """
+        for sensor_type_id, label_entry, description_entry, unique_id in self.sensor_entries:
+            if label_entry.get() == "":
+                return False
+            if description_entry.get() == "":
+                return False
+        return True
+
+    def are_all_label_unique(self):
+        """!
+        @brief This functions checks that all the entry label are unique
+        @param the instance
+        @return True if all the entry are unique, else return false
+        """
+        for sensor_type_id_i, label_entry_i, description_entry_i, unique_id_i in self.sensor_entries:
+            for sensor_type_id_j, label_entry_j, description_entry_j, unique_id_j in self.sensor_entries:
+                # If the labels are identical and if it's not the same sensor return False
+                if label_entry_i.get() == label_entry_j.get():
+                    if unique_id_i != unique_id_j:
+                        return False
+        # Return True if all the labels are identical
+        return True
