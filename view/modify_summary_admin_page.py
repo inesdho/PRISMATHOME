@@ -164,7 +164,7 @@ class ModifySummaryAdmin:
                                    globals.global_scenario_name_configuration,
                                    globals.global_description_configuration,
                                    new_sensor_entries)
-        self.clear_sensor_entries()
+        self.clear_sensor_entries_and_sensor_count()
 
     def clear_sensor_entries_and_sensor_count(self):
         """!
