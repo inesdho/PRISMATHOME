@@ -531,7 +531,7 @@ class App(ThemedTk):
 
         program_pid = system_function.get_pid_of_script("reception.py")
 
-        system_function.send_sigterm(program_pid)
+        system_function.send_signal(program_pid, "SIGUSR1")
 
         # Calling the function to stop the observation
         # voir avec les indus comment stopper la reception des datas

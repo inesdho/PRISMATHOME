@@ -31,8 +31,8 @@ ids_to_modify = ['id_sensor', 'id_data', 'id_observation']
 tables_to_prepend = ['sensor', 'data', 'observation']
 
 config = {
-    "host": "192.168.1.22",
-    "user": "prisme",
+    "host": "localhost",
+    "user": "root",
     "password": "Q3fhllj2",
     "database": "prisme@home_ICM"
 }

@@ -1,9 +1,9 @@
 import subprocess
 import os
 # TODO faire la doc
-def send_sigterm(pid):
+def send_signal(pid, signal_name):
     script_path = "/home/prisme/Prisme@home/PRISMATHOME/kill_program.sh"
-    subprocess.run(["sh", script_path, str(pid)], check=True)
+    subprocess.run(["sh", script_path, str(pid), signal_name], check=True)
 
 def get_pid_of_script(script_name):
     """!

@@ -17,7 +17,10 @@ import os
 import time
 import signal
 import threading
-sys.path.append(os.path.abspath('/home/prisme/Prisme@home//PRISMATHOME'))
+
+sys.path.append(os.path.abspath('/home/prisme/Prisme@home/PRISMATHOME'))
+
+from system import system_function
 import model.local
 
 ## The GPIO pin number of the shutdown button
@@ -88,7 +91,7 @@ def listen_for_shutdown():
     GPIO.wait_for_edge(BUTTON_PIN, GPIO.FALLING)
 
 
-def yellow_led_blink():
+def yellow_led_blink_start():
     """!
     Make the yellow LED blink until the prism@home program is ready
 
@@ -97,8 +100,7 @@ def yellow_led_blink():
     # Switching off green LED 
     GPIO.output(GREEN_LED_PIN, GPIO.LOW)
     print("Clignotage en cours")
-    # Set the signal handler
-    signal.signal(signal.SIGTERM, handler_prgm_started)
+
     global program_up
     # Make the Yellow LED blink forever
     while not program_up:
@@ -108,7 +110,7 @@ def yellow_led_blink():
         time.sleep(0.5)
 
 
-def yellow_led_blink_background():
+def yellow_led_blink_stop():
     """!
     Make the yellow LED blink forever in background
 
@@ -133,15 +135,19 @@ def set_LED_to_green():
 
     @return None
     """
+    print("GREEN LED")
     GPIO.output(YELLOW_LED_PIN, GPIO.LOW)
     GPIO.output(GREEN_LED_PIN, GPIO.HIGH)
 
 
 if __name__ == "__main__":
+
     # Initialise the GPIO pins
     init_GPIO_pins()
 
     # TODO : Faire clignoter la led ici
+    thread_yellow_led_blink_start = threading.Thread(target=yellow_led_blink_start)
+    thread_yellow_led_blink_start.start()
 
     model.local.connect_to_local_db()
 
@@ -153,6 +159,8 @@ if __name__ == "__main__":
 
     if (id_observation is not None
             and id_observation is not False):
+        # Set the signal handler
+        signal.signal(signal.SIGTERM, handler_prgm_started)
         sensor_list = model.local.get_sensors_from_observation(id_observation)
         print("sensor list: ", sensor_list)
         for sensor in sensor_list:
@@ -162,27 +170,38 @@ if __name__ == "__main__":
         command = ["python", "/home/prisme/Prisme@home/PRISMATHOME/reception.py"] + arguments
 
         # Start the main program
-        main_program = subprocess.Popen(command)
+        subprocess.Popen(command)
+    else:
+        print("else")
+        program_up = True
 
-        yellow_led_blink()
+    thread_yellow_led_blink_start.join()
+    print("thread_yellow_led_blink_start joined")
 
     set_LED_to_green()
 
     # Waiting for shutdown button to be pressed
     listen_for_shutdown()
+    print("listen shut down")
 
     # Creation of a thread
-    blink_background = threading.Thread(target=yellow_led_blink_background)
-    blink_background.start()
+    thread_yellow_led_blink_stop = threading.Thread(target=yellow_led_blink_stop)
+    thread_yellow_led_blink_stop.start()
 
-    signal.signal(signal.SIGTERM, handler_prgm_stopped)
+    if model.local.get_active_observation():
+        main_pid = system_function.get_pid_of_script("reception.py")
 
-    # Send a SIGTERM signal to the prism@home program
-    subprocess.call(['kill', '-SIGTERM', str(main_program.pid)], shell=False)
+        print("\033[33mmain_pid : ", main_pid, "\033[0m")
 
-    # Wait for the signal comming from prism@home program
-    while not program_down:
-        pass
+        signal.signal(signal.SIGTERM, handler_prgm_stopped)
 
+        # Send a SIGUSR2 signal to the prism@home program
+        system_function.send_signal(main_pid, "SIGUSR2")
+
+        # Wait for the signal comming from prism@home program
+        while not program_down:
+            pass
+
+        print("coucou")
     # Shutdown the system when everything is ready
     subprocess.run(["sudo", "shutdown", "-h", "now"], check=True)
