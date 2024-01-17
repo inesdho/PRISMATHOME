@@ -33,10 +33,16 @@ class SummaryAdmin:
         label = ttk.Label(self.frame, text="SUMMARY ADMIN", font=globals.global_font_title, foreground='#3daee9')
         label.pack(pady=30)
 
-        # Information about the configuration
-        scenario_label = ttk.Label(self.frame, text="Configuration : " + globals.global_scenario_name_configuration,
-                                   padding=10, anchor="w", font=globals.global_font_title1)
-        scenario_label.pack(pady=20, fill=tk.BOTH)
+        if globals.global_id_config_modify:
+            # Information about the configuration
+            scenario_label = ttk.Label(self.frame, text="Configuration : " + local.get_config_labels_ids(globals.global_id_config_modify),
+                                       padding=10, anchor="w", font=globals.global_font_title1)
+            scenario_label.pack(pady=20, fill=tk.BOTH)
+        else:
+            # Information about the configuration
+            scenario_label = ttk.Label(self.frame, text="Configuration : " + globals.global_scenario_name_configuration,
+                                       padding=10, anchor="w", font=globals.global_font_title1)
+            scenario_label.pack(pady=20, fill=tk.BOTH)
 
         # Creation of the frame that will contain the buttons
         self.button_frame = ttk.Frame(self.frame)
@@ -146,7 +152,7 @@ class SummaryAdmin:
         self.frame.destroy()
         self.button_frame.destroy()
 
-    def validate_conf(self):
+    def validate_conf_for_create(self):
         """!
         @brief This functions validated all the infos relative to the current created configuration in order to save them
         @param self : the instance
@@ -167,6 +173,25 @@ class SummaryAdmin:
                                    globals.global_description_configuration,
                                    new_sensor_entries)
         self.clear_sensor_entries_and_sensor_count()
+
+    def validate_conf_for_modify(self):
+        """!
+        @brief This functions validated all the infos relative to the current created configuration in order to save them
+        @param self : the instance
+        @return Nothing
+        """
+        local.delete_sensor_config(globals.global_id_config_modify)
+        # Get the new id config to create it
+        globals.global_id_config = globals.global_id_config_modify
+
+        # Remove the id_unique field in the sensor list which is useless
+        new_sensor_entries = [(sensor_id, label_entry, description_entry)
+                              for index, (sensor_id, label_entry, description_entry, id_unique)
+                              in enumerate(globals.global_sensor_entries, start=1)]
+        # Insert the configuration in DB and the sensor configs
+        local.insert_new_sensors_for_configuration(globals.global_id_config, new_sensor_entries)
+        self.clear_sensor_entries_and_sensor_count()
+
 
     def clear_sensor_entries_and_sensor_count(self):
         """!

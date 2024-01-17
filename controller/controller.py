@@ -295,8 +295,11 @@ class App(ThemedTk):
         @param summary_admin_page : the summary admin page
         @return Nothing
         """
-        # Log the data into the database
-        summary_admin_page.validate_conf()
+        if globals.global_is_modification:
+            summary_admin_page.validate_conf_for_modify()
+        else:
+            # Log the data into the database
+            summary_admin_page.validate_conf_for_create()
 
         # Go back to the "modify or create a configuration page"
         self.redirect_to_modify_or_create_configuration_from_anywhere(summary_admin_page)
@@ -316,7 +319,7 @@ class App(ThemedTk):
             # Set the modification indicator to True
             globals.global_is_modification = True
             # Redirection to selection sensor quantity
-            self.redirect_to_modify_selection_sensor_quantity_from_anywhere(modify_or_create_configuration_page)
+            self.redirect_to_selection_sensor_quantity_from_anywhere(modify_or_create_configuration_page)
 
     def redirect_to_modify_selection_sensor_quantity_from_anywhere(self, page):
         """!
