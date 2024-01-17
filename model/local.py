@@ -107,7 +107,6 @@ def add_system_id(local_id):
 def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3):
     # A flag to retry or not on connection lost
     # if a transaction is started to rollback changes
-    print("QUERY = ", query)
     retry = True
     conn = None
     for attempt in range(max_attempts):
@@ -1145,3 +1144,20 @@ def config_label_exists(label):
         return False
     else:
         return True
+
+
+def get_remote_queries():
+    """
+    Retrieves all the unsent remote queries stored in the 'remote_queries' table to export them in an SQL file
+
+    @return The list of unsent remote queries.
+    """
+    query = "SELECT id_query, query FROM remote_queries"
+    remote_queries_list = execute_query_with_reconnect(query)
+
+    if remote_queries_list:
+        return remote_queries_list
+    else:
+        return None
+
+

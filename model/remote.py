@@ -77,7 +77,7 @@ def execute_remote_query(query, values=None, synchronise=False):
     @param synchronise: TODO
     @return 1 if successfully inserted, 0 otherwise
     """
-    print("Enterring execute_remote_query")
+    print("Entering execute_remote_query")
     global flag_synchro, thread_active
 
     conn = None
@@ -132,8 +132,7 @@ def synchronise_queries():
     while local.caching:
         pass
 
-    query = "SELECT id_query, query FROM remote_queries"
-    remote_queries_list = local.execute_query_with_reconnect(query)     # Fetch all unsent remote queries
+    remote_queries_list = local.get_remote_queries()
 
     if not remote_queries_list:
         return
@@ -149,6 +148,7 @@ def synchronise_queries():
                                        None, None, f"id_query = {id_query}")
         except Exception as e:
             print("Sync error : ", e)
+            return
 
 
 def fetch_remote_configs(get_users, get_configs):
@@ -222,7 +222,6 @@ def fetch_remote_configs(get_users, get_configs):
                             )
                         if insertion is None:
                             return 0
-
 
             remote_query = "SELECT id_config, id_sensor_type, sensor_label, sensor_description FROM sensor_config"
             cursor.execute(remote_query)
