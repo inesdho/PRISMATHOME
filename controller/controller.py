@@ -312,7 +312,7 @@ class App(ThemedTk):
         if modify_or_create_configuration_page.configuration_combobox.get() == 'No configuration available':
             messagebox.showerror("Error", "No observation exist locally, please create or import one to be able to use the modify function.")
         else:
-            modify_or_create_configuration_page.on_click_modify_button()
+            modify_or_create_configuration_page.start_config_modification()
             # Set the modification indicator to True
             globals.global_is_modification = True
             # Redirection to selection sensor quantity

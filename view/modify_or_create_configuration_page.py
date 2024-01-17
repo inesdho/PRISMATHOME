@@ -125,32 +125,30 @@ class ModifyOrCreateConfiguration:
                 return id_config
         return None
 
-    def on_click_modify_button(self):
-
+    def start_config_modification(self):
+        """!
+        @brief This function saves the config to modify and the sensors associated to the configuration into global
+        variables
+        @param self : the instance
+        @return Nothing
+        """
         # Store the selected config into a global variable
         globals.global_id_config_modify = self.get_selected_id_config()
         globals.sensor_counts.clear()
 
-        # Fill the sensor_count global variable
+        # Get the list of sensor associated with the configuration
         list_sensor_config = local.get_sensors_from_configuration(globals.global_id_config_modify)
 
+        # Get the list of sensor types
         sensor_types = local.get_sensor_type_list()
 
-        print(list_sensor_config)
-        print(sensor_types)
-
-        globals.sensor_counts.clear()
-
-        for id_sensor, type_sensor in sensor_types:
-            print("hello", type_sensor)
+        # Count the number of sensor of each type and add it to the sensor_count global and add each sensor in the
+        # global_sensor_entries global variable
+        for id_sensor_type, type_sensor in sensor_types:
             count = 0
             for index, sensor in enumerate(list_sensor_config, start=0):
-                print("bye", sensor["type"])
                 if type_sensor == sensor["type"]:
+                    globals.global_sensor_entries.append((id_sensor_type, sensor["label"], sensor["description"], f"{id_sensor_type}_{count}"))
                     count = count + 1
+            globals.sensor_counts.setdefault(id_sensor_type, []).append(count)
 
-            globals.sensor_counts.setdefault(id_sensor, []).append(count)
-
-        # Print the values to check
-        for sensor_type, counts in globals.sensor_counts.items():
-            print(f"Number of id_type {sensor_type} Sensors selected:", counts)
