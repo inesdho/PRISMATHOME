@@ -31,8 +31,10 @@ ids_to_modify = ['id_sensor', 'id_data', 'id_observation']
 tables_to_prepend = ['sensor', 'data', 'observation']
 
 config = {
-    "host": "localhost",
-    "user": "root",
+    #"host": "localhost",
+    "host": "192.168.1.122",
+    # "user": "root",
+    "user": "prisme",
     "password": "Q3fhllj2",
     "database": "prisme@home_ICM"
 }
@@ -74,7 +76,7 @@ def execute_remote_query(query, values=None, synchronise=False):
     @param synchronise: TODO
     @return 1 if successfully inserted, 0 otherwise
     """
-    print("Enterring execute_remote_query")
+    print("Entering execute_remote_query")
     global flag_synchro, thread_active
 
     conn = None
