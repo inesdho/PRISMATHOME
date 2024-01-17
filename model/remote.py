@@ -29,7 +29,9 @@ ids_to_modify = ['id_sensor', 'id_data', 'id_observation']
 tables_to_prepend = ['sensor', 'data', 'observation']
 
 config = {
+    #"host": "192.168.1.22",
     "host": "localhost",
+    #"user": "prisme",
     "user": "root",
     "password": "Q3fhllj2",
     "database": "prisme@home_ICM"
@@ -155,6 +157,119 @@ def synchronise_queries():
         if success:
             # If the query was executed successfully, delete the entry from the local table
             # TODO faire le delete avec l'id (à rajouter dans la bdd)
-            local.send_query_local('delete', 'remote_queries', None, None, f"query = {query}")
+            local.send_query_local('delete', 'remote_queries',
+                                   None, None, f"query = {query}")
 
     print("Synchro sortie normale")
+
+
+def fetch_remote_configs(get_users, get_configs):
+    """!
+    Imports configuration, sensor_config and user tables from the remote database to the local database
+
+    @param get_configs: set to 1 to import all configurations and sensor configs, 0 to skip this import
+    @param get_users: set to 1 to import all users, 0 to skip this import
+    @return: 1 if successful, 0 otherwise
+    """
+    conn = None
+    cursor = None
+    try:
+        conn = pool.get_connection()
+        cursor = conn.cursor()
+
+        if get_users == 1:
+            remote_query = "SELECT id_user, login, password FROM user"
+            cursor.execute(remote_query)
+            remote_users = cursor.fetchall()
+            local_users = local.get_users()
+
+            if remote_users is not None:
+                if local_users is not None:
+                    for remote_user in remote_users:    # Compare remote and local user lists
+                        if remote_user not in local_users:   # If the remote user is not found in the local list
+                            # append to the insert list to add this user
+                            print("id_user à insérer : ", remote_user[0])
+                            insertion = local.execute_query_with_reconnect(
+                                f"INSERT INTO user (id_user, login, password) "
+                                f"VALUES ('{remote_user[0]}', '{remote_user[1]}', '{remote_user[2]}');"
+                            )
+                            if insertion is None:
+                                return 0
+                else:
+                    print("local_users is none")
+                    for remote_user in remote_users:    # Compare remote and local user lists
+                        # append to the insert list to add this user
+                        insertion = local.execute_query_with_reconnect(
+                            f"INSERT INTO user (id_user, login, password) "
+                            f"VALUES ('{remote_user[0]}', '{remote_user[1]}', '{remote_user[2]}');\n"
+                        )
+                        if insertion is None:
+                            return 0
+        if get_configs == 0:
+            return 1
+        elif get_configs == 1:
+            remote_query = "SELECT id_config, id_user, label, description FROM configuration"
+            cursor.execute(remote_query)
+            remote_configs = cursor.fetchall()
+            local_configs = local.get_configurations()
+
+            print("local_configs:", local_configs)
+            print("remote_configs:", remote_configs)
+
+            if remote_configs is not None:
+                if local_configs is not None:
+                    for remote_c in remote_configs:    # Compare remote and local config lists
+                        if remote_c not in local_configs:   # If the remote user is not found in the local list
+                            insertion = local.execute_query_with_reconnect(
+                                f"INSERT INTO configuration (id_config, id_user, label, description) "
+                                f"VALUES ('{remote_c[0]}', '{remote_c[1]}', '{remote_c[2]}', '{remote_c[3]}');\n"
+                                )
+                            if insertion is None:
+                                return 0
+                else:
+                    for remote_c in remote_configs:    # Compare remote and local config lists
+                        insertion = local.execute_query_with_reconnect(
+                            f"INSERT INTO configuration (id_config, id_user, label, description) "
+                            f"VALUES ('{remote_c[0]}', '{remote_c[1]}', '{remote_c[2]}', '{remote_c[3]}');\n"
+                            )
+                        if insertion is None:
+                            return 0
+
+
+            remote_query = "SELECT id_config, id_sensor_type, sensor_label, sensor_description FROM sensor_config"
+            cursor.execute(remote_query)
+            remote_sensor_configs = cursor.fetchall()
+            local_sensor_configs = local.get_sensor_configs()
+
+            if remote_sensor_configs is not None:
+                if local_sensor_configs is not None:
+                    for remote_sc in remote_sensor_configs:  # Compare remote and local sensor config lists
+                        if remote_sc not in local_sensor_configs:  # If the sensor config is not in the local db
+                            insertion = local.execute_query_with_reconnect(
+                                f"INSERT INTO sensor_config (id_config, id_sensor_type, sensor_label, sensor_description) "
+                                f"VALUES ('{remote_sc[0]}', '{remote_sc[1]}', '{remote_sc[2]}', '{remote_sc[3]}');\n"
+                            )
+                            if insertion is None:
+                                return 0
+                else:
+                    for remote_sc in remote_sensor_configs:  # Compare remote and local sensor config lists
+                        insertion = local.execute_query_with_reconnect(
+                            f"INSERT INTO sensor_config (id_config, id_sensor_type, sensor_label, sensor_description) "
+                            f"VALUES ('{remote_sc[0]}', '{remote_sc[1]}', '{remote_sc[2]}', '{remote_sc[3]}');\n"
+                        )
+                        if insertion is None:
+                            return 0
+            return 1
+
+        else:
+            return 1
+    except (mysql.connector.errors.InterfaceError, mysql.connector.errors.OperationalError) as e:
+        # Error inserting the data in distant base
+        print("\033[91mErreur :", e, "Dans la fonction de synchro distant vers local\033[0m")
+        return 0
+
+    finally:
+        if conn:
+            # Close the connection
+            cursor.close()
+            conn.close()

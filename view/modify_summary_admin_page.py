@@ -28,10 +28,6 @@ class ModifySummaryAdmin:
 
         self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
 
-        # Creation of the frame that will contain the buttons
-        self.button_frame = ttk.Frame(self.master)
-        self.button_frame.pack(padx=5, pady=10)
-
         # Displays the title of the page
         label = ttk.Label(self.frame, text="SUMMARY ADMIN - MODIFICATION", font=globals.global_font_title, foreground='#3daee9')
         label.pack(pady=30)
@@ -41,6 +37,7 @@ class ModifySummaryAdmin:
                                    padding=10, anchor="w", font=globals.global_font_title1)
         scenario_label.pack(pady=20, fill=tk.BOTH)
 
+        # Creation of the frame that will contain the buttons
         self.button_frame = ttk.Frame(self.frame)
         self.button_frame.pack(padx=5, pady=10)
 
@@ -138,11 +135,15 @@ class ModifySummaryAdmin:
 
     def clear_page(self):
         """!
-        @brief This functions clears the entire "new observation" page
+        @brief This functions clears the entire "modify summary admin" page
         @param self : the instance
         @return Nothing
         """
+        self.data_frame.destroy()
+        self.frame_canvas.destroy()
+        self.canvas.destroy()
         self.frame.destroy()
+        self.button_frame.destroy()
 
     def validate_conf(self):
         """!

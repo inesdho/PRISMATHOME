@@ -51,7 +51,7 @@ class App(ThemedTk):
             self.attributes('-fullscreen', True)
             self.bind('<Escape>', lambda e: self.attributes('-fullscreen', False))
 
-        self.wm_attributes('-topmost',1)
+        self.lift()
 
         # Theme of the application
         self.style = ThemedStyle(self)
@@ -222,7 +222,7 @@ class App(ThemedTk):
         self.create_new_main_frame()
 
         # Redirecting to the login page
-        login_as_admin_page = LoginAsAdministrator(self.master)
+        login_as_admin_page = LoginAsAdministrator(self)
         login_as_admin_page.show_page()
 
         # Connection button
@@ -263,19 +263,17 @@ class App(ThemedTk):
 
         # Set the 'is modification' value to False
         globals.global_is_modification = False
-
         globals.sensor_counts.clear()
         globals.global_sensor_entries.clear()
 
         # Creation of the "modify or create configuration page"
-        modify_or_create_configuration_page = ModifyOrCreateConfiguration(self.master)
+        modify_or_create_configuration_page = ModifyOrCreateConfiguration(self)
         modify_or_create_configuration_page.show_page()
 
         # Logout Button
-        logout_button = ttk.Button(self.main_frame, text="Log out",
+        ttk.Button(self.main_frame, text="Log out",
                                    command=lambda: self.redirect_to_new_observation_from_modify_or_create_a_config(
-                                       modify_or_create_configuration_page))
-        logout_button.place(relx=0.9, rely=0.1)
+                                       modify_or_create_configuration_page)).place(relx=0.9, rely=0.1)
 
         # Modify Button
         modify_button = ttk.Button(modify_or_create_configuration_page.left_frame, text="Modify the configuration",
@@ -397,10 +395,10 @@ class App(ThemedTk):
         self.create_new_main_frame()
 
         # Add buttons
-        back_button = ttk.Button(self.main_frame, text="Back",
+        cancel_button = ttk.Button(self.main_frame, text="Cancel",
                                  command=lambda: self.redirect_to_modify_selection_sensor_quantity_from_modify_labellisation(
                                      modify_labellisation_sensor_page))
-        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+        cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         next_button = ttk.Button(self.main_frame, text="Next",
                                  command=lambda: self.redirect_to_modify_summary_admin_from_labellisation(
@@ -571,10 +569,10 @@ class App(ThemedTk):
         self.create_new_main_frame()
 
         # Add buttons
-        back_button = ttk.Button(self.main_frame, text="Back",
+        cancel_button = ttk.Button(self.main_frame, text="Cancel",
                                  command=lambda: self.redirect_to_selection_sensor_quantity_from_labellisation(
                                      labellisation_sensor_page))
-        back_button.pack(side=tk.LEFT, padx=10, expand=True)
+        cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         next_button = ttk.Button(self.main_frame, text="Next",
                                  command=lambda: self.redirect_to_summary_admin_from_labellisation(
@@ -652,6 +650,17 @@ class App(ThemedTk):
         # Redirecting to the 'Summary user' page
         self.redirect_to_summary_user_from_anywhere(sensor_pairing_page)
 
+    def redirect_to_new_observation_from_summary_user(self, summary_user_page):
+        """!
+        @brief This function asks the user if they want to exit the observation because there will be no going back.
+        @param self : the instance
+        @param page : the previous page
+        @return Nothing
+        """
+        if messagebox.askyesno("End observation", "Are you sure you want to end the observation. The observation cannot"
+                                                  "be restarted. "):
+            self.redirect_to_new_observation_from_anywhere(summary_user_page)
+
     def redirect_to_summary_user_from_anywhere(self, page):
         """!
         @brief This function clears the previous page in order to display the content of the "summary user"
@@ -671,8 +680,8 @@ class App(ThemedTk):
         self.create_new_main_frame()
 
         # Cancel button
-        cancel_button = ttk.Button(self.main_frame, text="Exit",
-                                   command=lambda: self.redirect_to_new_observation_from_anywhere(summary_user_page))
+        cancel_button = ttk.Button(self.main_frame, text="Cancel",
+                                   command=lambda: self.redirect_to_new_observation_from_summary_user(summary_user_page))
         cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Back button
