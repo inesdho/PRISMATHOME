@@ -28,7 +28,6 @@ from view.modify_summary_admin_page import ModifySummaryAdmin
 from system import system_function
 import webbrowser
 import sys
-import signal
 
 
 class App(ThemedTk):
@@ -45,7 +44,7 @@ class App(ThemedTk):
 
         my_os = sys.platform
 
-        if my_os == 'Linux':
+        if my_os == 'Linux' or my_os == 'linuxarm':
             self.attributes('-zoomed', True)
             self.bind('<Escape>', lambda e: self.attributes('-zoomed', False))
         elif my_os == 'win32' or my_os == 'cygwin':
@@ -92,7 +91,7 @@ class App(ThemedTk):
 
         # Redirection to login as an admin button
         ttk.Button(self.main_frame, text="Login as administrator",
-                   command=lambda: self.redirect_to_login_as_admin_from_anywhere(new_observation_page))\
+                   command=lambda: self.redirect_to_login_as_admin_from_anywhere(new_observation_page)) \
             .pack(side=tk.RIGHT, padx=10, anchor='e')
 
         # Get data button
@@ -232,7 +231,7 @@ class App(ThemedTk):
 
         # Cancel button to redirect to the new observation page
         ttk.Button(self.main_frame, text="Cancel",
-                   command=lambda: self.redirect_to_new_observation_from_anywhere(login_as_admin_page))\
+                   command=lambda: self.redirect_to_new_observation_from_anywhere(login_as_admin_page)) \
             .pack(side=tk.TOP, padx=10, expand=True, anchor='e')
 
     def connexion_button_clic(self, login_as_admin_page):
@@ -273,8 +272,8 @@ class App(ThemedTk):
 
         # Logout Button
         ttk.Button(self.main_frame, text="Log out",
-                                   command=lambda: self.redirect_to_new_observation_from_modify_or_create_a_config(
-                                       modify_or_create_configuration_page)).place(relx=0.9, rely=0.1)
+                   command=lambda: self.redirect_to_new_observation_from_modify_or_create_a_config(
+                       modify_or_create_configuration_page)).place(relx=0.9, rely=0.1)
 
         # Modify Button
         modify_button = ttk.Button(modify_or_create_configuration_page.left_frame, text="Modify the configuration",
@@ -313,7 +312,7 @@ class App(ThemedTk):
         if modify_or_create_configuration_page.configuration_combobox.get() == 'No configuration available':
             messagebox.showerror("Error", "No observation exist locally, please create or import one to be able to use the modify function.")
         else:
-            modify_or_create_configuration_page.on_click_modify_button()
+            modify_or_create_configuration_page.start_config_modification()
             # Set the modification indicator to True
             globals.global_is_modification = True
             # Redirection to selection sensor quantity
@@ -397,8 +396,8 @@ class App(ThemedTk):
 
         # Add buttons
         cancel_button = ttk.Button(self.main_frame, text="Cancel",
-                                 command=lambda: self.redirect_to_modify_selection_sensor_quantity_from_modify_labellisation(
-                                     modify_labellisation_sensor_page))
+                                   command=lambda: self.redirect_to_modify_selection_sensor_quantity_from_modify_labellisation(
+                                       modify_labellisation_sensor_page))
         cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         next_button = ttk.Button(self.main_frame, text="Next",
@@ -571,8 +570,8 @@ class App(ThemedTk):
 
         # Add buttons
         cancel_button = ttk.Button(self.main_frame, text="Cancel",
-                                 command=lambda: self.redirect_to_selection_sensor_quantity_from_labellisation(
-                                     labellisation_sensor_page))
+                                   command=lambda: self.redirect_to_selection_sensor_quantity_from_labellisation(
+                                       labellisation_sensor_page))
         cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         next_button = ttk.Button(self.main_frame, text="Next",
@@ -709,27 +708,22 @@ class App(ThemedTk):
         @param summary_user_page : the summary user page
         @return Nothing
         """
-
-        # The list of sensors formated like "type/label"
         arguments = []
 
-        # Get the sensor list from db
         sensor_list = local.get_sensors_from_observation(globals.global_new_id_observation)
-
-        # Format the sensor list like "type/label" to start the program
+        print("\033[95msensor list: ", sensor_list, "\033[0m")
         for sensor in sensor_list:
             arguments.append(sensor["type"] + "/" + sensor["label"])
 
-        # Create the command
+        print("arguments : ", arguments)
         command = ["python", "/home/prisme/Prisme@home/PRISMATHOME/reception.py"] + arguments
 
-        # Start the reception.py program
-        subprocess.Popen(command)
+        # Start the main program
+        main_program = subprocess.Popen(command)
 
-        # Update observation status to start (1) in db
-        local.update_observation_status(1)
+        # Calling the function to start the observation
+        local.update_observation_status('1')
 
-        # Display a message that observation as started
         messagebox.showinfo("Start observation", "The observation is started.")
 
         # Changing the label and the function associated to the button
@@ -744,16 +738,14 @@ class App(ThemedTk):
         @return Nothing
         """
 
-        # Get the program pid of reception.py
         program_pid = system_function.get_pid_of_script("reception.py")
 
-        # Send a signal SIUSR1 to reception.py to stop it
-        system_function.send_signal(program_pid, signal.SIGUSR1)
+        system_function.send_sigterm(program_pid)
 
-        # Update observation status to stop (0) in db
+        # Calling the function to stop the observation
+        # voir avec les indus comment stopper la reception des datas
         local.update_observation_status(0)
 
-        # Display a message that observation as stopped
         messagebox.showinfo("Stop observation", "The observation is stopped.")
 
         # Changing the label and the function associated to the button
@@ -797,16 +789,9 @@ class App(ThemedTk):
         @param self : the instance
         @return Nothing
         """
-        # Display a confirmation popup before closing the app
         if messagebox.askokcancel("Quit", "Are you sure you want to quit PRISM@Home ?"):
-
-            # Close the threads get_sensor_value
             globals.thread_done = True
-            # Stop the functions local.connect_to_remote_db and local.connect_to_local_db if they are running
-            globals.global_disconnect_request = True
-
-            # Disconnect admin if connected
             if globals.global_id_user is not None:
+                print("Deconnexion normalement")
                 local.update_user_connexion_status(globals.global_id_user, 0)
-
             self.destroy()

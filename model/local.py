@@ -768,7 +768,6 @@ def get_config_labels_ids(id_config=None):
         if result:
             return result[0][0]
 
-
 def get_config_label_from_observation_id(id_observation):
     """!
     Gets the lconfig label from a configuration matching

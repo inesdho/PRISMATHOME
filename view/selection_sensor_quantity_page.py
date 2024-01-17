@@ -49,36 +49,22 @@ class QuantitySensor:
             #TODO
             print("en modif")
             print("id de la config a modifier", globals.global_id_config_modify)
-            # Calls a function to fetch all the existing sensor types in the database
-            sensor_types = local.get_sensor_type_list()
 
-            # Creating comboboxes according to the types of sensors existing
-            self.sensor_varsmodif = {}  # Stocking the labels of the sensor type
-            for id, type in sensor_types:
-                sensor_frame = tk.LabelFrame(self.frame_sensors, text=type, padx=5, pady=5)
-                sensor_var = tk.StringVar()
-                comboboxmodif = ttk.Combobox(sensor_frame, values=[0, 1, 2, 3, 4, 5], state="readonly", width=5,
-                                        textvariable=sensor_var)
-                comboboxmodif.set(self.how_many_sensors_for_this_type_and_conf(id, globals.global_id_config_modify))  # Default values
-                comboboxmodif.pack(padx=10, pady=5)
-                sensor_frame.pack(side=tk.LEFT, padx=10)
-                self.sensor_varsmodif[id] = sensor_var  # Stock the variable for a further use
 
-        else:
-            # Calls a function to fetch all the existing sensor types in the database
-            sensor_types = local.get_sensor_type_list()
+        # Calls a function to fetch all the existing sensor types in the database
+        sensor_types = local.get_sensor_type_list()
 
-            # Creating comboboxes according to the types of sensors existing
-            self.sensor_vars = {}  # Stocking the labels of the sensor type
-            for id, type in sensor_types:
-                sensor_frame = tk.LabelFrame(self.frame_sensors, text=type, padx=5, pady=5)
-                sensor_var = tk.StringVar()
-                combobox = ttk.Combobox(sensor_frame, values=[0, 1, 2, 3, 4, 5], state="readonly", width=5,
-                                        textvariable=sensor_var)
-                combobox.set(self.how_many_sensors_for_this_type(id))  # Default values
-                combobox.pack(padx=10, pady=5)
-                sensor_frame.pack(side=tk.LEFT, padx=10)
-                self.sensor_vars[id] = sensor_var  # Stock the variable for a further use
+        # Creating comboboxes according to the types of sensors existing
+        self.sensor_vars = {}  # Stocking the labels of the sensor type
+        for id, type in sensor_types:
+            sensor_frame = tk.LabelFrame(self.frame_sensors, text=type, padx=5, pady=5)
+            sensor_var = tk.StringVar()
+            combobox = ttk.Combobox(sensor_frame, values=[0, 1, 2, 3, 4, 5], state="readonly", width=5,
+                                    textvariable=sensor_var)
+            combobox.set(self.how_many_sensors_for_this_type(id))  # Default values
+            combobox.pack(padx=10, pady=5)
+            sensor_frame.pack(side=tk.LEFT, padx=10)
+            self.sensor_vars[id] = sensor_var  # Stock the variable for a further use
 
     def how_many_sensors_for_this_type(self, sensor_type_wanted):
         """!
@@ -93,46 +79,6 @@ class QuantitySensor:
                 if sensor_type == sensor_type_wanted:
                     return count
         return 0
-
-    def how_many_sensors_for_this_type_and_conf (self, sensor_type_wanted, conf):
-        """!
-        @brief This functions returns the number of sensors the user decided to attribute the type of sensor in param
-        @param self : the instance
-        @param sensor_type_wanted : the id of type of sensor for which we want the information
-        @return
-        returns 0
-        """
-        try:
-            conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="Q3fhllj2",
-                database="prisme_home_1"
-            )
-            cursor = conn.cursor()
-
-            # Execute a request
-            query = "SELECT COUNT(id_type) FROM sensor_type, configuration, sensor_config WHERE sensor_type.id_type = sensor_config.id_sensor_type AND sensor_config.id_config=configuration.id_config AND sensor_type.id_type=%s AND configuration.id_config=%s"
-            cursor.execute(query, (sensor_type_wanted, conf,))  # Pass label as a tuple
-
-            # Fetch the first result
-            result = cursor.fetchone()
-
-            # Make sure to fetch all results to clear the cursor before closing it, even if you don't use them.
-            while cursor.fetchone() is not None:
-                pass
-
-            return result[0] if result else 0
-
-        except mysql.connector.Error as err:
-            print(f"Database error: {err}")
-            return None
-
-        finally:
-            # Closing the cursor and connection
-            cursor.close()
-            conn.close()
-
 
 
     def clear_page(self):
