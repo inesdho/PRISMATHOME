@@ -1,4 +1,4 @@
 #!/bin/bash
 
-# Envoyer SIGTERM au PID donné
-sudo kill -SIGTERM "$1"
+# Send the specified signal to the specified PID
+sudo kill -"$2" "$1"

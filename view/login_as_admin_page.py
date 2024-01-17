@@ -33,20 +33,17 @@ class LoginAsAdministrator:
         @param self : the instance
         @return Nothing
         """
-        self.frame = ttk.Frame(self.master)
-        self.frame.pack(fill=tk.BOTH, expand=True)
-
         # Displays the title of the page
-        label = ttk.Label(self.frame, text="Connexion Administrator", font=16)
-        label.pack(pady=20)
+        label = ttk.Label(self.frame, text="LOGIN AS ADMIN", font=globals.global_font_title, foreground='#3daee9')
+        label.pack(pady=30)
 
         # login input
-        login_label = ttk.Label(self.frame, text="Login")
+        login_label = ttk.Label(self.frame, text="Login", font=globals.global_font_title1)
         login_label.pack()
         self.login_entry = EntryManager(self.frame, min=1, max=30, has_width=30)
 
         # password input
-        password_label = ttk.Label(self.frame, text="Password")
+        password_label = ttk.Label(self.frame, text="Password", font=globals.global_font_title1)
         password_label.pack()
         self.password_entry = EntryManager(self.frame, min=0, max=30, has_width=30, is_password=True,
                                            has_special_char=True)

@@ -1,6 +1,6 @@
 """!
-@file labellisation_sensor_page.py
-@brief This file will contain all the widgets and functions related to the "labellisation sensor" page itself
+@file modify_labellisation_sensor_page.py
+@brief This file will contain all the widgets and functions related to the "Modify labellisation sensor" page itself
 @author Naviis-Brain
 @version 1.0
 @date
@@ -12,7 +12,7 @@ from model import local
 import globals
 from controller.entry_manager import EntryManager
 
-class LabelisationSensor:
+class ModifyLabelisationSensor:
     def __init__(self, master):
         """!
         @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
@@ -28,7 +28,7 @@ class LabelisationSensor:
         self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
 
         # Displays the title of the page
-        label = ttk.Label(self.frame, text="SENSOR LABELLISATION", font=globals.global_font_title, foreground='#3daee9')
+        label = ttk.Label(self.frame, text="SENSOR LABELLISATION - MODIFICATION", font=globals.global_font_title, foreground='#3daee9')
         label.pack(pady=30)
 
         # Creation of a canvas in order to add a scrollbar in case to many lines of sensors are displayed

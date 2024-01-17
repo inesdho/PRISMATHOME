@@ -1,5 +1,5 @@
 """!
-@file summary_page.py
+@file modify_summary_admin_page.py
 @brief This file will contain all the widgets and functions related to the "summary" page itself
 @author Naviis-Brain
 @version 1.0
@@ -13,7 +13,7 @@ import globals
 import mysql.connector
 
 
-class SummaryAdmin:
+class ModifySummaryAdmin:
     def __init__(self, master):
         """!
         @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
@@ -35,12 +35,12 @@ class SummaryAdmin:
 
         if globals.global_id_config_modify:
             # Information about the configuration
-            scenario_label = ttk.Label(self.frame, text="Configuration : " + local.get_config_labels_ids(globals.global_id_config_modify),
+            scenario_label = ttk.Label(self.frame, text="Configuration : " + globals.global_scenario_name_configuration,
                                        padding=10, anchor="w", font=globals.global_font_title1)
             scenario_label.pack(pady=20, fill=tk.BOTH)
         else:
             # Information about the configuration
-            scenario_label = ttk.Label(self.frame, text="Configuration : " + globals.global_scenario_name_configuration,
+            scenario_label = ttk.Label(self.frame, text="Configuration : " + local.get_config_labels_ids(globals.global_id_config_modify),
                                        padding=10, anchor="w", font=globals.global_font_title1)
             scenario_label.pack(pady=20, fill=tk.BOTH)
 
@@ -152,28 +152,6 @@ class SummaryAdmin:
         self.frame.destroy()
         self.button_frame.destroy()
 
-    def validate_conf_for_create(self):
-        """!
-        @brief This functions validated all the infos relative to the current created configuration in order to save them
-        @param self : the instance
-        @return Nothing
-        """
-
-        # Get the new id config to create it
-        globals.global_id_config = local.get_new_config_id()
-
-        # Remove the id_unique field in the sensor list which is useless
-        new_sensor_entries = [(sensor_id, label_entry, description_entry)
-                              for index, (sensor_id, label_entry, description_entry, id_unique)
-                              in enumerate(globals.global_sensor_entries, start=1)]
-        # Insert the configuration in DB and the sensor configs
-        local.create_configuration(globals.global_id_config,
-                                   globals.global_id_user,
-                                   globals.global_scenario_name_configuration,
-                                   globals.global_description_configuration,
-                                   new_sensor_entries)
-        self.clear_sensor_entries_and_sensor_count()
-
     def validate_conf_for_modify(self):
         """!
         @brief This functions validated all the infos relative to the current created configuration in order to save them
@@ -191,7 +169,6 @@ class SummaryAdmin:
         # Insert the configuration in DB and the sensor configs
         local.insert_new_sensors_for_configuration(globals.global_id_config, new_sensor_entries)
         self.clear_sensor_entries_and_sensor_count()
-
 
     def clear_sensor_entries_and_sensor_count(self):
         """!

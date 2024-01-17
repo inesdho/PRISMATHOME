@@ -1,6 +1,6 @@
 """!
-@file selection_sensor_quantity_page.py
-@brief This file will contain all the widgets and functions related to the "selection sensor quantity" page itself
+@file modify_selection_sensor_quantity_page.py
+@brief This file will contain all the widgets and functions related to the "modify selection sensor quantity" page itself
 @author Naviis-Brain
 @version 1.0
 @date
@@ -14,7 +14,7 @@ import globals
 import mysql.connector
 
 
-class QuantitySensor:
+class ModifyQuantitySensor:
     def __init__(self, master):
         """!
         @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
@@ -38,7 +38,7 @@ class QuantitySensor:
         self.frame.pack(expand=True)
 
         # Displays the title of the page
-        label = ttk.Label(self.frame, text="SELECTION SENSOR QUANTITY", font=globals.global_font_title, foreground='#3daee9')
+        label = ttk.Label(self.frame, text="SELECTION SENSOR QUANTITY - MODIFICATION", font=globals.global_font_title, foreground='#3daee9')
         label.pack(pady=30)
 
         # Create a frame for the sensor selectors inside the main frame
@@ -46,7 +46,7 @@ class QuantitySensor:
         self.frame_sensors.pack()
 
         if(globals.global_is_modification):
-            #TODO a supprimer normalement si on garde les pages modify
+            #TODO
             print("en modif")
             print("id de la config a modifier", globals.global_id_config_modify)
 
