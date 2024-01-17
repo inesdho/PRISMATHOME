@@ -44,7 +44,7 @@ class App(ThemedTk):
 
         my_os = sys.platform
 
-        if my_os == 'Linux':
+        if my_os == 'Linux' or my_os == 'linuxarm':
             self.attributes('-zoomed', True)
             self.bind('<Escape>', lambda e: self.attributes('-zoomed', False))
         elif my_os == 'win32' or my_os == 'cygwin':

@@ -60,7 +60,7 @@ class SensorPairingManagement:
         frame_title.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
         # Create the title of the different field
-        ttk.Label(frame_title, background="#3daee9", width=20, text="Sensor", borderwidth=0.5, relief="solid",
+        ttk.Label(frame_title, background="#3daee9", width=50, text="Sensor", borderwidth=0.5, relief="solid",
                   padding=5, anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
         ttk.Label(frame_title, background="#3daee9", width=20, text="Label", borderwidth=0.5, relief="solid",
                   padding=5,  anchor="center", font=globals.global_font_text).pack(side=tk.LEFT)
@@ -89,7 +89,7 @@ class SensorPairingManagement:
         data_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
         # Showing the type of the sensor
-        ttk.Label(data_frame, text=sensor["type"] + " sensor " + str(index), width=20, anchor='w', wraplength=140,
+        ttk.Label(data_frame, text=sensor["type"] + " sensor " + str(index), width=50, anchor='w', wraplength=140,
                   background="white", borderwidth=0.5, relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
         # Creating a text widget tht will contain the label associated with the sensor
