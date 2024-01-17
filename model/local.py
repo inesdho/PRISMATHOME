@@ -57,7 +57,7 @@ def connect_to_local_db():
     print("try to connect to local database")
     global pool
     try:
-        if disconnect_request == 1:
+        if globals.global_disconnect_request:
             return
         # Création d'un pool de connexions
         pool = mysql.connector.pooling.MySQLConnectionPool(
@@ -70,21 +70,6 @@ def connect_to_local_db():
         time.sleep(1)
         # Loop until the connection works
         connect_to_local_db()
-
-
-def disconnect_from_local_db():
-    """!
-    Tries to connect to the local database and loops until successfully connected
-
-    @return None
-    """
-    global disconnect_request
-
-    disconnect_request = 1
-
-    # Disconnect from the database
-    pool.closeall()
-
 
 # DONE
 def get_system_id():
@@ -121,6 +106,7 @@ def add_system_id(local_id):
 def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3):
     # A flag to retry or not on connection lost
     # if a transaction is started to rollback changes
+    print("QUERY = ",query)
     retry = True
     conn = None
     for attempt in range(max_attempts):
@@ -314,7 +300,7 @@ def cache_query(remote_query, remote_values):
     else:
         remote_query_as_text = remote_query
 
-    send_query_local("insert", "remote_queries", "query", remote_query_as_text)
+    send_query_local("insert", "remote_queries", ("query",), (remote_query_as_text,))
 
     caching = False
     print("Fin caching : ", remote_query, remote_values)
@@ -957,6 +943,54 @@ def create_configuration(id_config, id_user, label, description, sensor_list):
                           ['id_config', 'id_sensor_type', 'sensor_label', 'sensor_description'],
                           values)
 
+def insert_new_sensors_for_configuration(id_config, sensor_list):
+    """!
+    Creates a new sensors for the given configuration. Insert into the local and remote DB
+
+    @param id_config: The config's id
+    @param sensor_list: The list of sensors to be inserted in the configuration
+    @return None
+    """
+    conn = None
+    cursor = None
+    error = False
+
+    try:
+        conn = pool.get_connection()
+
+        cursor = conn.cursor()
+        cursor.execute("START TRANSACTION;")
+
+        for sensor_type_id, sensor_label, sensor_description in sensor_list:  # Go through the sensor list
+
+            values = (id_config, sensor_type_id, sensor_label, sensor_description)
+            # Send each query and check for errors
+            result = send_query_local('insert', 'sensor_config',
+                                      ['id_config', 'id_sensor_type', 'sensor_label', 'sensor_description'],
+                                      values, None, cursor)
+            if result == -1:  # No data stored in local nor remote
+                raise Exception("Error while inserting sensor configuration")
+
+        conn.commit()
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+            error = True
+            print(f"Une erreur est survenue, la transaction a été annulée : {e}")
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
+        if error:
+            return
+
+    for sensor_type_id, sensor_label, sensor_description in sensor_list:
+        values = (id_config, sensor_type_id, sensor_label, sensor_description)
+
+        send_query_remote('insert', 'sensor_config',
+                          ['id_config', 'id_sensor_type', 'sensor_label', 'sensor_description'],
+                          values)
 
 def delete_sensor_config(id_config):
     """!

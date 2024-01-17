@@ -31,6 +31,7 @@ import time
 import subprocess
 from datetime import datetime
 import threading
+from system import system_function
 
 ## Constant for the broker port
 BROKER_PORT = 1883
@@ -81,23 +82,28 @@ def handler_program_stop(signum, frame):
     coordinator.loop_stop()
     coordinator.disconnect()
 
+    print("signum : " + str(signum))
+    print("SIGUSR2 " + str(signal.SIGUSR2))
+    pid_start_and_stop = get_pid_of_script("start_and_stop.py")
+    print("pid_start_and_stop :", pid_start_and_stop)
+
     # Register the datetime when the signal was received
     datetime_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-
-    # If the signal come from start_and_stop program :
-    # Send a monitoring message that the system is shut down
-    if pid_parent == pid_start_and_stop:
+    print("POUR ETRE SUR")
+    # If the signal come from start_and_stop program (SIGUSR2) :
+    if signum == signal.SIGUSR2:
+        print("signum = signal.SIGNUM")
+        # Send a monitoring message that the system is shut down
         local.monitor_system_shut_down_by_participant(datetime_now)
+        # Send a signal to start_and_stop program to indicate that the program is closed
+        print("BEFORE SIGNAL SENT")
+        system_function.send_signal(pid_start_and_stop, "SIGTERM")
+        print("Signal sent")
     else:
+        print("signum != signal.SIGNUM")
+        print("SIGNAL NOT SENT")
+        # Send a monitoring message that the observation is stopped
         local.monitor_observation_stopped(datetime_now)
-
-    # Disconnecting from DBs
-    #local.disconnect_from_local_db()
-    #remote.disconnect_from_remote_db()
-
-    # Send a signal to start_and_stop program to indicate that the program is closed
-    if pid_parent == pid_start_and_stop:
-        os.kill(pid_start_and_stop, signal.SIGTERM)
 
 
 def on_message(client, userdata, msg):
@@ -107,12 +113,12 @@ def on_message(client, userdata, msg):
 
 if __name__ == "__main__":
 
-    #global coordinator, pid_parent, pid_start_and_stop
     # Connection to local db
     local.connect_to_local_db()
 
-    # Connection to distant db
-    remote.connect_to_remote_db()
+    # Connect to remote db. With a thread in order not to block the program
+    connection_thread = threading.Thread(target=remote.connect_to_remote_db)
+    connection_thread.start()
 
     ## The mqtt client to collect the data from the broker
     coordinator = mqtt.Client("Coordinator")
@@ -157,7 +163,8 @@ if __name__ == "__main__":
 
     print("CREATION HANDLER")
     # Wait for a signal comming from start_and_stop program
-    signal.signal(signal.SIGTERM, handler_program_stop)
+    signal.signal(signal.SIGUSR1, handler_program_stop)
+    signal.signal(signal.SIGUSR2, handler_program_stop)
     print("LOOP")
     # Blocking call that processes network traffic, dispatches callbacks and
     # handles reconnecting.
