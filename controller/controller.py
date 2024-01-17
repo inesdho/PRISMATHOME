@@ -91,7 +91,7 @@ class App(ThemedTk):
 
         # Redirection to login as an admin button
         ttk.Button(self.main_frame, text="Login as administrator",
-                   command=lambda: self.redirect_to_login_as_admin_from_anywhere(new_observation_page))\
+                   command=lambda: self.redirect_to_login_as_admin_from_anywhere(new_observation_page)) \
             .pack(side=tk.RIGHT, padx=10, anchor='e')
 
         # Get data button
@@ -231,7 +231,7 @@ class App(ThemedTk):
 
         # Cancel button to redirect to the new observation page
         ttk.Button(self.main_frame, text="Cancel",
-                   command=lambda: self.redirect_to_new_observation_from_anywhere(login_as_admin_page))\
+                   command=lambda: self.redirect_to_new_observation_from_anywhere(login_as_admin_page)) \
             .pack(side=tk.TOP, padx=10, expand=True, anchor='e')
 
     def connexion_button_clic(self, login_as_admin_page):
@@ -272,8 +272,8 @@ class App(ThemedTk):
 
         # Logout Button
         ttk.Button(self.main_frame, text="Log out",
-                                   command=lambda: self.redirect_to_new_observation_from_modify_or_create_a_config(
-                                       modify_or_create_configuration_page)).place(relx=0.9, rely=0.1)
+                   command=lambda: self.redirect_to_new_observation_from_modify_or_create_a_config(
+                       modify_or_create_configuration_page)).place(relx=0.9, rely=0.1)
 
         # Modify Button
         modify_button = ttk.Button(modify_or_create_configuration_page.left_frame, text="Modify the configuration",
@@ -396,8 +396,8 @@ class App(ThemedTk):
 
         # Add buttons
         cancel_button = ttk.Button(self.main_frame, text="Cancel",
-                                 command=lambda: self.redirect_to_modify_selection_sensor_quantity_from_modify_labellisation(
-                                     modify_labellisation_sensor_page))
+                                   command=lambda: self.redirect_to_modify_selection_sensor_quantity_from_modify_labellisation(
+                                       modify_labellisation_sensor_page))
         cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         next_button = ttk.Button(self.main_frame, text="Next",
@@ -570,8 +570,8 @@ class App(ThemedTk):
 
         # Add buttons
         cancel_button = ttk.Button(self.main_frame, text="Cancel",
-                                 command=lambda: self.redirect_to_selection_sensor_quantity_from_labellisation(
-                                     labellisation_sensor_page))
+                                   command=lambda: self.redirect_to_selection_sensor_quantity_from_labellisation(
+                                       labellisation_sensor_page))
         cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         next_button = ttk.Button(self.main_frame, text="Next",

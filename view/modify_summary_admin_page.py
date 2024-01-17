@@ -28,12 +28,13 @@ class ModifySummaryAdmin:
 
         self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
 
+
         # Displays the title of the page
-        label = ttk.Label(self.frame, text="SUMMARY ADMIN - MODIFICATION", font=globals.global_font_title, foreground='#3daee9')
+        label = ttk.Label(self.frame, text="SUMMARY ADMIN", font=globals.global_font_title, foreground='#3daee9')
         label.pack(pady=30)
 
         # Information about the configuration
-        scenario_label = ttk.Label(self.frame, text="Configuration : " + globals.global_scenario_name_configuration,
+        scenario_label = ttk.Label(self.frame, text="Configuration : " + local.get_config_labels_ids(globals.global_id_config_modify),
                                    padding=10, anchor="w", font=globals.global_font_title1)
         scenario_label.pack(pady=20, fill=tk.BOTH)
 
@@ -135,7 +136,7 @@ class ModifySummaryAdmin:
 
     def clear_page(self):
         """!
-        @brief This functions clears the entire "modify summary admin" page
+        @brief This functions clears the entire "summary admin" page
         @param self : the instance
         @return Nothing
         """
@@ -151,19 +152,16 @@ class ModifySummaryAdmin:
         @param self : the instance
         @return Nothing
         """
-
+        local.delete_sensor_config(globals.global_id_config_modify)
         # Get the new id config to create it
-        globals.global_id_config = local.get_new_config_id()
+        globals.global_id_config = globals.global_id_config_modify
 
         # Remove the id_unique field in the sensor list which is useless
         new_sensor_entries = [(sensor_id, label_entry, description_entry)
                               for index, (sensor_id, label_entry, description_entry, id_unique)
                               in enumerate(globals.global_sensor_entries, start=1)]
         # Insert the configuration in DB and the sensor configs
-        local.create_configuration(globals.global_id_config,
-                                   globals.global_id_user,
-                                   globals.global_scenario_name_configuration,
-                                   globals.global_description_configuration,
+        local.insert_new_sensors_for_configuration(globals.global_id_config,
                                    new_sensor_entries)
         self.clear_sensor_entries_and_sensor_count()
 
