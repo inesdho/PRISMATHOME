@@ -126,4 +126,31 @@ class ModifyOrCreateConfiguration:
         return None
 
     def on_click_modify_button(self):
+
+        # Store the selected config into a global variable
         globals.global_id_config_modify = self.get_selected_id_config()
+        globals.sensor_counts.clear()
+
+        # Fill the sensor_count global variable
+        list_sensor_config = local.get_sensors_from_configuration(globals.global_id_config_modify)
+
+        sensor_types = local.get_sensor_type_list()
+
+        print(list_sensor_config)
+        print(sensor_types)
+
+        globals.sensor_counts.clear()
+
+        for id_sensor, type_sensor in sensor_types:
+            print("hello", type_sensor)
+            count = 0
+            for index, sensor in enumerate(list_sensor_config, start=0):
+                print("bye", sensor["type"])
+                if type_sensor == sensor["type"]:
+                    count = count + 1
+
+            globals.sensor_counts.setdefault(id_sensor, []).append(count)
+
+        # Print the values to check
+        for sensor_type, counts in globals.sensor_counts.items():
+            print(f"Number of id_type {sensor_type} Sensors selected:", counts)
