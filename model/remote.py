@@ -29,7 +29,7 @@ ids_to_modify = ['id_sensor', 'id_data', 'id_observation']
 tables_to_prepend = ['sensor', 'data', 'observation']
 
 config = {
-    "host": "192.168.1.22",
+    "host": "192.168.1.122",
     "user": "prisme",
     "password": "Q3fhllj2",
     "database": "prisme@home_ICM"
@@ -136,29 +136,28 @@ def synchronise_queries():
     Grabs all non sent queries from the local database's 'remote_queries' table and sends them to the remote database
     """
 
-    print("Synchronising data between local and remote databases")
-
     # Wait until caching is finished
     while local.caching:
+        print("waiting for local caching")
         pass
 
-    query = "SELECT * FROM remote_queries"
-    queries = local.execute_query_with_reconnect(query)
+    query = "SELECT id_query, query FROM remote_queries"
+    remote_queries_list = local.execute_query_with_reconnect(query)     # Fetch all unsent remote queries
 
-    if not queries:
-        print("\033[93msynchronise_queries : No queries\033[0m")
+    if not remote_queries_list:
         return
 
-    for query_entry in queries:
-        query = query_entry[1]
-        success = local.execute_remote_query(query, None, True)
-        if success:
-            # If the query was executed successfully, delete the entry from the local table
-            # TODO faire le delete avec l'id (à rajouter dans la bdd)
-            local.send_query_local('delete', 'remote_queries',
-                                   None, None, f"query = {query}")
-
-    print("Synchro sortie normale")
+    for query_entry in remote_queries_list:
+        try:
+            id_query = query_entry[0]
+            remote_query = query_entry[1]
+            success = execute_remote_query(remote_query, None, True)
+            if success:
+                # If the query was executed successfully, delete the entry from the local table
+                local.send_query_local('delete', 'remote_queries',
+                                       None, None, f"id_query = {id_query}")
+        except Exception as e:
+            print("Sync error : ", e)
 
 
 def fetch_remote_configs(get_users, get_configs):
