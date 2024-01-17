@@ -232,11 +232,13 @@ def send_query_remote(query_type, table, fields=None, values=None, condition=Non
         remote_values = tuple(add_system_id(value) if field in remote.ids_to_modify
                               else value for field, value in zip(fields, values))
     # Check if the condition's id needs to be modified
-    if condition is not None:
+    if condition is not None and table in remote.tables_to_prepend:
         left, right = map(str.strip, condition.split('='))
         if left in remote.ids_to_modify:
             right = str(add_system_id(right))  # Modifying the id to look for to prepend the system's id
         modified_condition = f"{left} = '{right}'"
+    else:
+        modified_condition = condition
 
     if query_type.upper() == "INSERT" and table in remote.tables_to_prepend:  # Need to add the id in the remote base
         fields = ['id_' + table] + fields
@@ -955,6 +957,19 @@ def create_configuration(id_config, id_user, label, description, sensor_list):
                           ['id_config', 'id_sensor_type', 'sensor_label', 'sensor_description'],
                           values)
 
+
+def delete_sensor_config(id_config):
+    """!
+    Creates a new configuration from the given parameters and inserts it in both databases.
+    Inserts also the sensor list into the database
+
+    @param id_config: The config's id
+    @return None
+    """
+
+    result = send_query('delete', 'sensor_config', None, None, f"id_config=\"{id_config}\"")
+
+    return result
 
 # DONE
 def encrypt_password(password):
