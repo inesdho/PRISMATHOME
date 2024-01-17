@@ -46,7 +46,7 @@ class QuantitySensor:
         self.frame_sensors.pack()
 
         if(globals.global_is_modification):
-            #TODO
+            #TODO a supprimer normalement si on garde les pages modify
             print("en modif")
             print("id de la config a modifier", globals.global_id_config_modify)
 
