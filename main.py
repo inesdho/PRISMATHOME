@@ -16,6 +16,9 @@ if __name__ == "__main__":
 
     print("START")
 
+    # Creating an instance of the application
+    app = App()
+
     # Checking the user's response after the main loop
     if messagebox.askyesno("Import data", "Do you want to try to import data from the remote database into "
                                              "the local database?"):
@@ -26,9 +29,9 @@ if __name__ == "__main__":
             messagebox.showerror("Erreur", f"An error occurred while trying to update the local database: {str(e)}")
             print('passé par le except')
 
-    # Creating an instance of the application
-    app = App()
 
     # Starting the main event loop
     app.mainloop()
+
+
 

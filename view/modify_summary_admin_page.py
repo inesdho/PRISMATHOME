@@ -1,5 +1,5 @@
 """!
-@file summary_page.py
+@file modify_summary_admin_page.py
 @brief This file will contain all the widgets and functions related to the "summary" page itself
 @author Naviis-Brain
 @version 1.0
@@ -13,7 +13,7 @@ import globals
 import mysql.connector
 
 
-class SummaryAdmin:
+class ModifySummaryAdmin:
     def __init__(self, master):
         """!
         @brief The __init__ function sets the master frame in parameters as the frame that will contain all the widgets of
@@ -28,9 +28,8 @@ class SummaryAdmin:
 
         self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
 
-
         # Displays the title of the page
-        label = ttk.Label(self.frame, text="SUMMARY ADMIN", font=globals.global_font_title, foreground='#3daee9')
+        label = ttk.Label(self.frame, text="SUMMARY ADMIN - MODIFICATION", font=globals.global_font_title, foreground='#3daee9')
         label.pack(pady=30)
 
         # Information about the configuration
@@ -136,7 +135,7 @@ class SummaryAdmin:
 
     def clear_page(self):
         """!
-        @brief This functions clears the entire "summary admin" page
+        @brief This functions clears the entire "modify summary admin" page
         @param self : the instance
         @return Nothing
         """

@@ -43,9 +43,13 @@ class ModifyOrCreateConfiguration:
         self.left_frame = tk.Frame(self.master, bd=2, relief="sunken", padx=5, pady=5)
         self.left_frame.place(relx=0.02, rely=0.09, relwidth=0.46, relheight=0.50)
 
+        # Displays the title of the page
+        label_title_left = ttk.Label(self.left_frame, text="MODIFY A CONFIGURATION", font=globals.global_font_title, foreground='#3daee9')
+        label_title_left.pack(pady=10)
+
         # Creates the elements related to the selection of a configuration to modify
-        label_scenario_name = tk.Label(self.left_frame, text="Scenario name :", font=globals.global_font_text)
-        label_scenario_name.pack(anchor="nw")
+        label_configuration_label = tk.Label(self.left_frame, text="Configuration :", font=globals.global_font_title1)
+        label_configuration_label.pack(anchor="nw")
 
         # Get the configuration labels and ids
         configurations = local.get_config_labels_ids()
@@ -55,29 +59,34 @@ class ModifyOrCreateConfiguration:
             self.configuration_values = [(config['label'], config['id_config']) for config in configurations]
 
             # Creation of a combobox with the list of configuration labels
-            self.configuration_combobox = ttk.Combobox(self.left_frame, width=30)
+            self.configuration_combobox = ttk.Combobox(self.left_frame, state="readonly", width=30, background="white")
             self.configuration_combobox['values'] = [label for label, id_config in self.configuration_values]
-            self.configuration_combobox.pack(fill="x")
+            self.configuration_combobox.set(self.configuration_values[0][0])
+            self.configuration_combobox.pack(fill="x", pady=10)
         else:
-            configurations = []
-            self.configuration_combobox = ttk.Combobox(self.frame, values=configurations, width=29)
-            self.configuration_combobox.pack(pady=10)
+            configurations = ['No configuration available']
+            self.configuration_combobox = ttk.Combobox(self.left_frame, state="readonly", values=configurations, width=29)
+            self.configuration_combobox.set(configurations[0])
+            self.configuration_combobox.pack(fill="x", pady=10)
 
         # Right Frame for configuration Creation
         self.right_frame = tk.Frame(self.master, bd=2, relief="sunken", padx=5, pady=5)
         self.right_frame.place(relx=0.50, rely=0.09, relwidth=0.48, relheight=0.50)
 
-        # Creates the elemtents related to the creation of a new configuration
-        tk.Label(self.right_frame, text="Scenario name :", font=globals.global_font_text).pack(anchor="nw")
-        self.right_frame.update()
-        self.name_entry = EntryManager(self.right_frame, min=1, max=30, has_width=self.right_frame.winfo_width(),
-                                       default_text="Enter label")
+        # Displays the title of the page
+        label_title_right = ttk.Label(self.right_frame, text="CREATE A CONFIGURATION", font=globals.global_font_title, foreground='#3daee9')
+        label_title_right.pack(pady=10)
 
-        tk.Label(self.right_frame, text="Description :", font=globals.global_font_text).pack(anchor="nw")
+        # Creates the elemtents related to the creation of a new configuration
+        tk.Label(self.right_frame, text="Configuration label :", font=globals.global_font_title1).pack(anchor="nw")
+        self.right_frame.update()
+        self.configuration_label_entry = EntryManager(self.right_frame, min=1, max=30, has_width=self.right_frame.winfo_width())
+
+        tk.Label(self.right_frame, text="Description :", font=globals.global_font_title1).pack(anchor="nw")
         # Create a Text widget for multi-line text entry
-        self.description_text_entry = TextManager(self.right_frame, min=1, max=800,
-                                                  has_width=self.right_frame.winfo_width(),
-                                                  has_height=5, default_text="Enter description")
+        self.configuration_description_text = TextManager(self.right_frame, min=1, max=800,
+                                                          has_width=self.right_frame.winfo_width(),
+                                                          has_height=5)
 
     def save_label_description_id_of_config_into_globals(self):
         """!
@@ -88,8 +97,8 @@ class ModifyOrCreateConfiguration:
         """
 
         # Saving the variables into global variables
-        globals.global_scenario_name_configuration = self.name_entry.get()
-        globals.global_description_configuration = self.description_text_entry.get()
+        globals.global_scenario_name_configuration = self.configuration_label_entry.get()
+        globals.global_description_configuration = self.configuration_description_text.get()
 
     def clear_page(self):
         """!
@@ -105,11 +114,11 @@ class ModifyOrCreateConfiguration:
 
     def get_selected_id_config(self):
         """
-           @brief Retrieves the 'id_config' associated with the selected label in the combobox.
+       @brief Retrieves the 'id_config' associated with the selected label in the combobox.
 
-           @return The 'id_config' associated with the selected label in the combobox.
-                   Returns None if no item is selected or if the selected item is not found.
-           """
+       @return The 'id_config' associated with the selected label in the combobox.
+               Returns None if no item is selected or if the selected item is not found.
+       """
         selected_label = self.configuration_combobox.get()
         for label, id_config in self.configuration_values:
             if label == selected_label:

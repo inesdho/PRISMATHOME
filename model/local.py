@@ -38,7 +38,9 @@ local_cursor_protect = False
 caching = False
 
 config = {
+    #"host": "192.168.1.22",
     "host": "localhost",
+    #"user": "prisme",
     "user": "root",
     "password": "Q3fhllj2",
     "database": "prisme_home_1"
@@ -554,6 +556,23 @@ def get_sensors_from_configuration(id_config):
     return None
 
 
+def get_sensor_configs():
+    """!
+        Gets all sensor configs from the local database.
+
+        @return: The sensor configs list if found, otherwise None.
+        """
+
+    query = "SELECT id_config, id_sensor_type, sensor_label, sensor_description FROM sensor_config"
+
+    result = execute_query_with_reconnect(query)
+
+    if result:
+        return [(row[0], row[1], row[2], row[3]) for row in result]
+    else:
+        return None
+
+
 def get_sensor_info_from_observation(id_observation, sensor_type=None):
     """!
     Gets the labels and descriptions of all sensors for a specific observation. A sensor type can be selected in
@@ -598,6 +617,23 @@ def get_error_id_from_label(label):
 
     # Return None if the sensor type is not found or there are errors
     return None
+
+
+def get_users():
+    """!
+        Gets all users from the local database.
+
+        @return: The user list if found, otherwise None.
+        """
+
+    query = "SELECT id_user, login, password, connected FROM user"
+
+    result = execute_query_with_reconnect(query)
+
+    if result:
+        return [(row[0], row[1], row[2]) for row in result]
+    else:
+        return None
 
 
 # DONE
@@ -988,6 +1024,20 @@ def get_observation_info(id_observation, field=None):
             return result[0][0]
         else:
             return None
+
+
+def get_configurations():
+    """
+    Retrieves all configurations in the local database
+
+    @return A list of the fields and their values. None list if nothing was found or an error occurred.
+    """
+    query = """SELECT id_config, id_user, label, description FROM configuration;"""
+    result = execute_query_with_reconnect(query)
+    if result:
+        return [(row[0], row[1], row[2], row[3]) for row in result]
+    else:
+        return None
 
 
 def config_label_exists(label):
