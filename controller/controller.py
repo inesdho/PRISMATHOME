@@ -7,13 +7,14 @@
 """
 
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 import subprocess
 
 from ttkthemes import ThemedTk, ThemedStyle
 
 import globals
 from model import local
+from model import remote
 from view.new_observation_page import NewObservation
 from view.login_as_admin_page import LoginAsAdministrator
 from view.modify_or_create_configuration_page import ModifyOrCreateConfiguration
@@ -607,12 +608,16 @@ class App(ThemedTk):
 
     def get_data(self):
         """!
-        @brief This function
+        @brief This function Ask the user to choose a path to save the queries
         @param self : the instance
         @return Nothing
         """
-        # TODO Matteo, c'est ici que tu peux mettre tes fonctions stv
-        messagebox.showinfo("Get data", "La fonction get_data est appelée")
+        file_path = filedialog.askdirectory()
+        if file_path:
+            queries = local.get_remote_queries()
+            local.export_remote_queries(queries, path)
+            # Faire quelque chose avec le chemin du fichier sélectionné
+            print(f"Chemin du fichier sélectionné : {file_path}")
 
     def clear_the_page(self, page):
         """!
