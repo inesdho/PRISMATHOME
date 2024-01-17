@@ -31,10 +31,10 @@ ids_to_modify = ['id_sensor', 'id_data', 'id_observation']
 tables_to_prepend = ['sensor', 'data', 'observation']
 
 config = {
-    #"host": "localhost",
-    "host": "192.168.1.122",
-    # "user": "root",
-    "user": "prisme",
+    "host": "localhost",
+    # "host": "192.168.1.122",
+    "user": "root",
+    # "user": "prisme",
     "password": "Q3fhllj2",
     "database": "prisme@home_ICM"
 }
@@ -221,7 +221,6 @@ def fetch_remote_configs(get_users, get_configs):
                             )
                         if insertion is None:
                             return 0
-
 
             remote_query = "SELECT id_config, id_sensor_type, sensor_label, sensor_description FROM sensor_config"
             cursor.execute(remote_query)

@@ -5,7 +5,7 @@
 @version 1.0
 @date
 """
-
+import os
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import subprocess
@@ -92,8 +92,8 @@ class App(ThemedTk):
                    command=lambda: self.redirect_to_login_as_admin_from_anywhere(new_observation_page)) \
             .pack(side=tk.RIGHT, padx=10, anchor='e')
 
-        # Get data button
-        button_get_data = ttk.Button(self.main_frame, text="Get data", command=lambda: self.get_data())
+        # Export local data
+        button_get_data = ttk.Button(self.main_frame, text="Export local data to file", command=lambda: self.get_data())
         button_get_data.pack(side=tk.RIGHT, padx=10, anchor='e')
 
         # Redirection to login as an admin button
@@ -130,8 +130,8 @@ class App(ThemedTk):
         button.config(command=lambda: self.stop_observation(button, summary_user_page))
         button.pack(side=tk.LEFT, padx=10, expand=True)
 
-        # Get data button
-        button_get_data = ttk.Button(self.main_frame, text="Get data", command=lambda: self.get_data())
+        # Export local data to file button
+        button_get_data = ttk.Button(self.main_frame, text="Export local data to file", command=lambda: self.get_data())
         button_get_data.pack(side=tk.LEFT, padx=10, expand=True)
 
     def redirect_to_new_observation_from_anywhere(self, page):
@@ -549,9 +549,8 @@ class App(ThemedTk):
         start_stop_button.config(command=lambda: self.start_observation(start_stop_button, summary_user_page))
         start_stop_button.pack(side=tk.LEFT, padx=10, expand=True)
 
-
-        # Get data button
-        button_get_data = ttk.Button(self.main_frame, text="Get data", command=lambda: self.get_data())
+        # Export local data to file button
+        button_get_data = ttk.Button(self.main_frame, text="Export local data to file", command=lambda: self.get_data())
         button_get_data.pack(side=tk.LEFT, padx=10, expand=True)
 
     def start_observation(self, start_stop_button, summary_user_page):
@@ -612,12 +611,31 @@ class App(ThemedTk):
         @param self : the instance
         @return Nothing
         """
-        file_path = filedialog.askdirectory()
+        # Creating Default Filename
+        default_filename = "DATA"
+        sys_id = local.get_system_id()
+        if sys_id is not None:
+            default_filename += "_syst" + str(sys_id)
+
+        # Configuring file selection / creation window
+        filetypes = [('SQL Files', '*.sql'), ('All Files', '*.*')]
+        file_path = filedialog.asksaveasfilename(initialdir='/media', defaultextension='.sql', filetypes=filetypes,
+                                                 confirmoverwrite=True, initialfile=default_filename)
+        # If a path is returned by the window
         if file_path:
-            queries = local.get_remote_queries()
-            local.export_remote_queries(queries, path)
-            # Faire quelque chose avec le chemin du fichier sélectionné
-            print(f"Chemin du fichier sélectionné : {file_path}")
+            directory, filename = os.path.split(file_path)
+            if len(filename) > 0:   # Check if a filename was specified or only a directory was chosen
+                queries = local.get_remote_queries()
+                result = system_function.export_remote_queries(file_path, queries)
+                if result is not False:
+                    messagebox.showinfo("Data saved", f"Data successfully exported to {file_path}")
+                else:
+                    messagebox.showerror("Error", "Error ")
+            else :
+                messagebox.showerror("Error", "You have selected a directory, please select a file or specify the "
+                                              "file name to create")
+        else:
+            messagebox.showerror("Error", "No path selected")
 
     def clear_the_page(self, page):
         """!
