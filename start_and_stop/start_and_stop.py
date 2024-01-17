@@ -18,7 +18,7 @@ import time
 import signal
 import threading
 
-sys.path.append(os.path.abspath('/home/prisme/Prisme@home/PRISMATHOME'))
+sys.path.append(os.path.abspath('/home/share/PRISMATHOME'))
 
 from system import system_function
 import model.local

@@ -28,6 +28,7 @@ from view.modify_summary_admin_page import ModifySummaryAdmin
 from system import system_function
 import webbrowser
 import sys
+import signal
 
 
 class App(ThemedTk):
@@ -747,7 +748,7 @@ class App(ThemedTk):
         program_pid = system_function.get_pid_of_script("reception.py")
 
         # Send a signal SIUSR1 to reception.py to stop it
-        system_function.send_signal(program_pid, "SIGUSR1")
+        system_function.send_signal(program_pid, signal.SIGUSR1)
 
         # Update observation status to stop (0) in db
         local.update_observation_status(0)
