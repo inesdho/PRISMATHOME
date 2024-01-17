@@ -38,7 +38,7 @@ local_cursor_protect = False
 caching = False
 
 config = {
-    "host": "192.168.1.22",
+    "host": "192.168.1.122",
     "user": "prisme",
     "password": "Q3fhllj2",
     "database": "prisme_home_1"
@@ -1067,3 +1067,21 @@ def config_label_exists(label):
         return False
     else:
         return True
+
+
+def get_remote_queries():
+    """
+    Retrieves all the unsent remote queries stored in the 'remote_queries' table to export them in an SQL file
+
+    @return The list of unsent remote queries.
+    TODO
+    """
+    query = "SELECT id_query, query FROM remote_queries"
+    remote_queries_list = local.execute_query_with_reconnect(query)
+
+    if remote_queries_list:
+        return remote_queries_list
+    else:
+        return None
+
+

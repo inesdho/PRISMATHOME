@@ -24,3 +24,13 @@ def get_pid_of_script(script_name):
     except Exception as e:
         print(f"Erreur lors de la recherche du PID: {e}")
     return None
+
+
+def export_remote_queries(file_path, remote_queries):
+    """!
+    Saves all the unsent remote queries in an SQL file
+    @param file_path: The path of the file to save the queries into
+    @param remote_queries: The list of remote queries
+    @return True if the file was successfully created and filled, 0 otherwise
+    TODO
+    """

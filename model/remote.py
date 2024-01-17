@@ -138,11 +138,9 @@ def synchronise_queries():
 
     # Wait until caching is finished
     while local.caching:
-        print("waiting for local caching")
         pass
 
-    query = "SELECT id_query, query FROM remote_queries"
-    remote_queries_list = local.execute_query_with_reconnect(query)     # Fetch all unsent remote queries
+    remote_queries_list = local.get_remote_queries()
 
     if not remote_queries_list:
         return
