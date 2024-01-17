@@ -89,7 +89,7 @@ class SensorPairingManagement:
         data_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
         # Showing the type of the sensor
-        ttk.Label(data_frame, text=sensor["type"] + " sensor " + str(index), width=50, anchor='w', wraplength=140,
+        ttk.Label(data_frame, text=sensor["type"] + " sensor " + str(index), width=50, anchor='w',
                   background="white", borderwidth=0.5, relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
         # Creating a text widget tht will contain the label associated with the sensor
@@ -418,7 +418,7 @@ class SensorPairingManagement:
         self.canvas.destroy()
         self.frame.destroy()
 
-    def on_validate_button_click(self):
+    def on_validate_button_click(self, only_local):
         # TODO vérifier que tous les capteurs ont été appairées
         for sensor in self.sensor_entries:
             sensor["ieee_address"] = "0x1234567891237894"  # Adresse IEEE fictive pour les tests
@@ -431,7 +431,7 @@ class SensorPairingManagement:
                                               globals.global_id_config_selected,
                                               globals.global_id_session_selected,
                                               globals.global_session_label_selected,
-                                              self.sensor_entries)
+                                              self.sensor_entries, only_local)
 
         # Set True to stop the thread displaying sensor values
         globals.thread_done = True

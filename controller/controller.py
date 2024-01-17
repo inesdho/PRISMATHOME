@@ -494,13 +494,17 @@ class App(ThemedTk):
 
     def redirect_to_summary_user_from_pairing(self, sensor_pairing_page):
         """!
-        @brief This function saves the information about the pairing of the sensor and calls the 'Summary user' page
+        @brief This function asks the user if they want to anable the local only mode.
+        It saves the information about the pairing of the sensor and calls the 'Summary user' page
         @param self : the instance
         @param sensor_pairing_page : the sensor pairing page
         @return Nothing
         """
+        only_local = messagebox.askyesno("Mode local only",
+                                     "You are about to start an observation. Do you want to activate the local only mode ?")
+
         # Saving the infos about the pairing
-        sensor_pairing_page.on_validate_button_click()
+        sensor_pairing_page.on_validate_button_click(only_local)
 
         # Redirecting to the 'Summary user' page
         self.redirect_to_summary_user_from_anywhere(sensor_pairing_page)
@@ -575,7 +579,7 @@ class App(ThemedTk):
             arguments.append(sensor["type"] + "/" + sensor["label"])
 
         # Create the command
-        command = ["python", "/home/prisme/Prisme@home/PRISMATHOME/reception.py"] + arguments
+        command = ["python", "/home/share/PRISMATHOME/reception.py"] + arguments
 
         # Start the reception.py program
         subprocess.Popen(command)

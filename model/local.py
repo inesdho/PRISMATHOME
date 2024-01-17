@@ -38,9 +38,9 @@ local_cursor_protect = False
 caching = False
 
 config = {
-    #"host": "192.168.1.22",
+    # "host": "192.168.1.22",
     "host": "localhost",
-    #"user": "prisme",
+    # "user": "prisme",
     "user": "root",
     "password": "Q3fhllj2",
     "database": "prisme_home_1"
@@ -70,6 +70,7 @@ def connect_to_local_db():
         time.sleep(1)
         # Loop until the connection works
         connect_to_local_db()
+
 
 # DONE
 def get_system_id():
@@ -106,7 +107,7 @@ def add_system_id(local_id):
 def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3):
     # A flag to retry or not on connection lost
     # if a transaction is started to rollback changes
-    print("QUERY = ",query)
+    print("QUERY = ", query)
     retry = True
     conn = None
     for attempt in range(max_attempts):
@@ -206,6 +207,7 @@ def send_query_local(query_type, table, fields=None, values=None, condition=None
 
 
 def send_query_remote(query_type, table, fields=None, values=None, condition=None, last_id=None):
+
     remote_values = None
     remote_query = None
 
@@ -245,10 +247,13 @@ def send_query_remote(query_type, table, fields=None, values=None, condition=Non
         remote_query = f"{query_type} FROM `{table}`"
         remote_query += f" WHERE {modified_condition}"
 
-    print(f"\033[94mTry execute (distant) : {remote_query, remote_values}\033[0m")
     # *****************************************************************************#
     # *************************** FIN CREATION REQUETE ****************************#
     # *****************************************************************************#
+
+    if globals.global_observation_mode == 1:
+        cache_query(remote_query, remote_values)
+        return 0
 
     # Attempting to send to remote DB
     if remote.execute_remote_query(remote_query, remote_values) == 1:  # Success
@@ -768,6 +773,7 @@ def get_config_labels_ids(id_config=None):
         if result:
             return result[0][0]
 
+
 def get_config_label_from_observation_id(id_observation):
     """!
     Gets the lconfig label from a configuration matching
@@ -787,23 +793,25 @@ def get_config_label_from_observation_id(id_observation):
 
 
 # DONE
-def create_observation_with_sensors(user, participant, id_config, id_session, session_label, sensor_list, active=0,
-                                    id_system=None):
+def create_observation_with_sensors(user, participant, id_config, id_session, session_label, sensor_list, only_local=0,
+                                    active=0, id_system=None):
     """!
     Creates a new observation with associated sensors from the given parameters and inserts them in both databases.
-
+    @param user: The linux user connected when the function is called
     @param id_system: The system's id (if None, it will be retrieved)
     @param participant: The participant's id
     @param id_config: The config's id
     @param id_session: The session's id
     @param session_label: The session's label
     @param sensor_list: The list of sensors associated with the observation
+    @param only_local: Indicate if the observation should only work in local mode (0 : not local only, 1 : local only)
     @param active: The status of the session (1=active, 0=inactive)
     @return True if successful, False if one or more errors occurred
     """
     conn = None
     cursor = None
     error = False
+    id_observation = None
     types_list = []
     id_list = []  # To store IDs of local database insertions
     try:
@@ -816,11 +824,10 @@ def create_observation_with_sensors(user, participant, id_config, id_session, se
         if id_system is None:
             id_system = get_system_id()
 
-        values = (id_system, user, participant, id_config, id_session, session_label, active)
+        values = (id_system, user, participant, id_config, id_session, session_label, only_local, active)
         id_observation = send_query_local('insert', 'observation',
                                           ['id_system', 'creator', 'participant', 'id_config', 'id_session',
-                                           'session_label',
-                                           'active'],
+                                           'session_label', 'only_local', 'active'],
                                           values, None, cursor)
 
         if id_observation == 0:
@@ -860,9 +867,11 @@ def create_observation_with_sensors(user, participant, id_config, id_session, se
         if error:
             return False
 
-    values = (id_system, user, participant, id_config, id_session, session_label, active)
+    values = (id_system, user, participant, id_config, id_session, session_label, only_local, active)
     # Insertion in the remote database for observation
-    send_query_remote('insert', 'observation', ['id_system', 'creator', 'participant', 'id_config', 'id_session', 'session_label', 'active'], values, None, id_list[0])
+    send_query_remote('insert', 'observation', ['id_system', 'creator', 'participant', 'id_config',
+                                                'id_session', 'session_label', 'only_local', 'active'], values,
+                      None, id_list[0])
 
     # Insertion in the remote database for sensors
     for i, sensor in enumerate(sensor_list, start=1):
@@ -942,6 +951,7 @@ def create_configuration(id_config, id_user, label, description, sensor_list):
                           ['id_config', 'id_sensor_type', 'sensor_label', 'sensor_description'],
                           values)
 
+
 def insert_new_sensors_for_configuration(id_config, sensor_list):
     """!
     Creates a new sensors for the given configuration. Insert into the local and remote DB
@@ -991,6 +1001,7 @@ def insert_new_sensors_for_configuration(id_config, sensor_list):
                           ['id_config', 'id_sensor_type', 'sensor_label', 'sensor_description'],
                           values)
 
+
 def delete_sensor_config(id_config):
     """!
     Creates a new configuration from the given parameters and inserts it in both databases.
@@ -1004,6 +1015,7 @@ def delete_sensor_config(id_config):
 
     return result
 
+
 # DONE
 def encrypt_password(password):
     """!
@@ -1014,7 +1026,23 @@ def encrypt_password(password):
     """
     return hashlib.sha256(password.encode()).hexdigest()
 
-# DONE
+def get_observation_mode():
+    """!
+    Select and return the mode of the active observation.
+
+    @return (0 : not only_local, 1 : only_local)
+    """
+
+    query = "SELECT only_local FROM observation WHERE active = 1;"
+
+    result = execute_query_with_reconnect(query)
+
+    if result:
+        print("only local ? :", result[0][0])
+        return result[0][0]
+    else:
+        return None
+
 def get_active_observation():
     """!
     Select and return the ID of the active observation.

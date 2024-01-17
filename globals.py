@@ -2,6 +2,8 @@
 
 # Bit used to close the connections thread when the window is closed
 global_disconnect_request = False
+# Bit used to know if the observation is in only_local mode or not (0 : not only_local, 1: only_local)
+global_observation_mode = 0
 
 global_id_user = None
 sensor_counts = {}

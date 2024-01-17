@@ -32,37 +32,18 @@ import subprocess
 from datetime import datetime
 import threading
 from system import system_function
+import globals
 
 ## Constant for the broker port
 BROKER_PORT = 1883
 ## Constant for the broker addr
 BROKER_ADDR = "127.0.0.1"
-
+## The pid of the program which started reception.py
 pid_parent = None
-
+## The pid of start_and_stop.py program
 pid_start_and_stop = None
-
+## The mqtt client to collect the data from the broker
 coordinator = None
-
-def get_pid_of_script(script_name):
-    """!
-    @brief Get the pid of the script "script_name"
-    @param script_name The name of the script that we want to get the pid
-    @return The pid of the script "script_name"
-    """
-    try:
-        # Exécution de la commande 'ps' pour obtenir les processus en cours
-        process = subprocess.run(['ps', 'aux'], stdout=subprocess.PIPE, text=True)
-        # Filtrage des lignes qui contiennent le nom du script
-        lines = process.stdout.split('\n')
-        for line in lines:
-            if script_name in line:
-                parts = line.split()
-                # Le PID est généralement le deuxième élément dans la sortie de 'ps aux'
-                return int(parts[1])
-    except Exception as e:
-        print(f"Erreur lors de la recherche du PID: {e}")
-    return None
 
 def handler_program_stop(signum, frame):
     """!
@@ -82,32 +63,27 @@ def handler_program_stop(signum, frame):
     coordinator.loop_stop()
     coordinator.disconnect()
 
-    print("signum : " + str(signum))
-    print("SIGUSR2 " + str(signal.SIGUSR2))
-    pid_start_and_stop = get_pid_of_script("start_and_stop.py")
-    print("pid_start_and_stop :", pid_start_and_stop)
+    # Get the pid of start_and_stop.py program
+    pid_start_and_stop = system_function.get_pid_of_script("start_and_stop.py")
 
     # Register the datetime when the signal was received
     datetime_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-    print("POUR ETRE SUR")
+
     # If the signal come from start_and_stop program (SIGUSR2) :
     if signum == signal.SIGUSR2:
-        print("signum = signal.SIGNUM")
         # Send a monitoring message that the system is shut down
         local.monitor_system_shut_down_by_participant(datetime_now)
         # Send a signal to start_and_stop program to indicate that the program is closed
-        print("BEFORE SIGNAL SENT")
         system_function.send_signal(pid_start_and_stop, "SIGTERM")
-        print("Signal sent")
     else:
-        print("signum != signal.SIGNUM")
-        print("SIGNAL NOT SENT")
         # Send a monitoring message that the observation is stopped
         local.monitor_observation_stopped(datetime_now)
 
+    # Reset the observation mode bit
+    globals.global_observation_mode = 0
+
 
 def on_message(client, userdata, msg):
-    print("message received 11")
     treatment.data_treatment(client, userdata, msg)
 
 
@@ -116,14 +92,17 @@ if __name__ == "__main__":
     # Connection to local db
     local.connect_to_local_db()
 
+    # Set the observation mode by getting it
+    globals.global_observation_mode = local.get_observation_mode()
+
     # Connect to remote db. With a thread in order not to block the program
     connection_thread = threading.Thread(target=remote.connect_to_remote_db)
     connection_thread.start()
 
-    ## The mqtt client to collect the data from the broker
+    # Create the mqtt client
     coordinator = mqtt.Client("Coordinator")
 
-    ## The on_message function of the mqtt client
+    # Set the message handling function
     coordinator.on_message = on_message
 
     # Connection to mqtt broker
@@ -131,7 +110,6 @@ if __name__ == "__main__":
 
     # Subscribe to every sensor paired
     for i in range(len(sys.argv) - 1):
-        print("subscribe : zigbee2mqtt/" + sys.argv[i + 1])
         coordinator.subscribe("zigbee2mqtt/" + sys.argv[i + 1])
 
     datetime_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
@@ -139,33 +117,31 @@ if __name__ == "__main__":
     # Get the parent process pid
     pid_parent = os.getppid()
 
-    print(f"pid_parent :'{pid_parent}'")
-
     # Get de start_and_stop process pid
-    pid_start_and_stop = get_pid_of_script("start_and_stop.py")
-
-    print(f"pid_start_and_stop : '{pid_start_and_stop}'")
+    pid_start_and_stop = system_function.get_pid_of_script("start_and_stop.py")
 
     # If the program was started by start_and_stop.py, it will :
     # - Send a signal to the start_and_stop program to indicate that reception.py is ready.
     # - Send a monitoring message to the db to indicate program started up
     if pid_parent == pid_start_and_stop:
+        # Monitor system started up by participant
         local.monitor_system_started_up_by_participant(datetime_now)
-        os.kill(pid_start_and_stop, signal.SIGTERM)
-        print("signal sent")
+        # Send a signal SIGTERM to the start_and_stop program to inform reception.py is up
+        system_function.send_signal(pid_start_and_stop, signal.SIGTERM)
     else:
-        print("Monitor observation started")
+        # Monitor observation started
         local.monitor_observation_started(datetime_now)
-        print("FIN Monitor observation started")
 
+    # Start the thread which check the sensors availability
     thread_availability = threading.Thread(target=local_mqtt.check_availability)
     thread_availability.start()
 
-    print("CREATION HANDLER")
-    # Wait for a signal comming from start_and_stop program
+    # Create a signal handler for signal coming from the main.py program
     signal.signal(signal.SIGUSR1, handler_program_stop)
+
+    # Create a signal handler for signal coming from start_and_stop program
     signal.signal(signal.SIGUSR2, handler_program_stop)
-    print("LOOP")
+
     # Blocking call that processes network traffic, dispatches callbacks and
     # handles reconnecting.
     coordinator.loop_forever()
