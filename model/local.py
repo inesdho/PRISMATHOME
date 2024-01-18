@@ -9,17 +9,16 @@
 
 @date January 10 2024
 """
-import errno
 
 import globals
 
 import mysql.connector
 import time
-import hashlib
 import threading
 
 from model import remote
-from mysql.connector import pooling
+
+from system.system_function import encrypt_password
 
 local_db = None
 local_cursor = None
@@ -1014,16 +1013,6 @@ def delete_sensor_config(id_config):
 
     return result
 
-
-# DONE
-def encrypt_password(password):
-    """!
-    Encrypts the given password using SHA-256
-
-    @param password: The unencrypted password
-    @return: The encrypted password
-    """
-    return hashlib.sha256(password.encode()).hexdigest()
 
 def get_observation_mode():
     """!
