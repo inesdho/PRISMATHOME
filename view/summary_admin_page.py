@@ -82,7 +82,7 @@ class SummaryAdmin:
         # Get the sensor types from DB
         all_sensor_types = local.get_sensor_type_list()
 
-        # TODO ines/mathilde : Commenter, code pas compréhensible et fait planter les requêtes
+        # TODO ines/mathilde : Détailler les commentaires
         for sensor_type_id, sensor_type in all_sensor_types:
 
             print("globals.global_sensor_entries : ",globals.global_sensor_entries)

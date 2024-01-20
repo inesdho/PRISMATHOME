@@ -46,7 +46,10 @@ def handler_prgm_started(signum, frame):
     @return None
     """
     global program_up
-    program_up = True
+    if signum == signal.SIGTERM:
+        program_up = True
+    else:
+        set_LED_to_green()
 
 
 def handler_prgm_stopped(signum, frame):
@@ -59,7 +62,10 @@ def handler_prgm_stopped(signum, frame):
     @return None
     """
     global program_down
-    program_down = True
+    if signum == signal.SIGTERM:
+        program_down = True
+    else:
+        set_LED_to_yellow()
 
 
 def init_GPIO_pins():
@@ -136,13 +142,24 @@ def set_LED_to_green():
     GPIO.output(YELLOW_LED_PIN, GPIO.LOW)
     GPIO.output(GREEN_LED_PIN, GPIO.HIGH)
 
+def set_LED_to_yellow():
+    """!
+    Set the Bi-color LED to yellow
+
+    @return None
+    """
+    GPIO.output(GREEN_LED_PIN, GPIO.LOW)
+    GPIO.output(YELLOW_LED_PIN, GPIO.HIGH)
+
 
 if __name__ == "__main__":
 
     # Initialise the GPIO pins
     init_GPIO_pins()
 
-    # TODO : Faire clignoter la led ici
+    signal.signal(signal.SIGUSR1, handler_prgm_started)
+    signal.signal(signal.SIGUSR2, handler_prgm_stopped)
+
     thread_yellow_led_blink_start = threading.Thread(target=yellow_led_blink_start)
     thread_yellow_led_blink_start.start()
 
@@ -154,6 +171,7 @@ if __name__ == "__main__":
 
     if (id_observation is not None
             and id_observation is not False):
+
         # Set the signal handler
         signal.signal(signal.SIGTERM, handler_prgm_started)
         sensor_list = model.local.get_sensors_from_observation(id_observation)
@@ -166,12 +184,15 @@ if __name__ == "__main__":
 
         # Start the main program
         subprocess.Popen(command)
+        thread_yellow_led_blink_start.join()
+        set_LED_to_green()
     else:
+
         program_up = True
+        thread_yellow_led_blink_start.join()
+        set_LED_to_yellow()
 
-    thread_yellow_led_blink_start.join()
 
-    set_LED_to_green()
 
     # Waiting for shutdown button to be pressed
     listen_for_shutdown()
@@ -188,9 +209,9 @@ if __name__ == "__main__":
         signal.signal(signal.SIGTERM, handler_prgm_stopped)
 
         # Send a SIGUSR2 signal to the prism@home program
-        system_function.send_signal(main_pid, "SIGUSR2")
+        system_function.send_signal(main_pid, signal.SIGUSR2)
 
-        # Wait for the signal comming from prism@home program
+        # Wait for the signal coming from prism@home program
         while not program_down:
             pass
 

@@ -9,7 +9,8 @@ import globals
 if __name__ == "__main__":
 
     # Connect to local db
-    local.connect_to_local_db()
+    if local.connect_to_local_db() == 0:
+        messagebox.showerror("Error", f"Impossible to connect to local data base (Connection time out)")
 
     # Set the observation mode by getting it
     globals.global_observation_mode = local.get_observation_mode()
@@ -17,8 +18,6 @@ if __name__ == "__main__":
     # Connect to remote db. With a thread in order not to block the program
     connection_thread = threading.Thread(target=remote.connect_to_remote_db)
     connection_thread.start()
-
-    print("START")
 
     # Creating an instance of the application
     app = App()
@@ -30,7 +29,7 @@ if __name__ == "__main__":
             # Try to update the local database with the data from the remote database
             UpdateLocalDatabase()
         except Exception as e:
-            messagebox.showerror("Erreur", f"An error occurred while trying to update the local database: {str(e)}")
+            messagebox.showerror("Error", f"An error occurred while trying to update the local database: {str(e)}")
             print('passé par le except')
 
 

@@ -50,11 +50,6 @@ class NewObservation:
         user_label.pack()
         user_label = ttk.Label(self.frame, text=getpass.getuser(), font=("Calibi", 12))
         user_label.pack(pady=10)
-        # TODO paul I guess ? remplacer le default texte par la valeur que tu as crée de l'utilisateur de la session
-        #self.user_entry = EntryManager(self.frame, min=1, max=30, has_width=30, default_text="User")
-
-        """list_configuration_labels = [config['label'] for config in configurations]
-        list_configuration_ids = [config['id_config'] for config in configurations]"""
 
         # Configuration list
         configuration_label = ttk.Label(self.frame, text="Configuration", font=globals.global_font_title1)

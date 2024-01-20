@@ -74,7 +74,7 @@ def execute_remote_query(query, values=None, synchronise=False):
     Tries to insert into the remote database the query and values passed as arguments
     @param query the query to be inserted
     @param values the values of said query
-    @param synchronise: TODO
+    @param synchronise: Bit to specified if the function is called by the synchronise_queries function
     @return 1 if successfully inserted, 0 otherwise
     """
     print("Entering execute_remote_query")

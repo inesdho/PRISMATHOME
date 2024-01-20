@@ -48,11 +48,12 @@ config = {
 
 
 # DONE
-def connect_to_local_db():
+def connect_to_local_db(cpt=0):
     """!
     Tries to connect to the local database and loops until successfully connected
+    or 15 seconds time out is reached
 
-    @return None
+    @return 1 if connection was successful, 0 otherwise
     """
     print("try to connect to local database")
     global pool
@@ -66,10 +67,14 @@ def connect_to_local_db():
             **config
         )
         print("\033[96mConnected to local database\033[0m")
+        return 1
     except Exception as e:
-        time.sleep(1)
-        # Loop until the connection works
-        connect_to_local_db()
+        if cpt < 15:
+            time.sleep(1)
+            # Loop until the connection works
+            return connect_to_local_db(cpt=cpt+1)
+        else:
+            return 0
 
 
 # DONE
@@ -698,7 +703,6 @@ def update_observation_status(observation_status, id_observation=None):
                       ['active'],
                       values,
                       "id_observation=" + str(id_observation))
-    # TODO : voir avec Paul s'il faut faire d'autres traitements pour stopper reception.py
 
 
 # DONE

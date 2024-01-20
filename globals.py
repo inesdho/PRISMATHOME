@@ -1,3 +1,15 @@
+"""!
+@file globals.py
+
+@brief This file is used to define all the global variables that we need to use.
+
+@author Naviis-Brain
+
+@version 1.0
+
+@date 28th Decembre 2023
+"""
+
 # TODO faire de la doc et des commentaires pour ce fichier
 
 # Bit used to close the connections thread when the window is closed

@@ -1,11 +1,29 @@
+"""!
+@file system_function.py
+
+@brief This file is a library of functions related to system commands
+
+@author Naviis-Brain
+
+@version 1.0
+
+@date 28th Decembre 2023
+"""
+
 import subprocess
 import os
 
 
-# TODO faire la doc
-def send_signal(pid, signal_name):
+def send_signal(pid, signal_number):
+    """!
+    @brief Send a signal "signal_name" to the script which has the "pid" specified.
+    In order to have the correct permission the function call a compiled script which has the bit setuid.
+    @param pid : The pid of the script we want to send the signal
+    @param signal_number : The number of the signal we want to send
+    @return None
+    """
     script_path = "/home/share/PRISMATHOME/test"
-    subprocess.run([script_path, str(pid), str(signal_name)], check=True)
+    subprocess.run([script_path, str(pid), str(signal_number)], check=True)
 
 
 def get_pid_of_script(script_name):
@@ -25,7 +43,7 @@ def get_pid_of_script(script_name):
                 # Le PID est généralement le deuxième élément dans la sortie de 'ps aux'
                 return int(parts[1])
     except Exception as e:
-        print(f"Erreur lors de la recherche du PID: {e}")
+        print(f"Something wrong append while looking for the script pid : {e}")
     return None
 
 
