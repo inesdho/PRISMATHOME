@@ -489,7 +489,7 @@ def check_availability():
                             availabilities[1][i] = "offline"
                             sensor_id = local.get_sensor_from_type_label(data_to_database[0], data_to_database[1])
                             if sensor_id:
-                                local.monitor_availability_offline(sensor_id, datetime_now)
+                                local.monitor_sensor_availability(sensor_id, datetime_now, 0)
 
                     # Case where the sensor is already in the system
                     elif 'online' in availabilities[1][i]:
@@ -497,14 +497,14 @@ def check_availability():
                             availabilities[1][i] = "offline"
                             sensor_id = local.get_sensor_from_type_label(data_to_database[0], data_to_database[1])
                             if sensor_id:
-                                local.monitor_availability_offline(sensor_id, datetime_now)
+                                local.monitor_sensor_availability(sensor_id, datetime_now, 0)
 
                     elif 'offline' in availabilities[1][i]:
                         if 'online' in availability_message['state']:
                             availabilities[1][i] = "online"
                             sensor_id = local.get_sensor_from_type_label(data_to_database[0], data_to_database[1])
                             if sensor_id:
-                                local.monitor_availability_online(sensor_id, datetime_now)
+                                local.monitor_sensor_availability(sensor_id, datetime_now, 1)
 
     def on_message_rename(client, userdata, msg):
         """!

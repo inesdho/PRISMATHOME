@@ -35,7 +35,6 @@ def export_remote_queries(file_path, remote_queries):
     @param file_path: The path of the file to save the queries into
     @param remote_queries: The list of remote queries
     @return True if the file was successfully created and filled, False otherwise
-    TODO finish and test this function
     """
 
     print("File path = ", file_path)

@@ -94,7 +94,7 @@ def handler_program_stop(signum, frame):
     if signum == signal.SIGUSR2:
         print("signum = signal.SIGNUM")
         # Send a monitoring message that the system is shut down
-        local.monitor_system_shut_down_by_participant(datetime_now)
+        local.monitor_system_start_stop(datetime_now, 0)
         # Send a signal to start_and_stop program to indicate that the program is closed
         print("BEFORE SIGNAL SENT")
         system_function.send_signal(pid_start_and_stop, "SIGTERM")
@@ -103,7 +103,7 @@ def handler_program_stop(signum, frame):
         print("signum != signal.SIGNUM")
         print("SIGNAL NOT SENT")
         # Send a monitoring message that the observation is stopped
-        local.monitor_observation_stopped(datetime_now)
+        local.monitor_observation_start_stop(datetime_now, 0)
 
 
 def on_message(client, userdata, msg):
@@ -150,12 +150,12 @@ if __name__ == "__main__":
     # - Send a signal to the start_and_stop program to indicate that reception.py is ready.
     # - Send a monitoring message to the db to indicate program started up
     if pid_parent == pid_start_and_stop:
-        local.monitor_system_started_up_by_participant(datetime_now)
+        local.monitor_system_start_stop(datetime_now, 1)
         os.kill(pid_start_and_stop, signal.SIGTERM)
         print("signal sent")
     else:
         print("Monitor observation started")
-        local.monitor_observation_started(datetime_now)
+        local.monitor_observation_start_stop(datetime_now, 1)
         print("FIN Monitor observation started")
 
     thread_availability = threading.Thread(target=local_mqtt.check_availability)
