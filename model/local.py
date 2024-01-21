@@ -373,7 +373,6 @@ def monitor_observation_start_stop(datetime, observation_status):
     return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
 
 
-# TODO : faire fonction 2 en 1
 def monitor_sensor_availability(sensor_id, datetime, availability):
     """!
     Insert the monitoring message "Sensor availability offline" or "Sensor availability online"
