@@ -31,10 +31,12 @@ class SummaryUser:
 
         self.frame.pack(fill=tk.BOTH, expand=tk.TRUE)
 
-
         # Displays the title of the page
         label = ttk.Label(self.frame, text="SUMMARY USER", font=globals.global_font_title, foreground='#3daee9')
         label.pack(pady=30)
+
+        self.observation_state = ttk.Label(self.frame, text=" ", font=globals.global_font_title1)
+        self.observation_state.pack(pady=10)
 
         # Information about the configuration
         scenario_label = ttk.Label(self.frame,
@@ -98,6 +100,15 @@ class SummaryUser:
         try:
             all_sensor_types = local.get_sensor_type_list()
 
+            # Creation of the button to display all the sensor
+            all_ssensor_type_button = ttk.Button(
+                self.button_frame,
+                text="All sensor",
+                command=lambda type=-1: self.display_sensor_info(type),
+                padding=5
+            )
+            all_ssensor_type_button.pack(side=tk.LEFT, padx=5)
+
             for sensor_type_id, sensor_type in all_sensor_types:
                 # Retrieve information from sensors of this type from the database
                 sensor_infos = local.get_sensor_info_from_observation(globals.global_new_id_observation, sensor_type_id)
@@ -113,7 +124,7 @@ class SummaryUser:
                             command=lambda type=sensor_type: self.display_sensor_info(type),
                             padding=5
                         )
-                        sensor_type_button.pack(side=tk.LEFT)
+                        sensor_type_button.pack(side=tk.LEFT, padx=5)
                     print("BEFORE create_sensor_info")
                     self.create_sensor_info(sensor_infos, sensor_type)
 
@@ -177,17 +188,22 @@ class SummaryUser:
 
     def display_sensor_info(self, sensor_type):
         """!
-        @brief Displays information about all sensors of a selected type.
+        @brief Displays information about all sensors of a selected type, or all the sensor if sensor_type == -1
         @param self: Instance reference.
-        @param sensor_infos: all the sensors associated with a type of sensor.
         @param sensor_type: Type of sensor.
         @return None
         """
-        for sensor_type_frame in self.sensor_type_frame_list:
-            if sensor_type_frame["type"] != sensor_type:
-                sensor_type_frame["frame"].pack_forget()
-            else:
+        # The value -1 is used to display all the sensor at once regarding of their type
+        if sensor_type ==-1:
+            for sensor_type_frame in self.sensor_type_frame_list:
                 sensor_type_frame["frame"].pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
+        # If the value is not -1 only the sensor with the type that match are displayed
+        else:
+            for sensor_type_frame in self.sensor_type_frame_list:
+                if sensor_type_frame["type"] != sensor_type:
+                    sensor_type_frame["frame"].pack_forget()
+                else:
+                    sensor_type_frame["frame"].pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
         # Configure the scroll region to follow the content of the frame
         self.frame_canvas.update_idletasks()

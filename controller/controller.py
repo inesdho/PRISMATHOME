@@ -105,7 +105,8 @@ class App(ThemedTk):
     def call_summary_user_page(self):
         """!
         @brief This function initialises and calls summary_user.py in order to show the page and also adds
-        navigation button
+        navigation button. This function is used to display the page specifically when the app is launch and an
+        observation is already running
         @param self : the instance
         @return Nothing
         """
@@ -116,15 +117,13 @@ class App(ThemedTk):
         # Creation of a main frame
         self.create_new_main_frame()
 
+        # Update the state of the observation
+        summary_user_page.observation_state.config(text="Observation running", foreground='#3eaf3e')
+
         # Cancel button
         cancel_button = ttk.Button(self.main_frame, text="Exit",
                                    command=lambda: self.redirect_to_new_observation_from_anywhere(summary_user_page))
         cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
-
-        # Back button
-        back_button = ttk.Button(self.main_frame, text="Back",
-                                 command=lambda: self.redirect_to_pairing_from_anywhere(summary_user_page))
-        back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Start observation button
         button = ttk.Button(self.main_frame, text="Stop observation")
@@ -517,7 +516,7 @@ class App(ThemedTk):
         @param page : the previous page
         @return Nothing
         """
-        if messagebox.askyesno("End observation", "Are you sure you want to end the observation. The observation cannot"
+        if messagebox.askyesno("End observation", "Are you sure you want to end the observation ? The observation cannot"
                                                   " be restarted. "):
             self.redirect_to_new_observation_from_anywhere(summary_user_page)
 
@@ -539,15 +538,13 @@ class App(ThemedTk):
         # Creation of a main frame
         self.create_new_main_frame()
 
+        # Update the state of the observation
+        summary_user_page.observation_state.config(text="Observation not running", foreground='#d9534f')
+
         # Cancel button
         cancel_button = ttk.Button(self.main_frame, text="Cancel",
                                    command=lambda: self.redirect_to_new_observation_from_summary_user(summary_user_page))
         cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
-
-        # Back button
-        back_button = ttk.Button(self.main_frame, text="Back",
-                                 command=lambda: self.redirect_to_pairing_from_anywhere(summary_user_page))
-        back_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Start observation button
         start_stop_button = ttk.Button(self.main_frame, text="Start observation")
@@ -567,6 +564,9 @@ class App(ThemedTk):
         @param summary_user_page : the summary user page
         @return Nothing
         """
+
+        # Update the state of the observation
+        summary_user_page.observation_state.config(text="Observation running", foreground='#3eaf3e')
 
         # The list of sensors formated like "type/label"
         arguments = []
@@ -601,6 +601,9 @@ class App(ThemedTk):
         @param summary_user_page : the summary user page
         @return Nothing
         """
+
+        # Update the state of the observation
+        summary_user_page.observation_state.config(text="Observation not running", foreground='#d9534f')
 
         # Get the program pid of reception.py
         program_pid = system_function.get_pid_of_script("reception.py")
