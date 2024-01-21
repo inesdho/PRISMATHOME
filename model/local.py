@@ -9,17 +9,16 @@
 
 @date January 10 2024
 """
-import errno
 
 import globals
 
 import mysql.connector
 import time
-import hashlib
 import threading
 
 from model import remote
-from mysql.connector import pooling
+
+from system.system_function import encrypt_password
 
 local_db = None
 local_cursor = None
@@ -99,7 +98,7 @@ def add_system_id(local_id):
 def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3):
     # A flag to retry or not on connection lost
     # if a transaction is started to rollback changes
-    # TODO : doc
+    # TODO Paul : doc
     retry = True
     conn = None
     for attempt in range(max_attempts):
@@ -145,7 +144,7 @@ def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3
 
 
 def send_query_local(query_type, table, fields=None, values=None, condition=None, cursor=None):
-    # TODO : doc
+    # TODO Paul : doc
     valid_query_types = ["INSERT", "UPDATE", "DELETE"]
     query = ""
 
@@ -200,7 +199,7 @@ def send_query_local(query_type, table, fields=None, values=None, condition=None
 
 
 def send_query_remote(query_type, table, fields=None, values=None, condition=None, last_id=None):
-    # TODO : doc
+    # TODO Paul : doc
     remote_values = None
     remote_query = None
 
@@ -240,10 +239,13 @@ def send_query_remote(query_type, table, fields=None, values=None, condition=Non
         remote_query = f"{query_type} FROM `{table}`"
         remote_query += f" WHERE {modified_condition}"
 
-    print(f"\033[94mTry execute (distant) : {remote_query, remote_values}\033[0m")
     # *****************************************************************************#
     # *************************** FIN CREATION REQUETE ****************************#
     # *****************************************************************************#
+
+    if globals.global_observation_mode == 1:
+        cache_query(remote_query, remote_values)
+        return 0
 
     # Attempting to send to remote DB
     if remote.execute_remote_query(remote_query, remote_values) == 1:  # Success
@@ -745,24 +747,25 @@ def get_config_label_from_observation_id(id_observation):
 
 
 # DONE
-def create_observation_with_sensors(user, participant, id_config, id_session, session_label, sensor_list, active=0,
-                                    id_system=None):
+def create_observation_with_sensors(user, participant, id_config, id_session, session_label, sensor_list, only_local=0,
+                                    active=0, id_system=None):
     """!
     Creates a new observation with associated sensors from the given parameters and inserts them in both databases.
-
-    @param user: The user creating the configuration
+    @param user: The linux user connected when the function is called
     @param id_system: The system's id (if None, it will be retrieved)
     @param participant: The participant's id
     @param id_config: The config's id
     @param id_session: The session's id
     @param session_label: The session's label
     @param sensor_list: The list of sensors associated with the observation
+    @param only_local: Indicate if the observation should only work in local mode (0 : not local only, 1 : local only)
     @param active: The status of the session (1=active, 0=inactive)
     @return True if successful, False if one or more errors occurred
     """
     conn = None
     cursor = None
     error = False
+    id_observation = None
     types_list = []
     id_list = []  # To store IDs of local database insertions
     try:
@@ -775,11 +778,10 @@ def create_observation_with_sensors(user, participant, id_config, id_session, se
         if id_system is None:
             id_system = get_system_id()
 
-        values = (id_system, user, participant, id_config, id_session, session_label, active)
+        values = (id_system, user, participant, id_config, id_session, session_label, only_local, active)
         id_observation = send_query_local('insert', 'observation',
                                           ['id_system', 'creator', 'participant', 'id_config', 'id_session',
-                                           'session_label',
-                                           'active'],
+                                           'session_label', 'only_local', 'active'],
                                           values, None, cursor)
 
         if id_observation == 0:
@@ -819,13 +821,11 @@ def create_observation_with_sensors(user, participant, id_config, id_session, se
         if error:
             return False
 
-    values = (id_system, user, participant, id_config, id_session, session_label, active)
+    values = (id_system, user, participant, id_config, id_session, session_label, only_local, active)
     # Insertion in the remote database for observation
-    send_query_remote('insert', 'observation',
-                      ['id_system', 'creator', 'participant', 'id_config', 'id_session', 'session_label', 'active'],
-                      values,
-                      None,
-                      id_list[0])
+    send_query_remote('insert', 'observation', ['id_system', 'creator', 'participant', 'id_config',
+                                                'id_session', 'session_label', 'only_local', 'active'], values,
+                      None, id_list[0])
 
     # Insertion in the remote database for sensors
     for i, sensor in enumerate(sensor_list, start=1):
@@ -965,22 +965,29 @@ def delete_sensor_config(id_config):
     @param id_config: The config's id
     @return None
     """
+
     result = send_query('delete', 'sensor_config', None, None, f"id_config=\"{id_config}\"")
 
     return result
 
 
-# DONE
-def encrypt_password(password):
+def get_observation_mode():
     """!
-    Encrypts the given password using SHA-256
+    Select and return the mode of the active observation.
 
-    @param password: The unencrypted password
-    @return: The encrypted password
+    @return (0 : not only_local, 1 : only_local)
     """
-    return hashlib.sha256(password.encode()).hexdigest()
 
-# DONE
+    query = "SELECT only_local FROM observation WHERE active = 1;"
+
+    result = execute_query_with_reconnect(query)
+
+    if result:
+        print("only local ? :", result[0][0])
+        return result[0][0]
+    else:
+        return None
+
 def get_active_observation():
     """!
     Select and return the IDs of active observations.

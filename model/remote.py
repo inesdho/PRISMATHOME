@@ -32,9 +32,7 @@ tables_to_prepend = ['sensor', 'data', 'observation']
 
 config = {
     "host": "localhost",
-    # "host": "192.168.1.122",
     "user": "root",
-    # "user": "prisme",
     "password": "Q3fhllj2",
     "database": "prisme@home_ICM"
 }
@@ -47,8 +45,11 @@ def connect_to_remote_db():
 
     @return None
     """
-    print("try to connect to remote database")
     global pool, thread_active
+
+    if globals.global_observation_mode == 1:
+        return
+
     thread_active = 1
     try:
         if globals.global_disconnect_request:

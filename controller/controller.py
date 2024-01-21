@@ -26,6 +26,7 @@ from view.sensor_pairing_management_page import SensorPairingManagement
 from system import system_function
 import webbrowser
 import sys
+import signal
 
 
 class App(ThemedTk):
@@ -494,13 +495,17 @@ class App(ThemedTk):
 
     def redirect_to_summary_user_from_pairing(self, sensor_pairing_page):
         """!
-        @brief This function saves the information about the pairing of the sensor and calls the 'Summary user' page
+        @brief This function asks the user if they want to anable the local only mode.
+        It saves the information about the pairing of the sensor and calls the 'Summary user' page
         @param self : the instance
         @param sensor_pairing_page : the sensor pairing page
         @return Nothing
         """
+        only_local = messagebox.askyesno("Mode local only",
+                                     "You are about to start an observation. Do you want to activate the local only mode ?")
+
         # Saving the infos about the pairing
-        sensor_pairing_page.on_validate_button_click()
+        sensor_pairing_page.on_validate_button_click(only_local)
 
         # Redirecting to the 'Summary user' page
         self.redirect_to_summary_user_from_anywhere(sensor_pairing_page)
@@ -513,7 +518,7 @@ class App(ThemedTk):
         @return Nothing
         """
         if messagebox.askyesno("End observation", "Are you sure you want to end the observation. The observation cannot"
-                                                  "be restarted. "):
+                                                  " be restarted. "):
             self.redirect_to_new_observation_from_anywhere(summary_user_page)
 
     def redirect_to_summary_user_from_anywhere(self, page):
@@ -562,22 +567,27 @@ class App(ThemedTk):
         @param summary_user_page : the summary user page
         @return Nothing
         """
+
+        # The list of sensors formated like "type/label"
         arguments = []
 
+        # Get the sensor list from db
         sensor_list = local.get_sensors_from_observation(globals.global_new_id_observation)
-        print("\033[95msensor list: ", sensor_list, "\033[0m")
+
+        # Format the sensor list like "type/label" to start the program
         for sensor in sensor_list:
             arguments.append(sensor["type"] + "/" + sensor["label"])
 
-        print("arguments : ", arguments)
-        command = ["python", "/home/prisme/Prisme@home/PRISMATHOME/reception.py"] + arguments
+        # Create the command
+        command = ["python", "/home/share/PRISMATHOME/reception.py"] + arguments
 
-        # Start the main program
-        main_program = subprocess.Popen(command)
+        # Start the reception.py program
+        subprocess.Popen(command)
 
-        # Calling the function to start the observation
-        local.update_observation_status('1')
+        # Update observation status to start (1) in db
+        local.update_observation_status(1)
 
+        # Display a message that observation as started
         messagebox.showinfo("Start observation", "The observation is started.")
 
         # Changing the label and the function associated to the button
@@ -592,14 +602,16 @@ class App(ThemedTk):
         @return Nothing
         """
 
+        # Get the program pid of reception.py
         program_pid = system_function.get_pid_of_script("reception.py")
 
-        system_function.send_sigterm(program_pid)
+        # Send a signal SIUSR1 to reception.py to stop it
+        system_function.send_signal(program_pid, signal.SIGUSR1)
 
-        # Calling the function to stop the observation
-        # voir avec les indus comment stopper la reception des datas
+        # Update observation status to stop (0) in db
         local.update_observation_status(0)
 
+        # Display a message that observation as stopped
         messagebox.showinfo("Stop observation", "The observation is stopped.")
 
         # Changing the label and the function associated to the button
@@ -666,9 +678,16 @@ class App(ThemedTk):
         @param self : the instance
         @return Nothing
         """
+        # Display a confirmation popup before closing the app
         if messagebox.askokcancel("Quit", "Are you sure you want to quit PRISM@Home ?"):
+
+            # Close the threads get_sensor_value
             globals.thread_done = True
+            # Stop the functions local.connect_to_remote_db and local.connect_to_local_db if they are running
+            globals.global_disconnect_request = True
+
+            # Disconnect admin if connected
             if globals.global_id_user is not None:
-                print("Deconnexion normalement")
                 local.update_user_connexion_status(globals.global_id_user, 0)
+
             self.destroy()

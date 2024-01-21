@@ -99,7 +99,6 @@ def yellow_led_blink_start():
     """
     # Switching off green LED 
     GPIO.output(GREEN_LED_PIN, GPIO.LOW)
-    print("Clignotage en cours")
 
     global program_up
     # Make the Yellow LED blink forever
@@ -118,7 +117,6 @@ def yellow_led_blink_stop():
     """
     # Switching off green LED 
     GPIO.output(GREEN_LED_PIN, GPIO.LOW)
-    print("Clignotage en cours")
 
     global program_up
     # Make the Yellow LED blink forever
@@ -135,7 +133,6 @@ def set_LED_to_green():
 
     @return None
     """
-    print("GREEN LED")
     GPIO.output(YELLOW_LED_PIN, GPIO.LOW)
     GPIO.output(GREEN_LED_PIN, GPIO.HIGH)
 
@@ -153,8 +150,6 @@ if __name__ == "__main__":
 
     id_observation = model.local.get_active_observation()
 
-    print("start_and_stop : id_observation : ", id_observation)
-
     arguments = []
 
     if (id_observation is not None
@@ -162,7 +157,7 @@ if __name__ == "__main__":
         # Set the signal handler
         signal.signal(signal.SIGTERM, handler_prgm_started)
         sensor_list = model.local.get_sensors_from_observation(id_observation)
-        print("sensor list: ", sensor_list)
+
         for sensor in sensor_list:
             arguments.append(sensor["type"] + "/" + sensor["label"])
 
@@ -172,17 +167,14 @@ if __name__ == "__main__":
         # Start the main program
         subprocess.Popen(command)
     else:
-        print("else")
         program_up = True
 
     thread_yellow_led_blink_start.join()
-    print("thread_yellow_led_blink_start joined")
 
     set_LED_to_green()
 
     # Waiting for shutdown button to be pressed
     listen_for_shutdown()
-    print("listen shut down")
 
     # Creation of a thread
     thread_yellow_led_blink_stop = threading.Thread(target=yellow_led_blink_stop)
@@ -202,6 +194,5 @@ if __name__ == "__main__":
         while not program_down:
             pass
 
-        print("coucou")
     # Shutdown the system when everything is ready
     subprocess.run(["sudo", "shutdown", "-h", "now"], check=True)

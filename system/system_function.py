@@ -1,11 +1,12 @@
+import hashlib
 import subprocess
 import os
+
+
 # TODO faire la doc
-
-
 def send_signal(pid, signal_name):
     script_path = "/home/share/PRISMATHOME/test"
-    subprocess.run([script_path, str(pid), signal_name], check=True)
+    subprocess.run([script_path, str(pid), str(signal_name)], check=True)
 
 
 def get_pid_of_script(script_name):
@@ -35,6 +36,7 @@ def export_remote_queries(file_path, remote_queries):
     @param file_path: The path of the file to save the queries into
     @param remote_queries: The list of remote queries
     @return True if the file was successfully created and filled, False otherwise
+    TODO display a popup if an error occurred
     """
 
     print("File path = ", file_path)
@@ -63,3 +65,13 @@ def export_remote_queries(file_path, remote_queries):
             print(f"Error while exporting queries :", e)
             return False
     return True
+
+
+def encrypt_password(password):
+    """!
+    Encrypts the given password using SHA-256
+
+    @param password: The unencrypted password
+    @return: The encrypted password
+    """
+    return hashlib.sha256(password.encode()).hexdigest()
