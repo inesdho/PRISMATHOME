@@ -134,6 +134,7 @@ class ModifyOrCreateConfiguration:
         """
         # Store the selected config into a global variable
         globals.global_id_config_modify = self.get_selected_id_config()
+        globals.global_label_modify, globals.global_description_modify = local.get_config_labels_description_ids(globals.global_id_config_modify)
         globals.sensor_counts.clear()
 
         # Get the list of sensor associated with the configuration
