@@ -10,6 +10,7 @@
 @date 28th Decembre 2023
 """
 
+import hashlib
 import subprocess
 import os
 
@@ -82,3 +83,13 @@ def export_remote_queries(file_path, remote_queries):
             print(f"Error while exporting queries :", e)
             return False
     return True
+
+
+def encrypt_password(password):
+    """!
+    Encrypts the given password using SHA-256
+
+    @param password: The unencrypted password
+    @return: The encrypted password
+    """
+    return hashlib.sha256(password.encode()).hexdigest()
