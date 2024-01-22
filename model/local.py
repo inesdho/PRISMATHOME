@@ -1069,10 +1069,10 @@ def get_configurations(active=None):
     """
     if active is not None:
         query = """SELECT id_config, id_user, label, description FROM configuration WHERE active = %s;"""
-        result = execute_query_with_reconnect(query, active)
+        result = execute_query_with_reconnect(query, (active,))
     else:
         query = """SELECT id_config, id_user, label, description FROM configuration;"""
-        result = execute_query_with_reconnect(query, active)
+        result = execute_query_with_reconnect(query, (active,))
     if result:
         return [(row[0], row[1], row[2], row[3]) for row in result]
     else:

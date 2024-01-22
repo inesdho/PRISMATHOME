@@ -61,11 +61,11 @@ class NewObservation:
         configuration_label.pack()
 
         # Get the configuration labels and ids
-        configurations = local.get_config_labels_ids()
+        configurations = local.get_configurations('1')
 
         if configurations is not None:
             # Creation of a tuple list
-            self.configuration_values = [(config['label'], config['id_config']) for config in configurations]
+            self.configuration_values = [(config[2], config[0]) for config in configurations]
 
             # Creation of a combobox with the list of configuration labels
             self.configuration_combobox = ttk.Combobox(self.frame, state="readonly", width=29, background="white")
