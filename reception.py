@@ -25,10 +25,7 @@ from model import local
 from model import remote
 from model import local_mqtt
 import os
-import getpass
 import signal
-import time
-import subprocess
 from datetime import datetime
 import threading
 from system import system_function

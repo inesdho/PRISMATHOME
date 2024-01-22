@@ -14,19 +14,18 @@ import globals
 
 import mysql.connector
 import time
-import threading
 
 from model import remote
 
 from system.system_function import encrypt_password
 
-local_db = None
-local_cursor = None
+# The local pool of connection
+pool = None
 
-pool = None     # Connection pool
-
+# Flag to indicate if the caching function is running (True) or not (False)
 caching = False
 
+# The config for remote database
 config = {
     # "host": "192.168.1.122",
     "host": "localhost",
@@ -50,7 +49,7 @@ def connect_to_local_db(cpt=0):
     try:
         if globals.global_disconnect_request:
             return
-        # Création d'un pool de connexions
+        # Creation of a connection pool
         pool = mysql.connector.pooling.MySQLConnectionPool(
             pool_name="mypool",
             pool_size=3,
@@ -90,7 +89,7 @@ def get_system_id():
 # DONE
 def add_system_id(local_id):
     """!
-    Prepends the system's ID to any local ID provided in order to store them into the distant database
+    Prepends the system's ID to any local ID providein order to store them into the distant database
 
     @param local_id the local ID to which the system ID needs to be added
     @return the modified ID to be inserted into the distant database
@@ -101,14 +100,31 @@ def add_system_id(local_id):
 
 
 def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3):
+    """
+    Execute a SQL query with the option to reconnect on connection loss.
+
+    This function attempts to execute a provided SQL query up to a maximum number of attempts. If the connection is lost,
+    it tries to reconnect and re-execute the query. The function handles SELECT, INSERT, DELETE, and UPDATE queries
+    differently in terms of return values.
+
+    @param query: The SQL query string to be executed.
+    @param values: Optional. The values to be used in the SQL query.
+    @param cursor: Optional. A cursor object to an existing database connection. If None, a new connection is obtained.
+    @param max_attempts: Optional. The maximum number of attempts to execute the query in case of connection issues.
+
+    @return: Depending on the type of query:
+             - SELECT: Returns all fetched results.
+             - INSERT: Returns the ID of the last inserted row.
+             - DELETE/UPDATE: Returns the count of rows affected.
+             Returns None if the query execution fails after all attempts.
+    """
     # A flag to retry or not on connection lost
     # if a transaction is started to rollback changes
-    # TODO Paul : doc
     retry = True
     conn = None
     for attempt in range(max_attempts):
         try:
-            # Utiliser la connexion existante ou obtenir une nouvelle du pool
+            # Use existing connection or obtain a new one from the pool
             if not cursor:
                 conn = pool.get_connection()
                 cursor = conn.cursor()
@@ -119,13 +135,13 @@ def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3
 
             query_type = query.strip().upper().split(" ")[0]
             if query_type == "SELECT":
-                # Pour SELECT, retourner tous les résultats
+                # For SELECT, return all results
                 return cursor.fetchall()
             elif query_type == "INSERT":
-                # Pour INSERT, retourner l'ID de la dernière ligne insérée
+                # For INSERT, return the ID of the last inserted row
                 return cursor.lastrowid
             elif query_type in ["DELETE", "UPDATE"]:
-                # Pour DELETE et UPDATE, retourner le nombre de lignes affectées
+                # For DELETE and UPDATE, return the number of affected rows
                 return cursor.rowcount
 
         except (mysql.connector.errors.InterfaceError, mysql.connector.errors.OperationalError) as e:
@@ -133,7 +149,7 @@ def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3
             if not retry:
                 print(f"Connection lost, don't retry Error: {e}")
                 return None
-            conn = None  # Réinitialiser la connexion
+            conn = None  # Reset the connectio
             print(f"Connection lost, attempting to reconnect. Attempt {attempt + 1}/{max_attempts}. Error: {e}")
 
         finally:
@@ -144,18 +160,30 @@ def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3
                     cursor.close()
                     conn.close()
 
-    # Si toutes les tentatives échouent
+    # If all attempts fail
     return None
 
 
 def send_query_local(query_type, table, fields=None, values=None, condition=None, cursor=None):
-    # TODO Paul : doc
+    """
+    Constructs and executes a SQL query on a local database.
+
+    This function supports INSERT, UPDATE, and DELETE query types. It builds the query based on the parameters provided
+    and executes it using the `execute_query_with_reconnect` function. For INSERT queries on the 'observation' table,
+    it updates a global variable with the new ID.
+
+    @param query_type: Type of SQL query ('INSERT', 'UPDATE', 'DELETE').
+    @param table: The database table to be queried.
+    @param fields: Optional. The fields to be used in the SQL query, required for INSERT and UPDATE queries..
+    @param values: Optional. The values to be used in the SQL query, required for INSERT and UPDATE queries.
+    @param condition: Optional. The condition for UPDATE and DELETE queries.
+    @param cursor: Optional. A cursor object to an existing database connection. If None, a new connection is obtained.
+
+    @return: The result of the query execution. Returns -1 if the query execution fails.
+    """
     valid_query_types = ["INSERT", "UPDATE", "DELETE"]
     query = ""
 
-    # *****************************************************************************#
-    # *************************** CREATION DE LA REQUETE **************************#
-    # *****************************************************************************#
     if query_type.upper() not in valid_query_types:
         raise ValueError(f"Invalid query_type. Supported types are {', '.join(valid_query_types)}.")
 
@@ -178,15 +206,8 @@ def send_query_local(query_type, table, fields=None, values=None, condition=None
             raise ValueError(f"Condition is required for {query_type} queries.")
         query = f"{query_type} FROM `{table}`"
         query += f" WHERE {condition}"
-    # *****************************************************************************#
-    # *************************** FIN CREATION REQUETE ****************************#
-    # *****************************************************************************#
 
     print(f"\033[92mTry execute (local) : {query, values}\033[0m")
-
-    # *****************************************************************************#
-    # *************************** EXECUTION DE LA REQUETE *************************#
-    # *****************************************************************************#
 
     # Storing data in local DB
     result = execute_query_with_reconnect(query, values, cursor, 3)
@@ -204,20 +225,37 @@ def send_query_local(query_type, table, fields=None, values=None, condition=None
 
 
 def send_query_remote(query_type, table, fields=None, values=None, condition=None, last_id=None):
-    # TODO Paul : doc
+    """
+    Constructs and executes a SQL query on the remote database.
+
+    This function prepares and sends a SQL query to the remote database. It handles INSERT, UPDATE, and DELETE
+    queries. Additionally, it preprocesses certain fields and values, like appending system IDs where required,
+    before executing the query. If the only local observation mode is enabled, it caches the query instead of
+    executing it.
+
+    @param query_type: Type of SQL query ('INSERT', 'UPDATE', 'DELETE').
+    @param table: The database table to be queried.
+    @param fields: Optional. The fields to be used in the SQL query.
+    @param values: Optional. The values to be used in the SQL query.
+    @param condition: Optional. The condition for UPDATE and DELETE queries.
+    @param last_id: Optional. The last ID used, relevant for some INSERT queries.
+
+    @return: 1 if the query execution is successful, 0 if the query is cached.
+
+    @note: In the case of INSERT queries on certain tables, the function modifies the ID to be inserted by
+           appending a system-specific ID. For UPDATE and DELETE queries, it also modifies the condition
+           if required.
+    """
     remote_values = None
     remote_query = None
 
-    # *****************************************************************************#
-    # *************************** CREATION DE LA REQUETE **************************#
-    # *****************************************************************************#
     # Building remote query
     # Appending system id to specific ids before sending to remote DB storing function
     if fields is not None and values is not None:
         remote_values = tuple(add_system_id(value) if field in remote.ids_to_modify
                               else value for field, value in zip(fields, values))
     # Check if the condition's id needs to be modified
-    if condition is not None and table in remote.tables_to_prepend:
+    if condition is not None and table in remote.tables_to_modify:
         left, right = map(str.strip, condition.split('='))
         if left in remote.ids_to_modify:
             right = str(add_system_id(right))  # Modifying the id to look for to prepend the system's id
@@ -225,7 +263,7 @@ def send_query_remote(query_type, table, fields=None, values=None, condition=Non
     else:
         modified_condition = condition
 
-    if query_type.upper() == "INSERT" and table in remote.tables_to_prepend:  # Need to add the id in the remote base
+    if query_type.upper() == "INSERT" and table in remote.tables_to_modify:  # Need to add the id in the remote base
         fields = ['id_' + table] + fields
         remote_values = (add_system_id(last_id),) + remote_values
         remote_query = f"{query_type} INTO `{table}`"
@@ -244,10 +282,6 @@ def send_query_remote(query_type, table, fields=None, values=None, condition=Non
         remote_query = f"{query_type} FROM `{table}`"
         remote_query += f" WHERE {modified_condition}"
 
-    # *****************************************************************************#
-    # *************************** FIN CREATION REQUETE ****************************#
-    # *****************************************************************************#
-
     if globals.global_observation_mode == 1:
         cache_query(remote_query, remote_values)
         return 0
@@ -262,16 +296,23 @@ def send_query_remote(query_type, table, fields=None, values=None, condition=Non
 
 # DONE
 def send_query(query_type, table, fields=None, values=None, condition=None):
-    """!
-    Inserts, updates, or deletes data in the local database and then saves it to the remote database.
+    """
+    Facilitates the insertion, update, or deletion of data in both local and remote databases.
 
-    @param query_type : The type of query ("INSERT", "UPDATE", "DELETE", etc.).
-    @param table : The name of the table.
-    @param fields : List of field names for the query.
-    @param values : List of values corresponding to the fields.
-    @param condition : Condition for the UPDATE or DELETE query (optional).
+    It first applies these operations to the local database and then attempts to replicate them in the remote
+    database. The function is designed to handle the synchronization of data between the local and remote
+    databases.
 
-    @return 1 if data sent to local and remote DB, 2 if sent only to local DB, 0 if no data was stored
+    @param query_type: The type of SQL query ('INSERT', 'UPDATE', 'DELETE', etc.).
+    @param table: The name of the database table to be queried.
+    @param fields: Optional. List of field names for the query. Required for INSERT and UPDATE queries.
+    @param values: Optional. List of values corresponding to the fields. Required for INSERT and UPDATE queries.
+    @param condition: Optional. The condition for UPDATE or DELETE queries.
+
+    @return: An integer indicating the result of the operation:
+             - 1 if data was successfully sent to both local and remote databases.
+             - 2 if data was only sent to the local database.
+             - 0 if no data was stored.
     """
 
     result = send_query_local(query_type, table, fields, values, condition)
@@ -685,12 +726,14 @@ def get_new_config_id():
 
 # DONE
 def get_new_id_session(participant, id_config):
-    """!
-    @brief This functions returns the id of the last session created in the database + 1
-    @param self : the instance
-    @return the id of the last session created in the database
     """
-    # TODO Paul : doc
+    Calculates the ID for the next session based on existing sessions in the database.
+
+    @param participant: The identifier of the participant.
+    @param id_config: The configuration ID associated with the session.
+
+    @return: The ID for the next session to be created. Returns 1 if no previous sessions are found.
+    """
 
     query = "SELECT MAX(id_session) FROM observation WHERE participant=%s AND id_config=%s"
     values = (participant, id_config)
@@ -864,45 +907,57 @@ def create_configuration(id_config, id_user, label, description, sensor_list):
     error = False
 
     try:
+        # Establish a new database connection
         conn = pool.get_connection()
-
         cursor = conn.cursor()
+
+        # Start a new transaction
         cursor.execute("START TRANSACTION;")
 
         values = (id_config, id_user, label, description)
+
+        # Insert configuration into the local database and check for errors
         result = send_query_local('insert', 'configuration', ['id_config', 'id_user', 'label', 'description'], values,
                                   None, cursor)
 
         if result == -1:
             raise Exception("Error while inserting configuration")
 
+        # Iterate through each sensor in the sensor list
         for sensor_type_id, sensor_label, sensor_description in sensor_list:  # Go through the sensor list
 
             values = (id_config, sensor_type_id, sensor_label, sensor_description)
-            # Send each query and check for errors
+            # Insert sensor configuration into the local database and check for errors
             result = send_query_local('insert', 'sensor_config',
                                       ['id_config', 'id_sensor_type', 'sensor_label', 'sensor_description'],
                                       values, None, cursor)
             if result == -1:  # No data stored in local nor remote
                 raise Exception("Error while inserting sensor configuration")
 
+        # Commit the transaction after successful inserts
         conn.commit()
 
     except Exception as e:
+        # Handle exceptions, rollback the transaction and set error flag
         if conn:
             conn.rollback()
             error = True
             print(f"Une erreur est survenue, la transaction a été annulée : {e}")
     finally:
+        # Close the connection
         if conn:
             cursor.close()
             conn.close()
+        # Exit the function if there was an error
         if error:
             return
 
     values = (id_config, id_user, label, description)
+
+    # Insert configuration into remote database
     send_query_remote('insert', 'configuration', ['id_config', 'id_user', 'label', 'description'], values, None)
 
+    # Insert each sensor configuration into the remote database
     for sensor_type_id, sensor_label, sensor_description in sensor_list:
         values = (id_config, sensor_type_id, sensor_label, sensor_description)
 
@@ -920,6 +975,7 @@ def insert_new_sensors_for_configuration(id_config, sensor_list):
     @return None
     """
     # TODO Paul : qq comms pour expliciter le code
+    # TODO MATTEO : Elle va dégager cette fonction normalement donc pas besoin
     conn = None
     cursor = None
     error = False
@@ -1114,5 +1170,3 @@ def get_remote_queries():
         return remote_queries_list
     else:
         return None
-
-

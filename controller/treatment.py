@@ -20,6 +20,8 @@ def data_treatment(client, userdata, mqtt_msg):
     Treats the incoming MQTT message from sensors and call local.py
     to store the data received
 
+    @param userdata:
+    @param client:
     @param mqtt_msg: The MQTT message received.
 
     @return None

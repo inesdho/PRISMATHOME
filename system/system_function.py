@@ -1,13 +1,14 @@
 """!
 @file system_function.py
 
-@brief This file is a library of functions related to system commands
+@brief This file contains a collection of functions for managing system-level operations, including sending signals
+to processes, retrieving process IDs, exporting queries to a file, and password encryption.
 
 @author Naviis-Brain
 
 @version 1.0
 
-@date 28th Decembre 2023
+@date 28th December 2023
 """
 
 import hashlib
