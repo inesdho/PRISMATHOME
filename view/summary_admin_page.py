@@ -82,36 +82,41 @@ class SummaryAdmin:
         # Get the sensor types from DB
         all_sensor_types = local.get_sensor_type_list()
 
-        # TODO ines/mathilde : Détailler les commentaires
-        for sensor_type_id, sensor_type in all_sensor_types:
+        all_sensor_type_button = ttk.Button(
+            self.button_frame,
+            text="All sensor",
+            command=lambda: self.display_sensor_info(globals.global_sensor_entries),
+            padding=5
+        )
+        all_sensor_type_button.pack(side=tk.LEFT, padx=5)
 
-            print("globals.global_sensor_entries : ",globals.global_sensor_entries)
+        # For each type of sensor existing
+        for sensor_type_id, sensor_type in all_sensor_types:
 
             # Convert sensor_type_id to str for comparison
             sensor_type_id_str = str(sensor_type_id)
-            # Filter entries for this sensor type
+
+            # Get all the sensor for which the type match the type we want to associate to a button
             entries_for_type = [
                 entry for entry in globals.global_sensor_entries
                 if str(entry[0]).startswith(sensor_type_id_str)  # Ensure both are strings
             ]
 
-            print("entries_for_type = ",entries_for_type)
-
+            # If there is sensor for this sensor type, display a button with the type of sensor
             if entries_for_type:
                 sensor_type_button = ttk.Button(
                     self.button_frame,
                     text=sensor_type,
-                    command=lambda type=sensor_type, entries_for_type=entries_for_type: self.display_sensor_info(type, entries_for_type),
+                    command=lambda entries_for_type=entries_for_type : self.display_sensor_info(entries_for_type),
                     padding=5
                 )
                 sensor_type_button.pack(side=tk.LEFT, padx=5)
 
-    def display_sensor_info(self, sensor_type, entries_for_type):
+    def display_sensor_info(self, entries_for_type):
         """!
         @brief Displays information about all sensors of a selected type.
         @param self: Instance reference.
         @param entries_for_type: all the sensors associated with a type of sensor
-        @param sensor_type: Type of sensor.
         @return None
         """
 
@@ -123,6 +128,8 @@ class SummaryAdmin:
         for index, (sensor_id, label_entry, description_entry, id_unique) in enumerate(entries_for_type, start=1):
             sensor_frame = ttk.Frame(self.data_frame)
             sensor_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
+
+            sensor_type=local.get_sensor_type_from_id_type(int(id_unique[0]))
 
             # Showing the type of the sensor
             ttk.Label(sensor_frame, text=f"{sensor_type} sensor {index}", width=20, anchor='w', wraplength=140,
