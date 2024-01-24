@@ -37,7 +37,9 @@ global_is_modification = False
 # Bit used to close threads get_sensor_value
 thread_done = False
 
-global_id_config_modify= None
+global_id_config_modify = None
+global_label_modify = None
+global_description_modify = None
 
 global_font_title = ("Arial", 18, "bold")
 global_font_title1 = ("Calibi", 12, "bold")

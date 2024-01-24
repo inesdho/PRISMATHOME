@@ -187,16 +187,20 @@ class SummaryAdmin:
         @param self : the instance
         @return Nothing
         """
-        local.delete_sensor_config(globals.global_id_config_modify)
-        # Get the new id config to create it
-        globals.global_id_config = globals.global_id_config_modify
+        local.update_configuration_active('0', globals.global_id_config_modify)
+        globals.global_id_config_modify = local.get_new_config_id()
 
         # Remove the id_unique field in the sensor list which is useless
         new_sensor_entries = [(sensor_id, label_entry, description_entry)
                               for index, (sensor_id, label_entry, description_entry, id_unique)
                               in enumerate(globals.global_sensor_entries, start=1)]
         # Insert the configuration in DB and the sensor configs
-        local.insert_new_sensors_for_configuration(globals.global_id_config, new_sensor_entries)
+        #local.insert_new_sensors_for_configuration(globals.global_id_config, new_sensor_entries)
+        local.create_configuration(globals.global_id_config_modify,
+                                   globals.global_id_user,
+                                   globals.global_label_modify,
+                                   globals.global_description_modify,
+                                   new_sensor_entries)
         self.clear_sensor_entries_and_sensor_count()
 
 

@@ -682,6 +682,25 @@ def update_user_connexion_status(id_user, connexion_status):
     return None
 
 
+def update_configuration_active(active, id_conf):
+    """!
+    TODO : Mettre un vrai commentaire
+    Sets the connexion status to either 1 (connected) or 0 (disconnected) in the local db for the user.
+
+    @param id_user: user's id
+    @param connexion_status: The connexion status wanted
+    @return: 1 if successful, otherwise None
+    """
+
+    result = send_query_local("UPDATE", "configuration", ("active",), (active, id_conf),
+                              "id_config = %s")
+    if result != -1:
+        return 1
+
+    # Return None if the user is not found or there are errors
+    return None
+
+
 def update_observation_status(observation_status, id_observation=None):
     """!
     Sets the observation status to either 1 (active) or 0 (inactive) in both databases
@@ -773,6 +792,24 @@ def get_config_labels_ids(id_config=None):
 
         if result:
             return result[0][0]
+
+
+def get_config_labels_description_ids(id_config):
+    """!
+    Gets the label and description of a specific config from the local database.
+
+    @param id_config: The config's id.
+    @return: Tuple of (label, description) if successful, None otherwise.
+    """
+    query = "SELECT label, description FROM configuration WHERE id_config = %s"
+
+    result = execute_query_with_reconnect(query, (id_config,))
+
+    if result:
+        # Return both label and description
+        return result[0][0], result[0][1]
+    else:
+        return None
 
 
 def get_config_label_from_observation_id(id_observation):
@@ -914,10 +951,11 @@ def create_configuration(id_config, id_user, label, description, sensor_list):
         # Start a new transaction
         cursor.execute("START TRANSACTION;")
 
-        values = (id_config, id_user, label, description)
+        values = (id_config, id_user, label, description, '1')
 
         # Insert configuration into the local database and check for errors
-        result = send_query_local('insert', 'configuration', ['id_config', 'id_user', 'label', 'description'], values,
+        result = send_query_local('insert', 'configuration', ['id_config', 'id_user', 'label', 'description', 'active'],
+                                  values,
                                   None, cursor)
 
         if result == -1:
@@ -1130,10 +1168,10 @@ def get_configurations(active=None):
     """
     if active is not None:
         query = """SELECT id_config, id_user, label, description FROM configuration WHERE active = %s;"""
-        result = execute_query_with_reconnect(query, active)
+        result = execute_query_with_reconnect(query, (active,))
     else:
         query = """SELECT id_config, id_user, label, description FROM configuration;"""
-        result = execute_query_with_reconnect(query, active)
+        result = execute_query_with_reconnect(query, (active,))
     if result:
         return [(row[0], row[1], row[2], row[3]) for row in result]
     else:
