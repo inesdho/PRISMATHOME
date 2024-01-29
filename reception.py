@@ -25,7 +25,10 @@ from model import local
 from model import remote
 from model import local_mqtt
 import os
+import getpass
 import signal
+import time
+import subprocess
 from datetime import datetime
 import threading
 from system import system_function
@@ -71,11 +74,15 @@ def handler_program_stop(signum, frame):
     if signum == signal.SIGUSR2:
         # Send a monitoring message that the system is shut down
         local.monitor_system_start_stop(datetime_now, 0)
-        # Send a signal to start_and_stop program to indicate that the program is closed
+        # Send a signal to start_and_stop program to indicate that the program is closed for shutdown
+        print("send sigterm")
         system_function.send_signal(pid_start_and_stop, signal.SIGTERM)
     else:
         # Send a monitoring message that the observation is stopped
         local.monitor_observation_start_stop(datetime_now, 0)
+        # Send a signal to start_and_stop program to indicate that the program is closed
+        print("send sigusr2")
+        system_function.send_signal(pid_start_and_stop, signal.SIGUSR2)
 
     # Reset the observation mode bit
     globals.global_observation_mode = 0
@@ -124,11 +131,16 @@ if __name__ == "__main__":
     if pid_parent == pid_start_and_stop:
         # Monitor system started up by participant
         local.monitor_system_start_stop(datetime_now, 1)
-        # Send a signal SIGTERM to the start_and_stop program to inform reception.py is up
+        # Send a signal SIGTERM to the start_and_stop program to inform reception.py is up after shutdown
+        print("send sigterm")
         system_function.send_signal(pid_start_and_stop, signal.SIGTERM)
     else:
         # Monitor observation started
         local.monitor_observation_start_stop(datetime_now, 1)
+        # Send a signal SIGUSR1 to the start_and_stop program to inform reception.py is up by user action
+        print("send sigusr1")
+        print("start_and_stop : ", pid_start_and_stop)
+        system_function.send_signal(pid_start_and_stop, signal.SIGUSR1)
 
     # Start the thread which check the sensors availability
     thread_availability = threading.Thread(target=local_mqtt.check_availability)

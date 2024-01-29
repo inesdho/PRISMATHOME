@@ -19,6 +19,8 @@ from model import remote
 
 from system.system_function import encrypt_password
 
+from mysql.connector import pooling
+
 # The local pool of connection
 pool = None
 

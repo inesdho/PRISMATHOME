@@ -24,7 +24,7 @@ from system import system_function
 import model.local
 
 ## The GPIO pin number of the shutdown button
-BUTTON_PIN = 3
+BUTTON_PIN = 23
 ## The GPIO pin for the green LED
 GREEN_LED_PIN = 17
 ## The GPIO pin for the yellow LED
@@ -33,6 +33,8 @@ YELLOW_LED_PIN = 27
 program_up = False
 ## Global variable to shutdown the system
 program_down = False
+## Global flag to indicate the system as detected a button pressed for shutdown
+flag_shut_down = False
 
 
 def handler_prgm_started(signum, frame):
@@ -46,6 +48,7 @@ def handler_prgm_started(signum, frame):
     @return None
     """
     global program_up
+    print("received signal start")
     if signum == signal.SIGTERM:
         program_up = True
     else:
@@ -62,6 +65,7 @@ def handler_prgm_stopped(signum, frame):
     @return None
     """
     global program_down
+    print("received signal stop")
     if signum == signal.SIGTERM:
         program_down = True
     else:
@@ -92,9 +96,11 @@ def listen_for_shutdown():
 
     @return None
     """
+    global flag_shut_down
     # Wait for a falling event
     # (When the button is pressed the GPIO pin is shorted to ground)
     GPIO.wait_for_edge(BUTTON_PIN, GPIO.FALLING)
+    flag_shut_down = True
 
 
 def yellow_led_blink_start():
@@ -157,9 +163,6 @@ if __name__ == "__main__":
     # Initialise the GPIO pins
     init_GPIO_pins()
 
-    signal.signal(signal.SIGUSR1, handler_prgm_started)
-    signal.signal(signal.SIGUSR2, handler_prgm_stopped)
-
     thread_yellow_led_blink_start = threading.Thread(target=yellow_led_blink_start)
     thread_yellow_led_blink_start.start()
 
@@ -180,7 +183,7 @@ if __name__ == "__main__":
             arguments.append(sensor["type"] + "/" + sensor["label"])
 
         print("arguments : ", arguments)
-        command = ["python", "/home/prisme/Prisme@home/PRISMATHOME/reception.py"] + arguments
+        command = ["python", "/home/share/PRISMATHOME/reception.py"] + arguments
 
         # Start the main program
         subprocess.Popen(command)
@@ -192,10 +195,21 @@ if __name__ == "__main__":
         thread_yellow_led_blink_start.join()
         set_LED_to_yellow()
 
+    signal.signal(signal.SIGUSR1, handler_prgm_started)
+    signal.signal(signal.SIGUSR2, handler_prgm_stopped)
 
+    # TODO : Le retirer une fois la gestion RTC faite dans start_and_stop.sh
+    time.sleep(10)
 
     # Waiting for shutdown button to be pressed
-    listen_for_shutdown()
+    # Managed in thread to handle the signals while waiting for the button to be pressed
+    thread_listen_for_shutdown = threading.Thread(target=listen_for_shutdown)
+    thread_listen_for_shutdown.start()
+
+    #listen_for_shutdown()
+
+    while not flag_shut_down:
+        time.sleep(1)
 
     # Creation of a thread
     thread_yellow_led_blink_stop = threading.Thread(target=yellow_led_blink_stop)
