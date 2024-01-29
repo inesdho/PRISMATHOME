@@ -158,3 +158,16 @@ class LabelisationSensor:
                         return False
         # Return True if all the labels are identical
         return True
+
+    def are_label_not_only_numbers(self):
+        """!
+       @brief This functions checks that each the entry label doesn't contain only number
+       @param the instance
+       @return False if no entry contain only number, else return True
+       """
+        for sensor_type_id, label_entry, description_entry, unique_id in self.sensor_entries:
+            # Checks each label to know if they are only digits
+            if label_entry.get().isdigit():
+                return False
+        # Return True if no label contains only digits
+        return True

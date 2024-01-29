@@ -121,8 +121,8 @@ class App(ThemedTk):
         summary_user_page.observation_state.config(text="Observation running", foreground='#3eaf3e')
 
         # Cancel button
-        cancel_button = ttk.Button(self.main_frame, text="Exit",
-                                   command=lambda: self.redirect_to_new_observation_from_anywhere(summary_user_page))
+        cancel_button = ttk.Button(self.main_frame, text="Cancel",
+                                   command=lambda: self.redirect_to_new_observation_from_summary_user(summary_user_page))
         cancel_button.pack(side=tk.LEFT, padx=10, expand=True)
 
         # Start observation button
@@ -447,10 +447,13 @@ class App(ThemedTk):
 
         if labellisation_sensor_page.are_all_field_filled():
             if labellisation_sensor_page.are_all_label_unique():
-                # Saves the data entered by the user in the labellisation page into global variables
-                labellisation_sensor_page.get_sensor_data()
-                # Redirect to the summary adminpage
-                self.redirect_to_summary_admin_from_anywhere(labellisation_sensor_page)
+                if labellisation_sensor_page.are_label_not_only_numbers():
+                    # Saves the data entered by the user in the labellisation page into global variables
+                    labellisation_sensor_page.get_sensor_data()
+                    # Redirect to the summary adminpage
+                    self.redirect_to_summary_admin_from_anywhere(labellisation_sensor_page)
+                else:
+                    messagebox.showerror("Error", "Labels can't be only number.")
             else:
                 messagebox.showerror("Error", "All the label must be unique.")
         else:
