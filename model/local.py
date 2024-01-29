@@ -124,6 +124,7 @@ def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3
     # if a transaction is started to rollback changes
     retry = True
     conn = None
+    query_type = None
     for attempt in range(max_attempts):
         try:
             # Use existing connection or obtain a new one from the pool
