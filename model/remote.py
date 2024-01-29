@@ -17,6 +17,7 @@ import mysql.connector
 from model import local
 
 import globals
+from model.local import add_system_id, cache_query
 
 thread_active = 0  # is used to know if the program is actively trying to reconnect to the remote db
 disconnect_request = 0  # is used to stop the connect thread from looping
@@ -40,7 +41,6 @@ config = {
 }
 
 
-# DONE
 def connect_to_remote_db():
     """!
     Tries to connect to the local database and loops until successfully connected
@@ -64,7 +64,6 @@ def connect_to_remote_db():
             **config
         )
         thread_active = 0
-        print("\033[96mConnected to remote database\033[0m")
         synchronise_queries()
     except Exception as e:
         time.sleep(1)
@@ -80,7 +79,6 @@ def execute_remote_query(query, values=None, synchronise=False):
     @param synchronise: Bit to specified if the function is called by the synchronise_queries function
     @return 1 if successfully inserted, 0 otherwise
     """
-    print("Entering execute_remote_query")
     global flag_synchro, thread_active
 
     conn = None
@@ -100,17 +98,16 @@ def execute_remote_query(query, values=None, synchronise=False):
         cursor = conn.cursor()
 
         if values is not None:
-            print("\033[94mExecuted in remote : ", query, "values", values, "\033[0m")
             cursor.execute(query, values)
         else:
-            print("\033[94mExecuted in remote : ", query, "\033[0m")
             cursor.execute(query)
 
         conn.commit()  # No errors, query inserted in the remote db
         return 1
     except (mysql.connector.errors.InterfaceError, mysql.connector.errors.OperationalError) as e:
         # Error inserting the data in distant base
-        print("\033[91mErreur connexion à la bdd distante" "En executant : ", query, "values", values, "\033[0m")
+        print("\033[91mConnection error to the remote database" "While executing : ", query, "values", values,
+              "\033[0m")
 
         # Create thread to check on the database
         local.caching = True
@@ -180,7 +177,6 @@ def fetch_remote_configs(get_users, get_configs):
                     for remote_user in remote_users:    # Compare remote and local user lists
                         if remote_user not in local_users:   # If the remote user is not found in the local list
                             # append to the insert list to add this user
-                            print("id_user à insérer : ", remote_user[0])
                             insertion = local.execute_query_with_reconnect(
                                 f"INSERT INTO user (id_user, login, password) "
                                 f"VALUES ('{remote_user[0]}', '{remote_user[1]}', '{remote_user[2]}');"
@@ -188,7 +184,6 @@ def fetch_remote_configs(get_users, get_configs):
                             if insertion is None:
                                 return 0
                 else:
-                    print("local_users is none")
                     for remote_user in remote_users:    # Compare remote and local user lists
                         # append to the insert list to add this user
                         insertion = local.execute_query_with_reconnect(
@@ -204,9 +199,6 @@ def fetch_remote_configs(get_users, get_configs):
             cursor.execute(remote_query)
             remote_configs = cursor.fetchall()
             local_configs = local.get_configurations()
-
-            print("local_configs:", local_configs)
-            print("remote_configs:", remote_configs)
 
             if remote_configs is not None:
                 if local_configs is not None:
@@ -256,7 +248,7 @@ def fetch_remote_configs(get_users, get_configs):
             return 1
     except (mysql.connector.errors.InterfaceError, mysql.connector.errors.OperationalError) as e:
         # Error inserting the data in distant base
-        print("\033[91mErreur :", e, "Dans la fonction de synchro distant vers local\033[0m")
+        print("\033[91mError :", e, "In the local to remote sync function\033[0m")
         return 0
 
     finally:
@@ -264,3 +256,73 @@ def fetch_remote_configs(get_users, get_configs):
             # Close the connection
             cursor.close()
             conn.close()
+
+
+def send_query_remote(query_type, table, fields=None, values=None, condition=None, last_id=None):
+    """
+    Constructs and executes an SQL query in the remote database.
+
+    This function prepares and sends a SQL query to the remote database. It handles INSERT, UPDATE, and DELETE
+    queries. Additionally, it preprocesses certain fields and values, like appending system IDs where required,
+    before executing the query. If the only local observation mode is enabled, it caches the query instead of
+    executing it.
+
+    @param query_type: Type of SQL query ('INSERT', 'UPDATE', 'DELETE').
+    @param table: The database table to be queried.
+    @param fields: Optional. The fields to be used in the SQL query.
+    @param values: Optional. The values to be used in the SQL query.
+    @param condition: Optional. The condition for UPDATE and DELETE queries.
+    @param last_id: Optional. The last ID used, relevant for some INSERT queries.
+
+    @return: 1 if the query execution is successful, 0 if the query is cached.
+
+    @note: In the case of INSERT queries on certain tables, the function modifies the ID to be inserted by
+           appending a system-specific ID. For UPDATE and DELETE queries, it also modifies the condition
+           if required.
+    """
+    remote_values = None
+    remote_query = None
+
+    # Building remote query
+    # Appending system id to specific ids before sending to remote DB storing function
+    if fields is not None and values is not None:
+        remote_values = tuple(add_system_id(value) if field in ids_to_modify
+                              else value for field, value in zip(fields, values))
+    # Check if the condition's id needs to be modified
+    if condition is not None and table in tables_to_modify:
+        left, right = map(str.strip, condition.split('='))
+        if left in ids_to_modify:
+            right = str(add_system_id(right))  # Modifying the id to look for to prepend the system's id
+        modified_condition = f"{left} = '{right}'"
+    else:
+        modified_condition = condition
+
+    if query_type.upper() == "INSERT" and table in tables_to_modify:  # Need to add the id in the remote base
+        fields = ['id_' + table] + fields
+        remote_values = (add_system_id(last_id),) + remote_values
+        remote_query = f"{query_type} INTO `{table}`"
+        remote_query += f" ({', '.join(fields)}) VALUES ({', '.join(['%s'] * len(fields))})"
+
+    elif query_type.upper() == "INSERT":
+        remote_query = f"{query_type} INTO `{table}`"
+        remote_query += f" ({', '.join(fields)}) VALUES ({', '.join(['%s'] * len(fields))})"
+
+    elif query_type.upper() == "UPDATE":
+        remote_query = f"{query_type} `{table}` SET "
+        remote_query += ', '.join([f"{field} = %s" for field in fields])
+        remote_query += f" WHERE {modified_condition}"
+
+    elif query_type.upper() == "DELETE":
+        remote_query = f"{query_type} FROM `{table}`"
+        remote_query += f" WHERE {modified_condition}"
+
+    if globals.global_observation_mode == 1:
+        cache_query(remote_query, remote_values)
+        return 0
+
+    # Attempting to send to remote DB
+    if execute_remote_query(remote_query, remote_values) == 1:  # Success
+        return 1
+    else:
+        cache_query(remote_query, remote_values)
+        return 0

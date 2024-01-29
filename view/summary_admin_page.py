@@ -187,7 +187,7 @@ class SummaryAdmin:
         @param self : the instance
         @return Nothing
         """
-        local.update_configuration_active('0', globals.global_id_config_modify)
+        local.update_configuration_status('0', globals.global_id_config_modify)
         globals.global_id_config_modify = local.get_new_config_id()
 
         # Remove the id_unique field in the sensor list which is useless
