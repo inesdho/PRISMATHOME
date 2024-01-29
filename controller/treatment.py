@@ -20,6 +20,8 @@ def data_treatment(client, userdata, mqtt_msg):
     Treats the incoming MQTT message from sensors and call local.py
     to store the data received
 
+    @param userdata:
+    @param client:
     @param mqtt_msg: The MQTT message received.
 
     @return None
@@ -105,7 +107,7 @@ def data_treatment(client, userdata, mqtt_msg):
             if 'vibration' in sensor_datas:
                 # Save the data in the db
                 local.save_sensor_data(sensor_id, sensor_datas["vibration"], datetime_now)
-                if sensor_datas["battery"]:
+                if 'battery' in sensor_datas:
                     # Update the sensor battery in db
                     local.save_sensor_battery(sensor_id, sensor_datas["battery"], datetime_now)
 

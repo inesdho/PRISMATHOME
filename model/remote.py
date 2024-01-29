@@ -18,18 +18,20 @@ from model import local
 
 import globals
 
-# Connexion to the database
 thread_active = 0  # is used to know if the program is actively trying to reconnect to the remote db
 disconnect_request = 0  # is used to stop the connect thread from looping
 
+# Flag to indicate that the synchro function is running (True) or not (False).
 flag_synchro = False
 
-db_protection = False
+# The remote pool of connection
 pool = None
 
+# The lists of IDs which are different in local and remote database
 ids_to_modify = ['id_sensor', 'id_data', 'id_observation']
-tables_to_prepend = ['sensor', 'data', 'observation']
+tables_to_modify = ['sensor', 'data', 'observation']
 
+# The config for remote database
 config = {
     "host": "localhost",
     "user": "root",
@@ -47,6 +49,7 @@ def connect_to_remote_db():
     """
     global pool, thread_active
 
+    # Do not connect if the observation is in only_local mode
     if globals.global_observation_mode == 1:
         return
 
@@ -54,7 +57,7 @@ def connect_to_remote_db():
     try:
         if globals.global_disconnect_request:
             return
-        # Création d'un pool de connexions
+        # Creation of a connection pool
         pool = mysql.connector.pooling.MySQLConnectionPool(
             pool_name="mypool",
             pool_size=3,
@@ -134,6 +137,7 @@ def synchronise_queries():
 
     remote_queries_list = local.get_remote_queries()
 
+    # Do not synchronise if there is no queries stored
     if not remote_queries_list:
         return
 

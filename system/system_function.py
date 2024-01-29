@@ -1,15 +1,17 @@
 """!
 @file system_function.py
 
-@brief This file is a library of functions related to system commands
+@brief This file contains a collection of functions for managing system-level operations, including sending signals
+to processes, retrieving process IDs, exporting queries to a file, and password encryption.
 
 @author Naviis-Brain
 
 @version 1.0
 
-@date 28th Decembre 2023
+@date 28th December 2023
 """
 
+import hashlib
 import subprocess
 import os
 
@@ -82,3 +84,13 @@ def export_remote_queries(file_path, remote_queries):
             print(f"Error while exporting queries :", e)
             return False
     return True
+
+
+def encrypt_password(password):
+    """!
+    Encrypts the given password using SHA-256
+
+    @param password: The unencrypted password
+    @return: The encrypted password
+    """
+    return hashlib.sha256(password.encode()).hexdigest()

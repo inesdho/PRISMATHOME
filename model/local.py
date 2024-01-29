@@ -9,36 +9,27 @@
 
 @date January 10 2024
 """
-import errno
 
 import globals
 
 import mysql.connector
 import time
-import hashlib
-import threading
 
 from model import remote
+
+from system.system_function import encrypt_password
+
 from mysql.connector import pooling
 
-local_db = None
-local_cursor = None
-
+# The local pool of connection
 pool = None
 
-local_db_thread_distant = None
-local_cursor_thread_distant = None
-
-disconnect_request = 0  # is used to stop the connect thread from looping
-
-local_cursor_protection = threading.Lock()
-
-local_cursor_protect = False
-
+# Flag to indicate if the caching function is running (True) or not (False)
 caching = False
 
+# The config for remote database
 config = {
-    # "host": "192.168.1.22",
+    # "host": "192.168.1.122",
     "host": "localhost",
     # "user": "prisme",
     "user": "root",
@@ -60,7 +51,7 @@ def connect_to_local_db(cpt=0):
     try:
         if globals.global_disconnect_request:
             return
-        # Création d'un pool de connexions
+        # Creation of a connection pool
         pool = mysql.connector.pooling.MySQLConnectionPool(
             pool_name="mypool",
             pool_size=3,
@@ -100,7 +91,8 @@ def get_system_id():
 # DONE
 def add_system_id(local_id):
     """!
-    Prepends the system's ID to any local ID provided in order to store them into the distant database
+    Prepends the system's ID to any local ID providein order to store them into the distant database
+
     @param local_id the local ID to which the system ID needs to be added
     @return the modified ID to be inserted into the distant database
     """
@@ -110,13 +102,31 @@ def add_system_id(local_id):
 
 
 def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3):
+    """
+    Execute a SQL query with the option to reconnect on connection loss.
+
+    This function attempts to execute a provided SQL query up to a maximum number of attempts. If the connection is lost,
+    it tries to reconnect and re-execute the query. The function handles SELECT, INSERT, DELETE, and UPDATE queries
+    differently in terms of return values.
+
+    @param query: The SQL query string to be executed.
+    @param values: Optional. The values to be used in the SQL query.
+    @param cursor: Optional. A cursor object to an existing database connection. If None, a new connection is obtained.
+    @param max_attempts: Optional. The maximum number of attempts to execute the query in case of connection issues.
+
+    @return: Depending on the type of query:
+             - SELECT: Returns all fetched results.
+             - INSERT: Returns the ID of the last inserted row.
+             - DELETE/UPDATE: Returns the count of rows affected.
+             Returns None if the query execution fails after all attempts.
+    """
     # A flag to retry or not on connection lost
     # if a transaction is started to rollback changes
     retry = True
     conn = None
     for attempt in range(max_attempts):
         try:
-            # Utiliser la connexion existante ou obtenir une nouvelle du pool
+            # Use existing connection or obtain a new one from the pool
             if not cursor:
                 conn = pool.get_connection()
                 cursor = conn.cursor()
@@ -127,13 +137,13 @@ def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3
 
             query_type = query.strip().upper().split(" ")[0]
             if query_type == "SELECT":
-                # Pour SELECT, retourner tous les résultats
+                # For SELECT, return all results
                 return cursor.fetchall()
             elif query_type == "INSERT":
-                # Pour INSERT, retourner l'ID de la dernière ligne insérée
+                # For INSERT, return the ID of the last inserted row
                 return cursor.lastrowid
             elif query_type in ["DELETE", "UPDATE"]:
-                # Pour DELETE et UPDATE, retourner le nombre de lignes affectées
+                # For DELETE and UPDATE, return the number of affected rows
                 return cursor.rowcount
 
         except (mysql.connector.errors.InterfaceError, mysql.connector.errors.OperationalError) as e:
@@ -141,7 +151,7 @@ def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3
             if not retry:
                 print(f"Connection lost, don't retry Error: {e}")
                 return None
-            conn = None  # Réinitialiser la connexion
+            conn = None  # Reset the connectio
             print(f"Connection lost, attempting to reconnect. Attempt {attempt + 1}/{max_attempts}. Error: {e}")
 
         finally:
@@ -152,17 +162,30 @@ def execute_query_with_reconnect(query, values=None, cursor=None, max_attempts=3
                     cursor.close()
                     conn.close()
 
-    # Si toutes les tentatives échouent
+    # If all attempts fail
     return None
 
 
 def send_query_local(query_type, table, fields=None, values=None, condition=None, cursor=None):
+    """
+    Constructs and executes a SQL query on a local database.
+
+    This function supports INSERT, UPDATE, and DELETE query types. It builds the query based on the parameters provided
+    and executes it using the `execute_query_with_reconnect` function. For INSERT queries on the 'observation' table,
+    it updates a global variable with the new ID.
+
+    @param query_type: Type of SQL query ('INSERT', 'UPDATE', 'DELETE').
+    @param table: The database table to be queried.
+    @param fields: Optional. The fields to be used in the SQL query, required for INSERT and UPDATE queries..
+    @param values: Optional. The values to be used in the SQL query, required for INSERT and UPDATE queries.
+    @param condition: Optional. The condition for UPDATE and DELETE queries.
+    @param cursor: Optional. A cursor object to an existing database connection. If None, a new connection is obtained.
+
+    @return: The result of the query execution. Returns -1 if the query execution fails.
+    """
     valid_query_types = ["INSERT", "UPDATE", "DELETE"]
     query = ""
 
-    # *****************************************************************************#
-    # *************************** CREATION DE LA REQUETE **************************#
-    # *****************************************************************************#
     if query_type.upper() not in valid_query_types:
         raise ValueError(f"Invalid query_type. Supported types are {', '.join(valid_query_types)}.")
 
@@ -185,15 +208,8 @@ def send_query_local(query_type, table, fields=None, values=None, condition=None
             raise ValueError(f"Condition is required for {query_type} queries.")
         query = f"{query_type} FROM `{table}`"
         query += f" WHERE {condition}"
-    # *****************************************************************************#
-    # *************************** FIN CREATION REQUETE ****************************#
-    # *****************************************************************************#
 
     print(f"\033[92mTry execute (local) : {query, values}\033[0m")
-
-    # *****************************************************************************#
-    # *************************** EXECUTION DE LA REQUETE *************************#
-    # *****************************************************************************#
 
     # Storing data in local DB
     result = execute_query_with_reconnect(query, values, cursor, 3)
@@ -211,20 +227,37 @@ def send_query_local(query_type, table, fields=None, values=None, condition=None
 
 
 def send_query_remote(query_type, table, fields=None, values=None, condition=None, last_id=None):
+    """
+    Constructs and executes a SQL query on the remote database.
 
+    This function prepares and sends a SQL query to the remote database. It handles INSERT, UPDATE, and DELETE
+    queries. Additionally, it preprocesses certain fields and values, like appending system IDs where required,
+    before executing the query. If the only local observation mode is enabled, it caches the query instead of
+    executing it.
+
+    @param query_type: Type of SQL query ('INSERT', 'UPDATE', 'DELETE').
+    @param table: The database table to be queried.
+    @param fields: Optional. The fields to be used in the SQL query.
+    @param values: Optional. The values to be used in the SQL query.
+    @param condition: Optional. The condition for UPDATE and DELETE queries.
+    @param last_id: Optional. The last ID used, relevant for some INSERT queries.
+
+    @return: 1 if the query execution is successful, 0 if the query is cached.
+
+    @note: In the case of INSERT queries on certain tables, the function modifies the ID to be inserted by
+           appending a system-specific ID. For UPDATE and DELETE queries, it also modifies the condition
+           if required.
+    """
     remote_values = None
     remote_query = None
 
-    # *****************************************************************************#
-    # *************************** CREATION DE LA REQUETE **************************#
-    # *****************************************************************************#
     # Building remote query
     # Appending system id to specific ids before sending to remote DB storing function
     if fields is not None and values is not None:
         remote_values = tuple(add_system_id(value) if field in remote.ids_to_modify
                               else value for field, value in zip(fields, values))
     # Check if the condition's id needs to be modified
-    if condition is not None and table in remote.tables_to_prepend:
+    if condition is not None and table in remote.tables_to_modify:
         left, right = map(str.strip, condition.split('='))
         if left in remote.ids_to_modify:
             right = str(add_system_id(right))  # Modifying the id to look for to prepend the system's id
@@ -232,7 +265,7 @@ def send_query_remote(query_type, table, fields=None, values=None, condition=Non
     else:
         modified_condition = condition
 
-    if query_type.upper() == "INSERT" and table in remote.tables_to_prepend:  # Need to add the id in the remote base
+    if query_type.upper() == "INSERT" and table in remote.tables_to_modify:  # Need to add the id in the remote base
         fields = ['id_' + table] + fields
         remote_values = (add_system_id(last_id),) + remote_values
         remote_query = f"{query_type} INTO `{table}`"
@@ -251,10 +284,6 @@ def send_query_remote(query_type, table, fields=None, values=None, condition=Non
         remote_query = f"{query_type} FROM `{table}`"
         remote_query += f" WHERE {modified_condition}"
 
-    # *****************************************************************************#
-    # *************************** FIN CREATION REQUETE ****************************#
-    # *****************************************************************************#
-
     if globals.global_observation_mode == 1:
         cache_query(remote_query, remote_values)
         return 0
@@ -269,16 +298,23 @@ def send_query_remote(query_type, table, fields=None, values=None, condition=Non
 
 # DONE
 def send_query(query_type, table, fields=None, values=None, condition=None):
-    """!
-    Inserts, updates, or deletes data in the local database and then saves it to the remote database.
+    """
+    Facilitates the insertion, update, or deletion of data in both local and remote databases.
 
-    @param query_type : The type of query ("INSERT", "UPDATE", "DELETE", etc.).
-    @param table : The name of the table.
-    @param fields : List of field names for the query.
-    @param values : List of values corresponding to the fields.
-    @param condition : Condition for the UPDATE or DELETE query (optional).
+    It first applies these operations to the local database and then attempts to replicate them in the remote
+    database. The function is designed to handle the synchronization of data between the local and remote
+    databases.
 
-    @return 1 if data sent to local and remote DB, 2 if sent only to local DB, 0 if no data was stored
+    @param query_type: The type of SQL query ('INSERT', 'UPDATE', 'DELETE', etc.).
+    @param table: The name of the database table to be queried.
+    @param fields: Optional. List of field names for the query. Required for INSERT and UPDATE queries.
+    @param values: Optional. List of values corresponding to the fields. Required for INSERT and UPDATE queries.
+    @param condition: Optional. The condition for UPDATE or DELETE queries.
+
+    @return: An integer indicating the result of the operation:
+             - 1 if data was successfully sent to both local and remote databases.
+             - 2 if data was only sent to the local database.
+             - 0 if no data was stored.
     """
 
     result = send_query_local(query_type, table, fields, values, condition)
@@ -296,6 +332,7 @@ def send_query(query_type, table, fields=None, values=None, condition=None):
 def cache_query(remote_query, remote_values):
     """!
     Caches the query that couldn't be sent to the remote database, in the local database as plain text
+
     @param remote_query: the query to store
     @param remote_values: the values of said query
     """
@@ -342,95 +379,68 @@ def monitor_battery_low(sensor_id, datetime):
     @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
     0 if no data was stored
     """
-    values = (sensor_id, get_system_id(), datetime, get_error_id_from_label('Sensor battery low'))
+    values = (sensor_id, get_system_id(), datetime, get_message_id_from_label('Sensor battery low'))
     return send_query('insert', 'monitoring', ['id_sensor', 'id_system', 'timestamp', 'id_error'], values)
 
 
-# TODO : faire fonction 2 en 1
-def monitor_system_shut_down_by_participant(datetime):
+def monitor_system_start_stop(datetime, system_status):
     """!
-    Insert the monitoring message "System shut down by participant"
+    Inserts a monitoring message to indicate that the system is powering off or powering on
 
-    @param datetime : The datetime when the datas had been received.
-
+    @param datetime : The datetime when the data has been received.
+    @param system_status: The status of the system, 1 for on and 0 for off.
     @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
-    0 if no data was stored
+    0 if no data was stored)
     """
+    if system_status == 0:
+        values = (get_system_id(), datetime, get_message_id_from_label('System shut down by participant'))
+    elif system_status == 1:
+        values = (get_system_id(), datetime, get_message_id_from_label('System started up by participant'))
+    else:
+        return 0
 
-    values = (get_system_id(), datetime, get_error_id_from_label('System shut down by participant'))
     return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
 
 
-def monitor_system_started_up_by_participant(datetime):
+def monitor_observation_start_stop(datetime, observation_status):
     """!
-    Insert the monitoring message "System started up by participant"
+    Insert the monitoring message "Observation started" or "Observation stopped"
 
-    @param datetime : The datetime when the datas had been received.
-
+    @param datetime : The datetime when the data has been received.
+    @param observation_status: The status of the observation, 1 for started and 0 for stopped.
     @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
-    0 if no data was stored
+    0 if no data was stored)
     """
+    if observation_status == 0:
+        values = (get_system_id(), datetime, get_message_id_from_label('Observation stopped'))
+    elif observation_status == 1:
+        values = (get_system_id(), datetime, get_message_id_from_label('Observation started'))
+    else:
+        return 0
 
-    values = (get_system_id(), datetime, get_error_id_from_label('System started up by participant'))
     return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
 
 
-# TODO : faire fonction 2 en 1
-def monitor_observation_started(datetime):
+def monitor_sensor_availability(sensor_id, datetime, availability):
     """!
-    Insert the monitoring message "Observation started"
-
-    @param datetime : The datetime when the datas had been received.
-
-    @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
-    0 if no data was stored
-    """
-
-    values = (get_system_id(), datetime, get_error_id_from_label('Observation started'))
-    return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
-
-
-def monitor_observation_stopped(datetime):
-    """!
-    Insert the monitoring message "Observation stopped"
-
-    @param datetime : The datetime when the datas had been received.
-
-    @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
-    0 if no data was stored
-    """
-
-    values = (get_system_id(), datetime, get_error_id_from_label('Observation stopped'))
-    return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
-
-
-# TODO : faire fonction 2 en 1
-def monitor_availability_offline(sensor_id, datetime):
-    """!
-    Insert the monitoring message "Sensor availability offline"
+    Insert the monitoring message "Sensor availability offline" or "Sensor availability online"
 
     @param sensor_id: The ID of the sensor.
     @param datetime : The datetime when the datas had been received.
-
+    @param availability: The sensor's availability
     @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
-    0 if no data was stored
+    0 if no data was stored)
     """
-    values = (sensor_id, get_system_id(), datetime, get_error_id_from_label('Sensor availability offline'))
-    return send_query('insert', 'monitoring', ['id_sensor', 'id_system', 'timestamp', 'id_error'], values)
+    if availability == 0:
+        values = (sensor_id, get_system_id(), datetime, get_message_id_from_label('Sensor availability offline'))
+    elif availability == 1:
+        values = (sensor_id, get_system_id(), datetime, get_message_id_from_label('Sensor availability online'))
+    else:
+        return 0
 
-
-def monitor_availability_online(sensor_id, datetime):
-    """!
-    Insert the monitoring message "Sensor availability online"
-
-    @param sensor_id: The ID of the sensor.
-    @param datetime : The datetime when the datas had been received.
-
-    @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
-    0 if no data was stored
-    """
-    values = (sensor_id, get_system_id(), datetime, get_error_id_from_label('Sensor availability online'))
-    return send_query('insert', 'monitoring', ['id_sensor', 'id_system', 'timestamp', 'id_error'], values)
+    return send_query('insert', 'monitoring',
+                      ['id_sensor', 'id_system', 'timestamp', 'id_error'],
+                      values)
 
 
 # DONE
@@ -503,14 +513,6 @@ def get_sensor_from_type_label(sensor_type, label):
 
     @return The ID of the corresponding sensor, False if no sensor was found or an error occurred
     """
-    """!
-    Select in the database the active sensor matching type and label
-
-    @param sensor_type : The sensor type.
-    @param label : The sensor label.
-
-    @return The ID of the corresponding sensor, False if no sensor was found or an error occurred
-    """
 
     query = """
         SELECT s.id_sensor 
@@ -533,20 +535,16 @@ def get_sensor_from_type_label(sensor_type, label):
 def get_sensors_from_configuration(id_config):
     """!
     Gets all the sensors associated with the given configuration id in the local database and returns them as a list
-    with a special format
 
     @param id_config: The configuration id
     @return: A list of sensors formatted as such [{"label": "Sensor1","description": "Description1","type": "Type1"},...
     """
-    print("Entrée dans la fonction get_sensors_from_configuration")
 
     query = (
         "SELECT sc.sensor_label, sc.sensor_description, st.type "
         "FROM sensor_config sc, sensor_type st  "
         "WHERE sc.id_config = %s  "
         "AND sc.id_sensor_type = st.id_type")
-
-    print("get_sensors_from_configuration : id_config = " + str(id_config))
 
     result = execute_query_with_reconnect(query, (id_config,))
 
@@ -561,7 +559,7 @@ def get_sensors_from_configuration(id_config):
                 })
             return sensors
     except Exception as e:
-        print("Erreur dans la conversion du résultat : ", e)
+        print("Error while getting sensors from configuration : ", e)
 
     # Return None if no sensors found or if an error occurred
     return None
@@ -595,10 +593,10 @@ def get_sensor_info_from_observation(id_observation, sensor_type=None):
     found or an error occurred
     """
 
-    if sensor_type is None:  # Grab all labels
+    if sensor_type is None:  # Grab for all types
         query = "SELECT label, description FROM sensor WHERE id_observation =%s"
         values = (id_observation,)
-    else:
+    else:   # Grab only for selected sensor type
         query = "SELECT label, description FROM sensor WHERE id_observation =%s AND id_type = %s"
         values = (id_observation, sensor_type)
 
@@ -611,7 +609,7 @@ def get_sensor_info_from_observation(id_observation, sensor_type=None):
 
 
 # DONE
-def get_error_id_from_label(label):
+def get_message_id_from_label(label):
     """!
     Finds the error id corresponding to the given label
 
@@ -626,7 +624,7 @@ def get_error_id_from_label(label):
     if result:
         return result[0][0]
 
-    # Return None if the sensor type is not found or there are errors
+    # Return None if the message id is not found or there are errors
     return None
 
 
@@ -671,15 +669,33 @@ def get_user_from_login_and_password(login, password):
 def update_user_connexion_status(id_user, connexion_status):
     """!
     Sets the connexion status to either 1 (connected) or 0 (disconnected) in the local db for the user.
+
     @param id_user: user's id
     @param connexion_status: The connexion status wanted
     @return: 1 if successful, otherwise None
     """
 
-    query = "UPDATE user SET connected = %s WHERE login = %s AND password = %s"
-
     result = send_query_local("UPDATE", "user", ("connected",), (connexion_status, id_user),
                               "id_user = %s")
+    if result != -1:
+        return 1
+
+    # Return None if the user is not found or there are errors
+    return None
+
+
+def update_configuration_active(active, id_conf):
+    """!
+    TODO : Mettre un vrai commentaire
+    Sets the connexion status to either 1 (connected) or 0 (disconnected) in the local db for the user.
+
+    @param id_user: user's id
+    @param connexion_status: The connexion status wanted
+    @return: 1 if successful, otherwise None
+    """
+
+    result = send_query_local("UPDATE", "configuration", ("active",), (active, id_conf),
+                              "id_config = %s")
     if result != -1:
         return 1
 
@@ -731,10 +747,13 @@ def get_new_config_id():
 
 # DONE
 def get_new_id_session(participant, id_config):
-    """!
-    @brief This functions returns the id of the last session created in the database + 1
-    @param self : the instance
-    @return the id of the last session created in the database
+    """
+    Calculates the ID for the next session based on existing sessions in the database.
+
+    @param participant: The identifier of the participant.
+    @param id_config: The configuration ID associated with the session.
+
+    @return: The ID for the next session to be created. Returns 1 if no previous sessions are found.
     """
 
     query = "SELECT MAX(id_session) FROM observation WHERE participant=%s AND id_config=%s"
@@ -775,6 +794,24 @@ def get_config_labels_ids(id_config=None):
 
         if result:
             return result[0][0]
+
+
+def get_config_labels_description_ids(id_config):
+    """!
+    Gets the label and description of a specific config from the local database.
+
+    @param id_config: The config's id.
+    @return: Tuple of (label, description) if successful, None otherwise.
+    """
+    query = "SELECT label, description FROM configuration WHERE id_config = %s"
+
+    result = execute_query_with_reconnect(query, (id_config,))
+
+    if result:
+        # Return both label and description
+        return result[0][0], result[0][1]
+    else:
+        return None
 
 
 def get_config_label_from_observation_id(id_observation):
@@ -903,50 +940,64 @@ def create_configuration(id_config, id_user, label, description, sensor_list):
     @param sensor_list: The list of sensors associated with the configuration
     @return None
     """
+    # TODO Paul : qq commentaires dans la fonction pour exlpliciter certaines parties du code
     conn = None
     cursor = None
     error = False
 
     try:
+        # Establish a new database connection
         conn = pool.get_connection()
-
         cursor = conn.cursor()
+
+        # Start a new transaction
         cursor.execute("START TRANSACTION;")
 
-        values = (id_config, id_user, label, description)
-        result = send_query_local('insert', 'configuration', ['id_config', 'id_user', 'label', 'description'], values,
+        values = (id_config, id_user, label, description, '1')
+
+        # Insert configuration into the local database and check for errors
+        result = send_query_local('insert', 'configuration', ['id_config', 'id_user', 'label', 'description', 'active'],
+                                  values,
                                   None, cursor)
 
         if result == -1:
             raise Exception("Error while inserting configuration")
 
+        # Iterate through each sensor in the sensor list
         for sensor_type_id, sensor_label, sensor_description in sensor_list:  # Go through the sensor list
 
             values = (id_config, sensor_type_id, sensor_label, sensor_description)
-            # Send each query and check for errors
+            # Insert sensor configuration into the local database and check for errors
             result = send_query_local('insert', 'sensor_config',
                                       ['id_config', 'id_sensor_type', 'sensor_label', 'sensor_description'],
                                       values, None, cursor)
             if result == -1:  # No data stored in local nor remote
                 raise Exception("Error while inserting sensor configuration")
 
+        # Commit the transaction after successful inserts
         conn.commit()
 
     except Exception as e:
+        # Handle exceptions, rollback the transaction and set error flag
         if conn:
             conn.rollback()
             error = True
             print(f"Une erreur est survenue, la transaction a été annulée : {e}")
     finally:
+        # Close the connection
         if conn:
             cursor.close()
             conn.close()
+        # Exit the function if there was an error
         if error:
             return
 
     values = (id_config, id_user, label, description)
+
+    # Insert configuration into remote database
     send_query_remote('insert', 'configuration', ['id_config', 'id_user', 'label', 'description'], values, None)
 
+    # Insert each sensor configuration into the remote database
     for sensor_type_id, sensor_label, sensor_description in sensor_list:
         values = (id_config, sensor_type_id, sensor_label, sensor_description)
 
@@ -957,12 +1008,14 @@ def create_configuration(id_config, id_user, label, description, sensor_list):
 
 def insert_new_sensors_for_configuration(id_config, sensor_list):
     """!
-    Creates a new sensors for the given configuration. Insert into the local and remote DB
+    Creates new sensors for the given configuration, then inserts them into the local and remote DB
 
     @param id_config: The config's id
     @param sensor_list: The list of sensors to be inserted in the configuration
     @return None
     """
+    # TODO Paul : qq comms pour expliciter le code
+    # TODO MATTEO : Elle va dégager cette fonction normalement donc pas besoin
     conn = None
     cursor = None
     error = False
@@ -1007,8 +1060,7 @@ def insert_new_sensors_for_configuration(id_config, sensor_list):
 
 def delete_sensor_config(id_config):
     """!
-    Creates a new configuration from the given parameters and inserts it in both databases.
-    Inserts also the sensor list into the database
+    Deletes all sensor configs associated with the selected config id
 
     @param id_config: The config's id
     @return None
@@ -1018,16 +1070,6 @@ def delete_sensor_config(id_config):
 
     return result
 
-
-# DONE
-def encrypt_password(password):
-    """!
-    Encrypts the given password using SHA-256
-
-    @param password: The unencrypted password
-    @return: The encrypted password
-    """
-    return hashlib.sha256(password.encode()).hexdigest()
 
 def get_observation_mode():
     """!
@@ -1048,7 +1090,7 @@ def get_observation_mode():
 
 def get_active_observation():
     """!
-    Select and return the ID of the active observation.
+    Select and return the IDs of active observations.
 
     @return A list of ID of active observations. Empty list if no active observations are found.
     """
@@ -1119,14 +1161,19 @@ def get_observation_info(id_observation, field=None):
             return None
 
 
-def get_configurations():
+def get_configurations(active=None):
     """
-    Retrieves all configurations in the local database
+    Retrieves all configurations in the local database matching the active parameter if set
 
+    @param active: 1 to get active configs, 0 to get non-active configs, None to get all configs
     @return A list of the fields and their values. None list if nothing was found or an error occurred.
     """
-    query = """SELECT id_config, id_user, label, description FROM configuration;"""
-    result = execute_query_with_reconnect(query)
+    if active is not None:
+        query = """SELECT id_config, id_user, label, description FROM configuration WHERE active = %s;"""
+        result = execute_query_with_reconnect(query, (active,))
+    else:
+        query = """SELECT id_config, id_user, label, description FROM configuration;"""
+        result = execute_query_with_reconnect(query, (active,))
     if result:
         return [(row[0], row[1], row[2], row[3]) for row in result]
     else:
@@ -1163,5 +1210,3 @@ def get_remote_queries():
         return remote_queries_list
     else:
         return None
-
-

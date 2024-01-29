@@ -93,7 +93,7 @@ def get_all_sensors_on_zigbee2mqtt(details_wanted):
                             'label': sensor.get("definition", {}).get("description", "Unknown")
                         }
                         connected_sensors_list.append(sensor_details)
-
+        # Ending the function when the informations are retrieved
         client.loop_stop()
         client.disconnect()
 
@@ -134,13 +134,17 @@ def change_permit_join(state_wanted):
         nonlocal transmission_state
         message = str(msg.payload)
 
+        # Checks the value of the payload
         if "ok" in message:
             transmission_state = 1
         elif "error" in message:
             transmission_state = 0
+
+        # Ending the function when the information are retrieved
         client.disconnect()
         client.loop_stop()
 
+    # Connection to the MQTT Client
     client = mqtt.Client("change_permit_join")
     client.on_message = on_message
     connect_to_mqtt_broker(client)
@@ -171,12 +175,6 @@ def rename_sensor(previous_name, new_name):
     transmission_state = 3
     cpt = 0
 
-    # This function allows the user to rename a sensor, using the currently known firendly name (or
-    # the IEEE address) and the new name
-    # This function is called when a message is received.
-    # We subscribe to the topic zigbee2mqtt/bridge/response/device/rename, in order to
-    # confirm that the rename was done correctly
-
     def on_message(client, userdata, msg):
         """!
         Function that is called when a message is received from a topic
@@ -200,12 +198,23 @@ def rename_sensor(previous_name, new_name):
 
         # Convert the feedback in json
         rename_feedback = json.loads(msg.payload)
-        print("feeedback: ", rename_feedback)
+
+        # Check the feedback
         if 'ok' in rename_feedback["status"]:
             transmission_state = 1
         elif 'error' in rename_feedback:
+
+            # Case where the previous name doesn't match anything
             if 'does not exist' in rename_feedback['error']:
                 transmission_state = 2
+
+            # Case where the new_name is already bound to another sensor
+            # It can also mean that the new_name is the same as the previous name,
+            # but we already handle that case in the program so it nerver happens.
+            #
+            # In that case, instead of showing the error (which can be confusing for the user),
+            # we rename the sensor correctly, and rename the sensor that had the name to its
+            # IEEE address + x
             elif 'is already in use' in rename_feedback['error']:
                 # Get the list of sensors
                 sensors = get_all_sensors_on_zigbee2mqtt("all")
@@ -220,12 +229,11 @@ def rename_sensor(previous_name, new_name):
                 transmission_state = rename_sensor(previous_name, new_name)
 
             else:
-                print("WTF 1 : ", rename_feedback)
                 transmission_state = 3
         else:
-            print("WTF 2 : ", rename_feedback)
             transmission_state = 3
 
+        # Ending the function
         client.disconnect()
         client.loop_stop()
 
@@ -237,6 +245,8 @@ def rename_sensor(previous_name, new_name):
     # Check if it is the same name, there is no need to rename it
     if new_name == previous_name:
         transmission_state = 1
+
+        # Ending the function
         client.disconnect()
         client.loop_stop()
     else:
@@ -262,7 +272,6 @@ def get_sensor_value(sensor_friendly_name, label_widget):
     @return The string value if the sensor 
     """
     global thread_done
-    print("Lancement du thread pour capteur", sensor_friendly_name)
     # The value of the sensor to return
     value = ""
 
@@ -274,8 +283,6 @@ def get_sensor_value(sensor_friendly_name, label_widget):
         sensor_label = msg.topic.split('/')[2]
         ## The datas sended by the sensor extracted from the mqtt message in json format
         sensor_datas = json.loads(msg.payload)
-        print("Sensor type : ", sensor_type)
-        print("Reception message ", sensor_friendly_name)
 
         match sensor_type:
             case "Button":
@@ -324,12 +331,9 @@ def get_sensor_value(sensor_friendly_name, label_widget):
 
     mqtt_client.loop_start()
 
-    print("thread done = ", globals.thread_done)
-
     while not globals.thread_done:
         time.sleep(1)
 
-    print("Sortie du thread get_sensor_value pour capteur : ", sensor_friendly_name)
     mqtt_client.loop_stop()
     mqtt_client.disconnect()
 
@@ -338,9 +342,7 @@ def get_new_sensors():
     """!
     This function is used to get the new sensors that joined zigbee2mqtt after a permit join
 
-    @param client: Client
-    @param userdata: Unused
-    @param msg: Message from topic
+    @param None
 
     @return None
     """
@@ -366,6 +368,7 @@ def get_new_sensors():
                 'ieee_address': sensor_data.get('data', {}).get('ieee_address', 'Unknown'),
                 'label': sensor_data.get('data', {}).get('definition', {}).get('description', 'Unknown')
             }
+            # Ending the function
             client.loop_stop()
             client.disconnect()
 
@@ -374,6 +377,7 @@ def get_new_sensors():
     client.on_message = on_message
     connect_to_mqtt_broker(client)
 
+    # Subscribing to the topic
     client.subscribe("zigbee2mqtt/bridge/event")
 
     client.loop_forever()
@@ -387,33 +391,32 @@ def check_availability():
 
     @return nothing
     """
-    ##  Double list, which contains the sensors and their status
 
+    ##  Double list, which contains the sensors and their status
     availabilities = [
         ["Sensor"],
         ["Status"],
     ]
 
     ## The topic list we need to subcribe to
-
     list_of_topics = []
 
     def on_message_getall(client, userdata, msg):
         """!
         Function that is called when a message is received from a topic
         In that case, it is zigbee2mqtt/bridge/devices
-        It will gather all of the devices and subscribe to the availability fields corresponding
+        It will gather all the devices and subscribe to the availability fields corresponding
 
         @param client: Client
         @param userdata: Unused
-        @param msg: JSON message, which contains all of the informations of the sensors
+        @param msg: JSON message, which contains all the information of the sensors
 
         @return None
         """
 
         nonlocal availabilities
         nonlocal list_of_topics
-        # Gets all of the sensor connected in the system
+        # Gets all the sensor connected in the system
         connected_devices = get_all_sensors_on_zigbee2mqtt("fname")
 
         for i in range(len(connected_devices)):
@@ -489,7 +492,7 @@ def check_availability():
                             availabilities[1][i] = "offline"
                             sensor_id = local.get_sensor_from_type_label(data_to_database[0], data_to_database[1])
                             if sensor_id:
-                                local.monitor_availability_offline(sensor_id, datetime_now)
+                                local.monitor_sensor_availability(sensor_id, datetime_now, 0)
 
                     # Case where the sensor is already in the system
                     elif 'online' in availabilities[1][i]:
@@ -497,14 +500,14 @@ def check_availability():
                             availabilities[1][i] = "offline"
                             sensor_id = local.get_sensor_from_type_label(data_to_database[0], data_to_database[1])
                             if sensor_id:
-                                local.monitor_availability_offline(sensor_id, datetime_now)
+                                local.monitor_sensor_availability(sensor_id, datetime_now, 0)
 
                     elif 'offline' in availabilities[1][i]:
                         if 'online' in availability_message['state']:
                             availabilities[1][i] = "online"
                             sensor_id = local.get_sensor_from_type_label(data_to_database[0], data_to_database[1])
                             if sensor_id:
-                                local.monitor_availability_online(sensor_id, datetime_now)
+                                local.monitor_sensor_availability(sensor_id, datetime_now, 1)
 
     def on_message_rename(client, userdata, msg):
         """!
