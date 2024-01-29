@@ -31,18 +31,18 @@ def send_signal(pid, signal_number):
 def get_pid_of_script(script_name):
     """!
     @brief Get the pid of the script "script_name"
-    @param script_name The name of the script that we want to get the pid
+    @param script_name The name of the script we want the pid of
     @return The pid of the script "script_name"
     """
     try:
-        # Exécution de la commande 'ps' pour obtenir les processus en cours
+        # 'ps' command execution to get the running processes
         process = subprocess.run(['ps', 'aux'], stdout=subprocess.PIPE, text=True)
-        # Filtrage des lignes qui contiennent le nom du script
+        # Filtering the lines that contain the name of the script
         lines = process.stdout.split('\n')
         for line in lines:
             if script_name in line:
                 parts = line.split()
-                # Le PID est généralement le deuxième élément dans la sortie de 'ps aux'
+                # The PID is generally the second output of 'ps aux'
                 return int(parts[1])
     except Exception as e:
         print(f"Something wrong append while looking for the script pid : {e}")
@@ -55,7 +55,6 @@ def export_remote_queries(file_path, remote_queries):
     @param file_path: The path of the file to save the queries into
     @param remote_queries: The list of remote queries
     @return True if the file was successfully created and filled, False otherwise
-    TODO display a popup if an error occurred
     """
 
     print("File path = ", file_path)
