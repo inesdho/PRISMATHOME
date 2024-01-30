@@ -13,11 +13,11 @@ import threading
 import time
 
 import mysql.connector
+from mysql.connector import pooling
 
 from model import local
 
 import globals
-from model.local import add_system_id, cache_query
 
 thread_active = 0  # is used to know if the program is actively trying to reconnect to the remote db
 disconnect_request = 0  # is used to stop the connect thread from looping
@@ -286,20 +286,20 @@ def send_query_remote(query_type, table, fields=None, values=None, condition=Non
     # Building remote query
     # Appending system id to specific ids before sending to remote DB storing function
     if fields is not None and values is not None:
-        remote_values = tuple(add_system_id(value) if field in ids_to_modify
+        remote_values = tuple(local.add_system_id(value) if field in ids_to_modify
                               else value for field, value in zip(fields, values))
     # Check if the condition's id needs to be modified
     if condition is not None and table in tables_to_modify:
         left, right = map(str.strip, condition.split('='))
         if left in ids_to_modify:
-            right = str(add_system_id(right))  # Modifying the id to look for to prepend the system's id
+            right = str(local.add_system_id(right))  # Modifying the id to look for to prepend the system's id
         modified_condition = f"{left} = '{right}'"
     else:
         modified_condition = condition
 
     if query_type.upper() == "INSERT" and table in tables_to_modify:  # Need to add the id in the remote base
         fields = ['id_' + table] + fields
-        remote_values = (add_system_id(last_id),) + remote_values
+        remote_values = (local.add_system_id(last_id),) + remote_values
         remote_query = f"{query_type} INTO `{table}`"
         remote_query += f" ({', '.join(fields)}) VALUES ({', '.join(['%s'] * len(fields))})"
 
@@ -317,12 +317,12 @@ def send_query_remote(query_type, table, fields=None, values=None, condition=Non
         remote_query += f" WHERE {modified_condition}"
 
     if globals.global_observation_mode == 1:
-        cache_query(remote_query, remote_values)
+        local.cache_query(remote_query, remote_values)
         return 0
 
     # Attempting to send to remote DB
     if execute_remote_query(remote_query, remote_values) == 1:  # Success
         return 1
     else:
-        cache_query(remote_query, remote_values)
+        local.cache_query(remote_query, remote_values)
         return 0
