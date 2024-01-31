@@ -74,9 +74,6 @@ class LoginAsAdministrator:
 
         connexion_allowed = False
 
-        print(username)
-        print(password)
-
         user = local.get_user_from_login_and_password(username, password)
 
         # Check if the user was found in the database

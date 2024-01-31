@@ -114,9 +114,6 @@ class SummaryUser:
                 sensor_infos = local.get_sensor_info_from_observation(globals.global_new_id_observation, sensor_type_id)
 
                 if sensor_infos:
-                    print("sensor infos", sensor_infos)
-                    print("sensor type", sensor_type)
-                    print("senor_type_id", sensor_type_id)
                     if sensor_infos:
                         sensor_type_button = ttk.Button(
                             self.button_frame,
@@ -125,31 +122,26 @@ class SummaryUser:
                             padding=5
                         )
                         sensor_type_button.pack(side=tk.LEFT, padx=5)
-                    print("BEFORE create_sensor_info")
                     self.create_sensor_info(sensor_infos, sensor_type)
 
         except Exception as err:
             print(f"Error: {err}")
 
     def create_sensor_info(self, sensor_infos, sensor_type):
-        print("Entrée create_sensor_info")
         for sensor_info in sensor_infos:
             sensor_frame = ttk.Frame(self.data_frame)
-            print("frame OK")
 
             self.sensor_type_frame_list.append({
                 "type": sensor_type,
                 "frame": sensor_frame
             })
 
-            print("Sensor list ok")
             #sensor_frame.pack(pady=5, fill=tk.BOTH, expand=tk.TRUE)
 
             # Showing the type of the sensor
             ttk.Label(sensor_frame, text=f"{sensor_type}", width=20, anchor='w', wraplength=140,
                       background="white", borderwidth=0.5, relief="solid", padding=5, font=globals.global_font_text).pack(side=tk.LEFT)
 
-            print("LABEL TYPE CREATED")
 
             # Creating a text widget tht will contain the label associated with the sensor
             ttk.Label(sensor_frame, text=f"{sensor_info['label']}", borderwidth=0.5, background="white", width=20,
@@ -162,8 +154,6 @@ class SummaryUser:
             # Showing the current state of the sensor
             label_state = ttk.Label(sensor_frame, text=f"Etat en direct", borderwidth=0.5, background="white", width=20,
                                     relief="solid", padding=5, anchor="center", font=globals.global_font_text)
-
-            print("Creation des label ok")
 
             match sensor_type:
                 case "Button":
@@ -180,11 +170,9 @@ class SummaryUser:
             globals.thread_done = False
 
             sensor_friendly_name = sensor_type + "/" + sensor_info['label']
-            print("Lancement thread")
             my_thread = threading.Thread(target=model.local_mqtt.get_sensor_value,
                                          args=(sensor_friendly_name, label_state))
             my_thread.start()
-            print("FIN FUNC")
 
     def display_sensor_info(self, sensor_type):
         """!

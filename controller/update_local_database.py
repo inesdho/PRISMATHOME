@@ -53,7 +53,6 @@ class FunctionSelectionDialog(tk.Toplevel):
         @return Nothing
         """
         selected_functions = [self.listbox.get(idx) for idx in self.listbox.curselection()]
-        print("seL Functions : ", selected_functions)
         self.callback(selected_functions)
         self.destroy()
 

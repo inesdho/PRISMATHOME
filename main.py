@@ -30,7 +30,6 @@ if __name__ == "__main__":
             UpdateLocalDatabase()
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred while trying to update the local database: {str(e)}")
-            print('passé par le except')
 
 
     # Starting the main event loop

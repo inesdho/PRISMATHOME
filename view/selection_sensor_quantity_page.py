@@ -103,10 +103,6 @@ class QuantitySensor:
         for sensor_type, sensor_var in self.sensor_vars.items():
             globals.sensor_counts[sensor_type] = int(sensor_var.get())
 
-        # Print the values to check
-        for sensor_type, count in globals.sensor_counts.items():
-            print(f"Number of id_type {sensor_type} Sensors selected:", count)
-
     def chose_at_least_one_sensor(self):
         """!
         @brief This function checks if the users has selected at least one sensor

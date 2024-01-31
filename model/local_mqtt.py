@@ -338,7 +338,7 @@ def get_sensor_value(sensor_friendly_name, label_widget):
     mqtt_client.disconnect()
 
 
-def get_new_sensors():
+def get_new_sensors(flag):
     """!
     This function is used to get the new sensors that joined zigbee2mqtt after a permit join
 
@@ -361,8 +361,10 @@ def get_new_sensors():
         """
         nonlocal sensor_details
         sensor_data = json.loads(msg.payload.decode())
+        print("sensor datas : ", sensor_data)
 
         if sensor_data.get('data').get('definition'):
+            print("Adding details")
             sensor_details = {
                 'name': sensor_data.get('data', {}).get('friendly_name', 'Unknown'),
                 'ieee_address': sensor_data.get('data', {}).get('ieee_address', 'Unknown'),
@@ -371,6 +373,7 @@ def get_new_sensors():
             # Ending the function
             client.loop_stop()
             client.disconnect()
+            flag[0]=True
 
     # Connection to the MQTT Client
     client = mqtt.Client("get_new_sensors")
@@ -380,7 +383,14 @@ def get_new_sensors():
     # Subscribing to the topic
     client.subscribe("zigbee2mqtt/bridge/event")
 
-    client.loop_forever()
+    client.loop_start()
+
+    while not flag[0]:
+        time.sleep(1)
+
+    flag[0] = False
+
+    print("return details")
     return sensor_details
 
 
@@ -569,7 +579,6 @@ def check_availability():
         @return None
         """
         remove_feedback = json.loads(msg.payload)
-        print(remove_feedback)
 
         # Checks if the remove was correctly done
         if 'ok' in remove_feedback['status']:

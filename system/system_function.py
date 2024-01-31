@@ -24,7 +24,7 @@ def send_signal(pid, signal_number):
     @param signal_number : The number of the signal we want to send
     @return None
     """
-    script_path = "/home/share/PRISMATHOME/test"
+    script_path = "/home/share/PRISMATHOME/kill"
     subprocess.run([script_path, str(pid), str(signal_number)], check=True)
 
 
@@ -56,9 +56,6 @@ def export_remote_queries(file_path, remote_queries):
     @param remote_queries: The list of remote queries
     @return True if the file was successfully created and filled, False otherwise
     """
-
-    print("File path = ", file_path)
-    print("Remote queries = ", remote_queries)
 
     if not file_path:
         return False

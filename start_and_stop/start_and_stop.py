@@ -48,7 +48,6 @@ def handler_prgm_started(signum, frame):
     @return None
     """
     global program_up
-    print("received signal start")
     if signum == signal.SIGTERM:
         program_up = True
     else:
@@ -65,7 +64,6 @@ def handler_prgm_stopped(signum, frame):
     @return None
     """
     global program_down
-    print("received signal stop")
     if signum == signal.SIGTERM:
         program_down = True
     else:
@@ -182,7 +180,6 @@ if __name__ == "__main__":
         for sensor in sensor_list:
             arguments.append(sensor["type"] + "/" + sensor["label"])
 
-        print("arguments : ", arguments)
         command = ["python", "/home/share/PRISMATHOME/reception.py"] + arguments
 
         # Start the main program
@@ -217,8 +214,6 @@ if __name__ == "__main__":
 
     if model.local.get_active_observation():
         main_pid = system_function.get_pid_of_script("reception.py")
-
-        print("\033[33mmain_pid : ", main_pid, "\033[0m")
 
         signal.signal(signal.SIGTERM, handler_prgm_stopped)
 
