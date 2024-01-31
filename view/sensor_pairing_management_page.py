@@ -239,6 +239,7 @@ class SensorPairingManagement:
             nonlocal flag
             flag[0] = True
             model.local_mqtt.change_permit_join(False)
+            popup.destroy()
 
         def on_click_new_sensor(event):
             """!
@@ -263,9 +264,7 @@ class SensorPairingManagement:
             global new_sensor
 
             while not flag[0]:
-                print("try to get new sensors")
                 new_sensor = model.local_mqtt.get_new_sensors(flag)
-                print("sensor getted")
 
                 # Create a box frame to the sensor_label
                 sensor_frame = tk.Frame(scrollable_frame, cursor="hand2", bg="white", pady=0)
@@ -313,7 +312,8 @@ class SensorPairingManagement:
         scrollable_frame = ttk.Frame(my_canvas)
         my_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=400)
 
-        if (model.local_mqtt.change_permit_join(True) != 1):
+
+        if model.local_mqtt.change_permit_join(True) != 1:
             showinfo("Error", "A problem occurred while changing the permit_join state")
             popup.grab_release()
             popup.destroy()
