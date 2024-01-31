@@ -151,6 +151,12 @@ def synchronise_queries():
             print("Sync error : ", e)
             return
 
+    try:
+        local.delete_remote_queries(remote_queries_list)
+    except Exception as e:
+        print("Sync error : ", e)
+        return
+
 
 def fetch_remote_configs(get_users, get_configs):
     """!

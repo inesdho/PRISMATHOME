@@ -254,6 +254,48 @@ def get_remote_queries():
         return None
 
 
+def delete_remote_queries(queries_list=None):
+    """!
+    Deletes one or multiple queries from the remote_queries table
+    @param queries_list: the list of queries to be deleted. If empty, deletes all queries in the table
+
+    @return 1 if successful, result of send_query_local() if an error occurred
+    """
+    try:
+        # Establish a new database connection
+        conn = pool.get_connection()
+        function_cursor = conn.cursor()
+
+        # Start a new transaction
+        function_cursor.execute("START TRANSACTION;")
+
+        # Iterate through each sensor in the sensor list
+        for id_query, query in queries_list:  # Go through the sensor list
+            # Insert sensor configuration into the local database and check for errors
+            result = send_query_local('delete', 'remote_queries', condition=f'id_query="{id_query}"',
+                                      cursor=function_cursor)
+            if result == -1:  # No data stored in local nor remote
+                raise Exception("Error while deleting remote_queries")
+
+        # Commit the transaction after successful inserts
+        conn.commit()
+
+    except Exception as e:
+        # Handle exceptions, rollback the transaction and set error flag
+        if conn:
+            conn.rollback()
+            error = True
+            print(f"An error occurred, the transaction will be cancelled : {e}")
+    finally:
+        # Close the connection
+        if conn:
+            function_cursor.close()
+            conn.close()
+        # Exit the function if there was an error
+        if error:
+            return
+
+
 ###############################################
 #               Sensor Management             #
 ###############################################

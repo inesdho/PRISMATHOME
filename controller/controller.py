@@ -625,7 +625,7 @@ class App(ThemedTk):
 
     def get_data(self):
         """!
-        @brief This function Ask the user to choose a path to save the queries
+        @brief This function asks the user to choose a path to save the queries
         @param self : the instance
         @return Nothing
         """

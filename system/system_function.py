@@ -45,7 +45,7 @@ def get_pid_of_script(script_name):
                 # The PID is generally the second output of 'ps aux'
                 return int(parts[1])
     except Exception as e:
-        print(f"Something wrong append while looking for the script pid : {e}")
+        print(f"Something wrong happened while looking for the script pid : {e}")
     return None
 
 
