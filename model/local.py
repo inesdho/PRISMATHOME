@@ -490,7 +490,7 @@ def get_message_id_from_label(label):
     @return: The corresponding message_id if found, None if nothing was found or an error occurred
     """
 
-    query = "SELECT id_error FROM error_message WHERE label = %s"
+    query = "SELECT id_message FROM monitoring_message WHERE label = %s"
 
     result = execute_query_with_reconnect(query, (label,))
 
@@ -519,7 +519,7 @@ def monitor_sensor_availability(sensor_id, datetime, availability):
         return 0
 
     return send_query('insert', 'monitoring',
-                      ['id_sensor', 'id_system', 'timestamp', 'id_error'],
+                      ['id_sensor', 'id_system', 'timestamp', 'id_message'],
                       values)
 
 
@@ -534,7 +534,7 @@ def monitor_battery_low(sensor_id, datetime):
     0 if no data was stored
     """
     values = (sensor_id, get_system_id(), datetime, get_message_id_from_label('Sensor battery low'))
-    return send_query('insert', 'monitoring', ['id_sensor', 'id_system', 'timestamp', 'id_error'], values)
+    return send_query('insert', 'monitoring', ['id_sensor', 'id_system', 'timestamp', 'id_message'], values)
 
 
 def monitor_system_start_stop(datetime, system_status):
@@ -553,7 +553,7 @@ def monitor_system_start_stop(datetime, system_status):
     else:
         return 0
 
-    return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
+    return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_message'], values)
 
 
 def monitor_observation_start_stop(datetime, observation_status):
@@ -572,7 +572,7 @@ def monitor_observation_start_stop(datetime, observation_status):
     else:
         return 0
 
-    return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_error'], values)
+    return send_query('insert', 'monitoring', ['id_system', 'timestamp', 'id_message'], values)
 
 
 ###############################################
