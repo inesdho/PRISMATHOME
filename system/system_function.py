@@ -14,6 +14,7 @@ to processes, retrieving process IDs, exporting queries to a file, and password 
 import hashlib
 import subprocess
 import os
+from model import local
 
 
 def send_signal(pid, signal_number):
@@ -79,6 +80,7 @@ def export_remote_queries(file_path, remote_queries):
         except Exception as e:
             print(f"Error while exporting queries :", e)
             return False
+    local.delete_remote_queries(remote_queries)
     return True
 
 

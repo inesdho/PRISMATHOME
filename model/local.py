@@ -261,6 +261,7 @@ def delete_remote_queries(queries_list=None):
 
     @return 1 if successful, result of send_query_local() if an error occurred
     """
+    error = False
     try:
         # Establish a new database connection
         conn = pool.get_connection()
