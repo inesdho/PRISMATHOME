@@ -29,6 +29,8 @@ BUTTON_PIN = 23
 GREEN_LED_PIN = 17
 ## The GPIO pin for the yellow LED
 YELLOW_LED_PIN = 27
+## The GPIO pin for the fan
+FAN_PIN = 22
 ## Global variable to interrupt the yellow_led_blink function
 program_up = False
 ## Global variable to shutdown the system
@@ -86,6 +88,7 @@ def init_GPIO_pins():
     # Setting pins in output mode
     GPIO.setup(YELLOW_LED_PIN, GPIO.OUT)
     GPIO.setup(GREEN_LED_PIN, GPIO.OUT)
+    GPIO.setup(FAN_PIN, GPIO.OUT)
 
 
 def listen_for_shutdown():
@@ -155,11 +158,20 @@ def set_LED_to_yellow():
     GPIO.output(GREEN_LED_PIN, GPIO.LOW)
     GPIO.output(YELLOW_LED_PIN, GPIO.HIGH)
 
+def switch_fan_ON():
+    """!
+    Switch on the fan
+
+    @return None
+    """
+    GPIO.output(FAN_PIN, GPIO.HIGH)
 
 if __name__ == "__main__":
 
     # Initialise the GPIO pins
     init_GPIO_pins()
+
+    switch_fan_ON()
 
     thread_yellow_led_blink_start = threading.Thread(target=yellow_led_blink_start)
     thread_yellow_led_blink_start.start()

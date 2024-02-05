@@ -18,7 +18,7 @@ import time
 
 from model.remote import send_query_remote
 
-from system.system_function import encrypt_password
+from system import system_function
 
 # The local pool of connection
 pool = None
@@ -607,7 +607,7 @@ def get_user_from_login_and_password(login, password):
     @return: The user details if found, otherwise None.
     """
 
-    encrypted_password = encrypt_password(password)
+    encrypted_password = system_function.encrypt_password(password)
     query = "SELECT * FROM user WHERE login = %s AND password = %s"
 
     result = execute_query_with_reconnect(query, (login, encrypted_password))
@@ -670,7 +670,7 @@ def get_configurations(active=None):
         result = execute_query_with_reconnect(query, (active,))
     else:
         query = """SELECT id_config, id_user, label, description FROM configuration;"""
-        result = execute_query_with_reconnect(query, (active,))
+        result = execute_query_with_reconnect(query)
     if result:
         return [(row[0], row[1], row[2], row[3]) for row in result]
     else:

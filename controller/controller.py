@@ -365,7 +365,7 @@ class App(ThemedTk):
         self.create_new_main_frame()
 
         # Add buttons
-        back_button = ttk.Button(self.main_frame, text="Back",
+        back_button = ttk.Button(self.main_frame, text="Cancel",
                                  command=lambda: self.redirect_to_modify_or_create_configuration_from_anywhere(
                                      selection_sensor_quantity_page))
         back_button.pack(side=tk.LEFT, padx=10, expand=True)
@@ -424,7 +424,7 @@ class App(ThemedTk):
         self.create_new_main_frame()
 
         # Add buttons
-        cancel_button = ttk.Button(self.main_frame, text="Cancel",
+        cancel_button = ttk.Button(self.main_frame, text="Back",
                                    command=lambda: self.redirect_to_selection_sensor_quantity_from_labellisation(
                                        labellisation_sensor_page))
         cancel_button.pack(side=tk.LEFT, padx=10, expand=True)

@@ -274,6 +274,7 @@ def get_sensor_value(sensor_friendly_name, label_widget):
     global thread_done
     # The value of the sensor to return
     value = ""
+    print("Getting the sensor value")
 
     def on_message(client, userdata, msg):
         nonlocal value
@@ -283,6 +284,8 @@ def get_sensor_value(sensor_friendly_name, label_widget):
         sensor_label = msg.topic.split('/')[2]
         ## The datas sended by the sensor extracted from the mqtt message in json format
         sensor_datas = json.loads(msg.payload)
+
+        print("Value getted")
 
         match sensor_type:
             case "Button":
