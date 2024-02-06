@@ -8,11 +8,10 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-import mysql.connector
 import globals
 from model import local
 
-from controller.entry_manager import EntryManager
+from utils.entry_manager import EntryManager
 
 
 class LoginAsAdministrator:

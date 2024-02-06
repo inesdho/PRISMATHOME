@@ -18,7 +18,7 @@ import time
 
 from model.remote import send_query_remote
 
-from system import system_function
+from utils import system_function
 
 # The local pool of connection
 pool = None
@@ -539,10 +539,10 @@ def monitor_battery_low(sensor_id, datetime):
 
 def monitor_system_start_stop(datetime, system_status):
     """!
-    Inserts a monitoring message to indicate that the system is powering off or powering on
+    Inserts a monitoring message to indicate that the utils is powering off or powering on
 
     @param datetime : The datetime when the data has been received.
-    @param system_status: The status of the system, 1 for on and 0 for off.
+    @param system_status: The status of the utils, 1 for on and 0 for off.
     @return result of the send_query function (1 if data sent to local and remote DB, 2 if sent only to local DB,
     0 if no data was stored)
     """
@@ -743,10 +743,10 @@ def get_config_label_from_observation_id(id_observation):
 
 def get_new_config_id():
     """!
-    Gives the config id to be used to create a new config for the current system by looking in the local database
-    and finding the highest config number corresponding to the system, and adding 1
+    Gives the config id to be used to create a new config for the current utils by looking in the local database
+    and finding the highest config number corresponding to the utils, and adding 1
 
-    @return the id to be used to create a new config for the current system
+    @return the id to be used to create a new config for the current utils
     """
     query = ("SELECT MAX(CAST(SUBSTRING(id_config, LOCATE('_', id_config) + 1, "
              "(LENGTH(id_config) - LOCATE('_', id_config))) AS SIGNED)) "
@@ -979,7 +979,7 @@ def create_observation_with_sensors(user, participant, id_config, id_session, se
     """!
     Creates a new observation with associated sensors from the given parameters and inserts them in both databases.
     @param user: The linux user connected when the function is called
-    @param id_system: The system's id (if None, it will be retrieved)
+    @param id_system: The utils's id (if None, it will be retrieved)
     @param participant: The participant's id
     @param id_config: The config's id
     @param id_session: The session's id
@@ -1092,13 +1092,13 @@ def update_observation_status(observation_status, id_observation=None):
 
 def get_system_id():
     """!
-    Gets the id of the current system from the local database
+    Gets the id of the current utils from the local database
 
-    @return the system's ID if successful, None otherwise
+    @return the utils's ID if successful, None otherwise
     """
 
     # Create query
-    query = """SELECT s.id_system FROM `system` s"""
+    query = """SELECT s.id_system FROM `utils` s"""
 
     result = execute_query_with_reconnect(query)
 
@@ -1111,9 +1111,9 @@ def get_system_id():
 
 def add_system_id(local_id):
     """!
-    Prepends the system's ID to any local ID provided in order to store them into the distant database
+    Prepends the utils's ID to any local ID provided in order to store them into the distant database
 
-    @param local_id the local ID to which the system ID needs to be added
+    @param local_id the local ID to which the utils ID needs to be added
     @return the modified ID to be inserted into the distant database
     """
     system_id = get_system_id()

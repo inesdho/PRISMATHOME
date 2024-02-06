@@ -12,8 +12,7 @@ import globals
 from model import local
 import getpass
 
-import mysql
-from controller.entry_manager import EntryManager
+from utils.entry_manager import EntryManager
 
 
 class NewObservation:

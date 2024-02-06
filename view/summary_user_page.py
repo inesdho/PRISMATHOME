@@ -7,13 +7,10 @@
 """
 import tkinter as tk
 from tkinter import ttk
-from tkinter import *
 import globals
 from model import local
-import mysql.connector
-import signal
 import threading
-import model.local_mqtt
+import mqtt.local_mqtt
 
 
 class SummaryUser:
@@ -170,7 +167,7 @@ class SummaryUser:
             globals.thread_done = False
 
             sensor_friendly_name = sensor_type + "/" + sensor_info['label']
-            my_thread = threading.Thread(target=model.local_mqtt.get_sensor_value,
+            my_thread = threading.Thread(target=mqtt.local_mqtt.get_sensor_value,
                                          args=(sensor_friendly_name, label_state))
             my_thread.start()
 

@@ -9,15 +9,11 @@ page itself
 import tkinter as tk
 from tkinter import ttk
 
-import mysql.connector
-from ttkthemes.themed_style import ThemedStyle
 import globals
 from model import local
 
-
-from view.login_as_admin_page import LoginAsAdministrator
-from controller.entry_manager import EntryManager
-from controller.text_manager import TextManager
+from utils.entry_manager import EntryManager
+from utils.text_manager import TextManager
 
 class ModifyOrCreateConfiguration:
 

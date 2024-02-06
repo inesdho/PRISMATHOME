@@ -2,11 +2,10 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import *
 
-import mysql
 import globals
 
 from model import local
-import model.local_mqtt
+import mqtt.local_mqtt
 import time
 import threading
 import getpass
@@ -170,7 +169,7 @@ class SensorPairingManagement:
         @return : None
         """
 
-        if (model.local_mqtt.rename_sensor(sensor_selected['name'],
+        if (mqtt.local_mqtt.rename_sensor(sensor_selected['name'],
                                            sensor_elt["type"] + "/" + sensor_elt['label']) != 1):
             showinfo("Problem", "A problem occured while renaming")
             popup.grab_release()
@@ -213,7 +212,7 @@ class SensorPairingManagement:
                 label_sensor_value = ttk.Label(button_pairing.master, text="Vibration : Unknown")
                 label_sensor_value.pack(side=tk.LEFT, padx=10)
 
-        my_thread = threading.Thread(target=model.local_mqtt.get_sensor_value,
+        my_thread = threading.Thread(target=mqtt.local_mqtt.get_sensor_value,
                                      args=(sensor_selected["name"], label_sensor_value))
         my_thread.start()
 
@@ -238,7 +237,7 @@ class SensorPairingManagement:
             """
             nonlocal flag
             flag[0] = True
-            model.local_mqtt.change_permit_join(False)
+            mqtt.local_mqtt.change_permit_join(False)
             popup.destroy()
 
         def on_click_new_sensor(event):
@@ -250,7 +249,7 @@ class SensorPairingManagement:
             nonlocal flag
             global new_sensor
             flag[0] = True
-            model.local_mqtt.change_permit_join(False)
+            mqtt.local_mqtt.change_permit_join(False)
             self.choose_sensor(button_pairing, new_sensor, sensor_elt, popup, edit_sensor)
 
         def display_new_sensor():
@@ -264,7 +263,7 @@ class SensorPairingManagement:
             global new_sensor
 
             while not flag[0]:
-                new_sensor = model.local_mqtt.get_new_sensors(flag)
+                new_sensor = mqtt.local_mqtt.get_new_sensors(flag)
 
                 # Create a box frame to the sensor_label
                 sensor_frame = tk.Frame(scrollable_frame, cursor="hand2", bg="white", pady=0)
@@ -313,7 +312,7 @@ class SensorPairingManagement:
         my_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=400)
 
 
-        if model.local_mqtt.change_permit_join(True) != 1:
+        if mqtt.local_mqtt.change_permit_join(True) != 1:
             showinfo("Error", "A problem occurred while changing the permit_join state")
             popup.grab_release()
             popup.destroy()
@@ -344,7 +343,7 @@ class SensorPairingManagement:
         }
         try:
             # Get the sensors paired to zigbee2mqtt
-            sensor_list = model.local_mqtt.get_all_sensors_on_zigbee2mqtt("all")
+            sensor_list = mqtt.local_mqtt.get_all_sensors_on_zigbee2mqtt("all")
 
             # Creation of the popup
             popup_pairing = tk.Toplevel()

@@ -1,5 +1,5 @@
 from controller.controller import App
-from controller.update_local_database import UpdateLocalDatabase
+from utils.update_local_database import UpdateLocalDatabase
 from tkinter import messagebox
 import threading
 from model import remote

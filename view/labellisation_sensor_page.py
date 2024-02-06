@@ -7,10 +7,9 @@
 """
 import tkinter as tk
 from tkinter import ttk
-import mysql.connector
 from model import local
 import globals
-from controller.entry_manager import EntryManager
+from utils.entry_manager import EntryManager
 
 class LabelisationSensor:
     def __init__(self, master):

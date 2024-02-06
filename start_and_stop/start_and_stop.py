@@ -20,7 +20,7 @@ import threading
 
 sys.path.append(os.path.abspath('/home/share/PRISMATHOME'))
 
-from system import system_function
+from utils import system_function
 import model.local
 
 ## The GPIO pin number of the shutdown button
@@ -33,9 +33,9 @@ YELLOW_LED_PIN = 27
 FAN_PIN = 22
 ## Global variable to interrupt the yellow_led_blink function
 program_up = False
-## Global variable to shutdown the system
+## Global variable to shutdown the utils
 program_down = False
-## Global flag to indicate the system as detected a button pressed for shutdown
+## Global flag to indicate the utils as detected a button pressed for shutdown
 flag_shut_down = False
 
 
@@ -236,5 +236,5 @@ if __name__ == "__main__":
         while not program_down:
             pass
 
-    # Shutdown the system when everything is ready
+    # Shutdown the utils when everything is ready
     subprocess.run(["sudo", "shutdown", "-h", "now"], check=True)

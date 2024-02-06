@@ -23,7 +23,7 @@ from view.summary_user_page import SummaryUser
 from view.selection_sensor_quantity_page import QuantitySensor
 from view.labellisation_sensor_page import LabelisationSensor
 from view.sensor_pairing_management_page import SensorPairingManagement
-from system import system_function
+from utils import system_function
 import webbrowser
 import sys
 import signal
