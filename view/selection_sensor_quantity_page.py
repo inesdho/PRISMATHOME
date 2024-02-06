@@ -8,10 +8,8 @@
 
 import tkinter as tk
 from tkinter import ttk
-from tkinter import *
 from model import local
 import globals
-import mysql.connector
 
 
 class QuantitySensor:

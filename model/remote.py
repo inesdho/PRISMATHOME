@@ -13,7 +13,6 @@ import threading
 import time
 
 import mysql.connector
-from mysql.connector import pooling
 
 from model import local
 

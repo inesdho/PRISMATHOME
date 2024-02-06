@@ -7,10 +7,8 @@
 """
 import tkinter as tk
 from tkinter import ttk
-from tkinter import *
 from model import local
 import globals
-import mysql.connector
 
 
 class SummaryAdmin:
@@ -35,7 +33,8 @@ class SummaryAdmin:
 
         if globals.global_id_config_modify:
             # Information about the configuration
-            scenario_label = ttk.Label(self.frame, text="Configuration : " + local.get_config_labels_ids(globals.global_id_config_modify),
+            scenario_label = ttk.Label(self.frame, text="Configuration : " + local.get_config_labels_ids(
+                globals.global_id_config_modify),
                                        padding=10, anchor="w", font=globals.global_font_title1)
             scenario_label.pack(pady=20, fill=tk.BOTH)
         else:

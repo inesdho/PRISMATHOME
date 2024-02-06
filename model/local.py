@@ -13,7 +13,6 @@
 import globals
 
 import mysql.connector
-from mysql.connector import pooling
 import time
 
 from model.remote import send_query_remote

@@ -14,7 +14,6 @@ from ttkthemes import ThemedTk, ThemedStyle
 
 import globals
 from model import local
-from model import remote
 from view.new_observation_page import NewObservation
 from view.login_as_admin_page import LoginAsAdministrator
 from view.modify_or_create_configuration_page import ModifyOrCreateConfiguration
@@ -24,7 +23,6 @@ from view.selection_sensor_quantity_page import QuantitySensor
 from view.labellisation_sensor_page import LabelisationSensor
 from view.sensor_pairing_management_page import SensorPairingManagement
 from utils import system_function
-import webbrowser
 import sys
 import signal
 
