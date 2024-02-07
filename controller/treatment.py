@@ -112,4 +112,4 @@ def data_treatment(client, userdata, mqtt_msg):
                     local.save_sensor_battery(sensor_id, sensor_datas["battery"], datetime_now)
 
         case _:
-            print("The sensor type doesn't match the list")
+            print("Error : The sensor type doesn't match the list")
