@@ -18,6 +18,8 @@ from model import local
 
 from utils import globals
 
+from mysql.connector import pooling
+
 thread_active = 0  # is used to know if the program is actively trying to reconnect to the remote db
 disconnect_request = 0  # is used to stop the connect thread from looping
 

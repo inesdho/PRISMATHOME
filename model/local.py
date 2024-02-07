@@ -19,6 +19,8 @@ from model.remote import send_query_remote
 
 from utils import system_function
 
+from mysql.connector import pooling
+
 # The local pool of connection
 pool = None
 
