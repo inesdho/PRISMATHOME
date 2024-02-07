@@ -8,7 +8,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-import globals
+from utils import globals
 from model import local
 
 from utils.entry_manager import EntryManager

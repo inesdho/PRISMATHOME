@@ -4,7 +4,7 @@ from tkinter import messagebox
 import threading
 from model import remote
 from model import local
-import globals
+from utils import globals
 
 if __name__ == "__main__":
 

@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import *
 
-import globals
+from utils import globals
 
 from model import local
 import mqtt.local_mqtt

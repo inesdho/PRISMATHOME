@@ -9,7 +9,7 @@
 import tkinter as tk
 from tkinter import ttk
 from model import local
-import globals
+from utils import globals
 
 
 class QuantitySensor:

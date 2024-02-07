@@ -12,7 +12,7 @@ import subprocess
 
 from ttkthemes import ThemedTk, ThemedStyle
 
-import globals
+from utils import globals
 from model import local
 from view.new_observation_page import NewObservation
 from view.login_as_admin_page import LoginAsAdministrator

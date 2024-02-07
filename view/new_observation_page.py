@@ -8,7 +8,7 @@
 
 import tkinter as tk
 from tkinter import ttk
-import globals
+from utils import globals
 from model import local
 import getpass
 

@@ -10,7 +10,7 @@
 @date January 10 2024
 """
 
-import globals
+from utils import globals
 
 import mysql.connector
 import time

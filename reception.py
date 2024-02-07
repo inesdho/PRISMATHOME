@@ -29,7 +29,7 @@ import signal
 from datetime import datetime
 import threading
 from utils import system_function
-import globals
+from utils import globals
 
 ## Constant for the broker port
 BROKER_PORT = 1883

@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 import time
 import json
-import globals
+from utils import globals
 from datetime import datetime
 from model import local
 
