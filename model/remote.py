@@ -7,7 +7,7 @@
 
 @version 1.0
 
-@date 28th December 2023
+@date 31st January 2024
 """
 import threading
 import time
@@ -270,7 +270,7 @@ def send_query_remote(query_type, table, fields=None, values=None, condition=Non
     Constructs and executes an SQL query in the remote database.
 
     This function prepares and sends a SQL query to the remote database. It handles INSERT, UPDATE, and DELETE
-    queries. Additionally, it preprocesses certain fields and values, like appending utils IDs where required,
+    queries. Additionally, it preprocesses certain fields and values, like appending system IDs where required,
     before executing the query. If the only local observation mode is enabled, it caches the query instead of
     executing it.
 
@@ -284,14 +284,14 @@ def send_query_remote(query_type, table, fields=None, values=None, condition=Non
     @return: 1 if the query execution is successful, 0 if the query is cached.
 
     @note: In the case of INSERT queries on certain tables, the function modifies the ID to be inserted by
-           appending a utils-specific ID. For UPDATE and DELETE queries, it also modifies the condition
+           appending a system-specific ID. For UPDATE and DELETE queries, it also modifies the condition
            if required.
     """
     remote_values = None
     remote_query = None
 
     # Building remote query
-    # Appending utils id to specific ids before sending to remote DB storing function
+    # Appending system id to specific ids before sending to remote DB storing function
     if fields is not None and values is not None:
         remote_values = tuple(local.add_system_id(value) if field in ids_to_modify
                               else value for field, value in zip(fields, values))
@@ -299,7 +299,7 @@ def send_query_remote(query_type, table, fields=None, values=None, condition=Non
     if condition is not None and table in tables_to_modify:
         left, right = map(str.strip, condition.split('='))
         if left in ids_to_modify:
-            right = str(local.add_system_id(right))  # Modifying the id to look for to prepend the utils's id
+            right = str(local.add_system_id(right))  # Modifying the id to look for to prepend the system's id
         modified_condition = f"{left} = '{right}'"
     else:
         modified_condition = condition

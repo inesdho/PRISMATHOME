@@ -3,7 +3,7 @@
 @brief This file will contain all the redirection between the pages of the user and admin interface
 @author Naviis-Brain
 @version 1.0
-@date
+@date 31st January 2024
 """
 import os
 import tkinter as tk

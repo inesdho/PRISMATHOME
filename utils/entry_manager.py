@@ -4,7 +4,7 @@
 value, password management, type of characters that are accepted etc...)
 @author Naviis-Brain
 @version 1.0
-@date
+@date 31st January 2024
 """
 
 import tkinter as tk

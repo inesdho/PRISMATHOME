@@ -4,7 +4,7 @@
 page itself
 @author Naviis-Brain
 @version 1.0
-@date
+@date 31st January 2024
 """
 import tkinter as tk
 from tkinter import ttk

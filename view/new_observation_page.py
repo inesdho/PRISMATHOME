@@ -3,7 +3,7 @@
 @brief This file will contain all the widgets and functions related to the "new observation" page itself
 @author Naviis-Brain
 @version 1.0
-@date
+@date 31st January 2024
 """
 
 import tkinter as tk

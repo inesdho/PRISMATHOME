@@ -1,14 +1,14 @@
 """!
 @file start_and_stop.py
 
-@brief This file is the script to start automaticly the program when raspberry pi starts
+@brief This file is the script to start automatically the program when raspberry pi starts
        This script also manage the LED and the shutdown button
 
 @author Naviis-Brain
 
 @version 1.0
 
-@date 28th Decembre 2023
+@date 31st January 2024
 """
 import RPi.GPIO as GPIO
 import subprocess
@@ -18,24 +18,25 @@ import time
 import signal
 import threading
 
-sys.path.append(os.path.abspath('/home/share/PRISMATHOME'))
-
 from utils import system_function
 import model.local
 
-## The GPIO pin number of the shutdown button
+sys.path.append(os.path.abspath('/home/share/PRISMATHOME'))
+
+
+# The GPIO pin number of the shutdown button
 BUTTON_PIN = 23
-## The GPIO pin for the green LED
+# The GPIO pin for the green LED
 GREEN_LED_PIN = 17
-## The GPIO pin for the yellow LED
+# The GPIO pin for the yellow LED
 YELLOW_LED_PIN = 27
-## The GPIO pin for the fan
+# The GPIO pin for the fan
 FAN_PIN = 22
-## Global variable to interrupt the yellow_led_blink function
+# Global variable to interrupt the yellow_led_blink function
 program_up = False
-## Global variable to shutdown the utils
+# Global variable to shut down the system
 program_down = False
-## Global flag to indicate the utils as detected a button pressed for shutdown
+# Global flag to indicate the system as detected a button pressed for shutdown
 flag_shut_down = False
 
 
@@ -149,6 +150,7 @@ def set_LED_to_green():
     GPIO.output(YELLOW_LED_PIN, GPIO.LOW)
     GPIO.output(GREEN_LED_PIN, GPIO.HIGH)
 
+
 def set_LED_to_yellow():
     """!
     Set the Bi-color LED to yellow
@@ -158,6 +160,7 @@ def set_LED_to_yellow():
     GPIO.output(GREEN_LED_PIN, GPIO.LOW)
     GPIO.output(YELLOW_LED_PIN, GPIO.HIGH)
 
+
 def switch_fan_ON():
     """!
     Switch on the fan
@@ -165,6 +168,7 @@ def switch_fan_ON():
     @return None
     """
     GPIO.output(FAN_PIN, GPIO.HIGH)
+
 
 if __name__ == "__main__":
 
@@ -215,7 +219,7 @@ if __name__ == "__main__":
     thread_listen_for_shutdown = threading.Thread(target=listen_for_shutdown)
     thread_listen_for_shutdown.start()
 
-    #listen_for_shutdown()
+    # listen_for_shutdown()
 
     while not flag_shut_down:
         time.sleep(1)
@@ -236,5 +240,5 @@ if __name__ == "__main__":
         while not program_down:
             pass
 
-    # Shutdown the utils when everything is ready
+    # Shutdown the system when everything is ready
     subprocess.run(["sudo", "shutdown", "-h", "now"], check=True)

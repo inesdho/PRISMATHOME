@@ -429,7 +429,7 @@ def check_availability():
 
         nonlocal availabilities
         nonlocal list_of_topics
-        # Gets all the sensor connected in the utils
+        # Gets all the sensor connected in the system
         connected_devices = get_all_sensors_on_zigbee2mqtt("fname")
 
         for i in range(len(connected_devices)):
@@ -493,7 +493,7 @@ def check_availability():
 
                 # Tries to find the topic received in the availabilities list
                 if fname in availabilities[0][i]:
-                    # Case where the state of the new sensor is NOT in the utils
+                    # Case where the state of the new sensor is NOT in the system
                     if 'none' in availabilities[1][i]:
 
                         # That sensor is online
@@ -507,7 +507,7 @@ def check_availability():
                             if sensor_id:
                                 local.monitor_sensor_availability(sensor_id, datetime_now, 0)
 
-                    # Case where the sensor is already in the utils
+                    # Case where the sensor is already in the system
                     elif 'online' in availabilities[1][i]:
                         if 'offline' in availability_message['state']:
                             availabilities[1][i] = "offline"

@@ -16,7 +16,7 @@ Project realized by 5 students from IG2I.
 
 @version 1.0
 
-@date 28th Decembre 2023
+@date 31st January 2024
 """
 import paho.mqtt.client as mqtt
 import sys
@@ -69,7 +69,7 @@ def handler_program_stop(signum, frame):
 
     # If the signal come from start_and_stop program (SIGUSR2) :
     if signum == signal.SIGUSR2:
-        # Send a monitoring message that the utils is shut down
+        # Send a monitoring message that the system is shut down
         local.monitor_system_start_stop(datetime_now, 0)
         # Send a signal to start_and_stop program to indicate that the program is closed for shutdown
         system_function.send_signal(pid_start_and_stop, signal.SIGTERM)
@@ -124,7 +124,7 @@ if __name__ == "__main__":
     # - Send a signal to the start_and_stop program to indicate that reception.py is ready.
     # - Send a monitoring message to the db to indicate program started up
     if pid_parent == pid_start_and_stop:
-        # Monitor utils started up by participant
+        # Monitor system started up by participant
         local.monitor_system_start_stop(datetime_now, 1)
         # Send a signal SIGTERM to the start_and_stop program to inform reception.py is up after shutdown
         system_function.send_signal(pid_start_and_stop, signal.SIGTERM)

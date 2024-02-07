@@ -1,14 +1,14 @@
 """!
 @file system_function.py
 
-@brief This file contains a collection of functions for managing utils-level operations, including sending signals
+@brief This file contains a collection of functions for managing system-level operations, including sending signals
 to processes, retrieving process IDs, exporting queries to a file, and password encryption.
 
 @author Naviis-Brain
 
 @version 1.0
 
-@date 28th December 2023
+@date 31st January 2024
 """
 
 import hashlib
