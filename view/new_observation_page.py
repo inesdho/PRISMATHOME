@@ -97,22 +97,15 @@ class NewObservation:
         @return Nothing
         """
         # Get the new id_config from function
-        id_config = self.get_selected_id_config()
+        globals.global_id_config_selected = self.get_selected_id_config()
         # Get participant from entry
-        participant = self.participant_entry.get()
+        globals.global_participant_selected = self.participant_entry.get()
         # Get new id session from function
-        id_session = local.get_new_id_session(participant, id_config)
+        globals.global_id_session_selected = local.get_new_id_session(globals.global_participant_selected, globals.global_id_config_selected)
         # Get session label from entry
-        session_label = self.session_entry.get()
+        globals.global_session_label_selected = self.session_entry.get()
 
-        globals.global_participant_selected = participant
         globals.global_id_system_selected = local.get_system_id()
-        globals.global_id_config_selected = id_config
-        globals.global_id_session_selected = id_session
-        globals.global_session_label_selected = session_label
-
-        # Caching
-        globals.global_id_config_selected = id_config
 
 
     def get_selected_id_config(self):
