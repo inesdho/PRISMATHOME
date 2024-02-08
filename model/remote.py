@@ -3,7 +3,7 @@
 
 @brief This file is used communicate with the distant database
 
-@author Naviis-Brain - Matteo
+@author Naviis-Brain
 
 @version 1.0
 
