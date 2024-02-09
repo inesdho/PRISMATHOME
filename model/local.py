@@ -27,12 +27,12 @@ pool = None
 # Flag to indicate if the caching function is running (True) or not (False)
 caching = False
 
-# The config for remote database
+# The config for local database
 config = {
     "host": "localhost",
-    "user": "root",
-    "password": "Q3fhllj2",
-    "database": "prisme_home_1"
+    "user": "phpmyadmin",
+    "password": "phpmyadmin",
+    "database": "prisme_home_db_local"
 }
 
 

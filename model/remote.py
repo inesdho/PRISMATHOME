@@ -36,9 +36,9 @@ tables_to_modify = ['sensor', 'data', 'observation']
 # The config for remote database
 config = {
     "host": "localhost",
-    "user": "root",
-    "password": "Q3fhllj2",
-    "database": "prisme@home_ICM"
+    "user": "phpmyadmin",
+    "password": "phpmyadmin",
+    "database": "prisme_home_db_remote"
 }
 
 

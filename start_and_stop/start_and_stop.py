@@ -18,10 +18,10 @@ import time
 import signal
 import threading
 
+sys.path.append(os.path.abspath('/home/share/PRISMATHOME'))
+
 from utils import system_function
 import model.local
-
-sys.path.append(os.path.abspath('/home/share/PRISMATHOME'))
 
 
 # The GPIO pin number of the shutdown button
