@@ -25,7 +25,7 @@ import model.local
 
 
 # The GPIO pin number of the shutdown button
-BUTTON_PIN = 23
+BUTTON_PIN = 3
 # The GPIO pin for the green LED
 GREEN_LED_PIN = 17
 # The GPIO pin for the yellow LED

@@ -1,3 +1,14 @@
+"""!
+@file local_mqtt.py
+
+@brief This file contain all the function that need to communicate in mqtt
+
+@author Naviis-Brain
+
+@version 1.0
+
+@date 31st January 2024
+"""
 import paho.mqtt.client as mqtt
 import time
 import json

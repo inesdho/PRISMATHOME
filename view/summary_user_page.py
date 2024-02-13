@@ -1,5 +1,5 @@
 """!
-@file summary_admin_page.py
+@file summary_user_page.py
 @brief This file will contain all the widgets and functions related to the "summary" page itself
 @author Naviis-Brain
 @version 1.0

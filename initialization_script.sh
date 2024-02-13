@@ -20,7 +20,7 @@ virtualenv /home/share/paho-mqtt
 source /home/share/paho-mqtt/bin/activate
 
 # Install the library needed for the project
-pip install paho-mqtt
+pip install paho-mqtt==1.6.1
 pip install ttkthemes
 pip install mysql-connector
 pip install RPi.GPIO
@@ -55,7 +55,7 @@ mkdir /opt/zigbee2mqtt
 # Change ownership of the /opt/zigbee2mqtt directory to the current user
 chown -R ${USER}: /opt/zigbee2mqtt
 # Clone the ZIGBEE2MQTT repository from GitHub
-git clone --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt # TODO : Copier notre répertoire /opt/zigbee2mqtt
+cp -r /home/share/zigbee2mqtt /opt/zigbee2mqtt
 # Change directory to the ZIGBEE2MQTT installation directory
 cd /opt/zigbee2mqtt
 # Install the required npm packages
@@ -89,7 +89,10 @@ rootpasswd=""
 #mysql -u root -p"$rootpasswd" -e "USE mysql; GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost'; FLUSH PRIVILEGES;"
 echo "USE mysql; GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost'; FLUSH PRIVILEGES;" | mysql -u root -p"$rootpasswd"
 # Define the start_and_stop program in the crontab to start it automatically on boot
-(crontab -l 2>/dev/null; echo "@reboot sh /home/share/PRISMEATHOME/start_and_stop/start_and_stop.sh > /home/share/log/log.txt 2>&1") | crontab -
+#(crontab -l 2>/dev/null; echo "@reboot sh /home/share/PRISMEATHOME/start_and_stop/start_and_stop.sh > /home/share/log/log.txt 2>&1") | crontab -
 
 # Disable the autologin
 sed -i 's/^autologin-user=/#autologin-user=/g' /etc/lightdm/lightdm.conf
+
+# set keyboard in azerty mode
+sed -i 's/XKBLAYOUT=".*"/XKBLAYOUT="fr"/g' /etc/default/keyboard

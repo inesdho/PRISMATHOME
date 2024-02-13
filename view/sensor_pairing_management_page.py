@@ -1,3 +1,10 @@
+"""!
+@file sensor_pairing_management_page.py
+@brief This file is the python program for the paring page, it manages all the pairing fonction.
+@author Naviis-Brain
+@version 1.0
+@date 31st January 2024
+"""
 import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import *
@@ -263,24 +270,30 @@ class SensorPairingManagement:
             global new_sensor
 
             while not flag[0]:
-                new_sensor = mqtt.local_mqtt.get_new_sensors(flag)
+                try:
+                    new_sensor = mqtt.local_mqtt.get_new_sensors(flag)
 
-                # Create a box frame to the sensor_label
-                sensor_frame = tk.Frame(scrollable_frame, cursor="hand2", bg="white", pady=0)
-                sensor_frame.pack(fill=tk.X, padx=10, pady=(5, 0), expand=True)
+                    # Create a box frame to the sensor_label
+                    sensor_frame = tk.Frame(scrollable_frame, cursor="hand2", bg="white", pady=0)
+                    sensor_frame.pack(fill=tk.X, padx=10, pady=(5, 0), expand=True)
 
-                # Display the sensor label
-                sensor_label = tk.Label(sensor_frame, text=new_sensor["label"] + "\n" + new_sensor["ieee_address"],
-                                        padx=10, pady=10, bg="white")
-                sensor_label.pack(fill=tk.X)
+                    # Display the sensor label
+                    sensor_label = tk.Label(sensor_frame, text=new_sensor["label"] + "\n" + new_sensor["ieee_address"],
+                                            padx=10, pady=10, bg="white")
+                    sensor_label.pack(fill=tk.X)
 
-                # Add event click on the labbel
-                # If the label is clicked the function "choose_sensor" will be called
-                sensor_label.bind("<Button-1>", on_click_new_sensor)
+                    # Add event click on the labbel
+                    # If the label is clicked the function "choose_sensor" will be called
+                    sensor_label.bind("<Button-1>", on_click_new_sensor)
 
-                # Add event enter and leave for style
-                sensor_label.bind("<Enter>", self.on_enter_sensor_label)
-                sensor_label.bind("<Leave>", self.on_leave_sensor_label)
+                    # Add event enter and leave for style
+                    sensor_label.bind("<Enter>", self.on_enter_sensor_label)
+                    sensor_label.bind("<Leave>", self.on_leave_sensor_label)
+                except Exception as e:
+                    showinfo("Error", "A problem occurred while paring, please try again.")
+                    popup.grab_release()
+                    popup.destroy()
+                    return
 
         flag = [False]
 

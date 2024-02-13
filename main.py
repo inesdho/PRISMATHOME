@@ -1,3 +1,36 @@
+"""!
+@mainpage Prisme@home project documentation
+
+@section description_main Description
+This project has been realized in the frame of an end of study project.
+
+The Prisme at Home project aims to observe the behavior of participants in the study within their homes. In modern
+research methodologies, it's crucial to gather data in naturalistic settings to ensure its validity and
+applicability. By deploying sensors and data collection mechanisms in participants' homes, this project facilitates
+the gathering of rich, real-world data without the biases introduced by laboratory settings.
+
+The realization of this project is necessary as it will enable the reliable, timely, and maximized collection of
+data. Currently, these data are gathered by surveying participants with targeted questions or by conducting studies
+within the institute. However, such approaches are limited in scope and may not fully capture the nuances of
+participants' behaviors in their daily lives.
+
+In this document, we have developed the designs of the functions required for the PRISME AT HOME project. These
+designs cover both the functions necessary for the system and those required for administration, ensuring seamless
+data collection, management, and analysis.
+
+This project was realized by 5 students from IG2I - Centrale Lille.
+Paul Monier - Matteo Cucco - Charly Trevette - Ines D'houdetot - Mathilde Dumont.
+
+@file main.py
+
+@brief This is the main project file.
+
+@author Naviis-Brain
+
+@version 1.0
+
+@date 31st January 2024
+"""
 from controller.controller import App
 from utils.update_local_database import UpdateLocalDatabase
 from tkinter import messagebox

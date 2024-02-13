@@ -1,16 +1,7 @@
 """!
-@mainpage Prisme@home project documentation
-
-@section description_main Description
-This project has been realized in the frame of a end of study project.
-
-@section notes_main Notes
-Project realized by 5 students from IG2I.
-
 @file reception.py
 
-@brief This is the main project file for collecting the informations with the sensors.
-        In this file we create the mqtt client and subscribe to the sensors we need.
+@brief This file is used to recept the data coming from the sensors.
 
 @author Naviis-Brain
 
